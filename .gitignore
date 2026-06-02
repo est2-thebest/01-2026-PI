@@ -1,0 +1,46 @@
+# SPRING BOOT / MAVEN
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/*.jar
+backend/*.war
+backend/*.class
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.apt_generated/
+backend/spring-pid
+
+# ANGULAR / NODE
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.sass-cache/
+frontend/connect.lock
+frontend/coverage/
+frontend/*.js.map
+
+# VARIÁVEIS DE AMBIENTE
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# SISTEMA OPERACIONAL
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# LOGS
+*.log
+logs/
