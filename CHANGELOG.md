@@ -11,4 +11,4 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
 - README.md, CHANGELOG.md e .gitignore iniciais
 - Estrutura de pastas repositório (`/docs`, `/frontend`, `/backend`, `/.github/workflows`)
-
+- Pipeline de CI (.github/workflows/ci.yml) para backend (Java 21) e frontend (Node 20)
