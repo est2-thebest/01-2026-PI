@@ -1,0 +1,111 @@
+<div class="dashboard-wrapper">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p>Visão geral do sistema de emergências</p>
+  </div>
+
+  @if (erro) {
+    <div class="alert alert-error">{{ erro }}</div>
+  }
+
+  @if (carregando) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Carregando dashboard...</p>
+    </div>
+  } @else {
+    <div class="stats-grid">
+      <!-- Profissionais -->
+      <div class="stat-card card-profissionais">
+        <div class="stat-icon">👨‍⚕️</div>
+        <div class="stat-content">
+          <h3>{{ stats.profissionaisCadastrados }}</h3>
+          <p>Profissionais</p>
+        </div>
+      </div>
+
+      <!-- Ambulâncias Disponíveis -->
+      <div class="stat-card card-ambulancias">
+        <div class="stat-icon">🚑</div>
+        <div class="stat-content">
+          <h3>{{ stats.ambulanciasDisponiveis }}/{{ stats.ambulanciasTotal }}</h3>
+          <p>Ambulâncias Disponíveis</p>
+        </div>
+      </div>
+
+      <!-- Equipes Ativas -->
+      <div class="stat-card card-equipes">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <h3>{{ stats.equipesAtivas }}</h3>
+          <p>Equipes Ativas</p>
+        </div>
+      </div>
+
+      <!-- Ocorrências Abertas -->
+      <div class="stat-card card-ocorrencias">
+        <div class="stat-icon">🚨</div>
+        <div class="stat-content">
+          <h3>{{ stats.ocorrenciasAbertas }}</h3>
+          <p>Ocorrências Abertas</p>
+        </div>
+      </div>
+
+      <!-- Atendimentos Hoje -->
+      <div class="stat-card card-atendimentos">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <h3>{{ stats.atendimentosHoje }}</h3>
+          <p>Atendimentos Hoje</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Histórico Recente -->
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Ocorrências Recentes</h2>
+      </div>
+      @if (historicoOcorrencias.length === 0) {
+        <div class="empty-state">
+          <p>Nenhuma ocorrência registrada</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Bairro</th>
+                <th>Tipo</th>
+                <th>Gravidade</th>
+                <th>Status</th>
+                <th>Abertura</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (oc of historicoOcorrencias; track oc.id) {
+                <tr>
+                  <td>#{{ oc.id }}</td>
+                  <td>{{ oc.bairro?.nome || 'N/A' }}</td>
+                  <td>{{ oc.tipo }}</td>
+                  <td>
+                    <span class="badge" [style.backgroundColor]="getGravidadeColor(oc.gravidade)">
+                      {{ oc.gravidade }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [style.backgroundColor]="getStatusColor(oc.status)">
+                      {{ oc.status }}
+                    </span>
+                  </td>
+                  <td>{{ converterData(oc.dataHoraAbertura) | date: 'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

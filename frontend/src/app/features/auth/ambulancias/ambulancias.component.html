@@ -1,0 +1,127 @@
+<div class="ambulancias-wrapper">
+  <div class="page-header">
+    <h1>Ambulâncias</h1>
+    <p>Gerenciamento de veículos de emergência</p>
+  </div>
+
+  @if (erro) {
+    <div class="alert alert-error">{{ erro }}</div>
+  }
+
+  <div class="page-controls">
+    <button 
+      class="btn btn-primary" 
+      (click)="abrirFormulario()"
+      [disabled]="mostraFormulario">
+      + Nova Ambulância
+    </button>
+  </div>
+
+  @if (mostraFormulario) {
+    <div class="form-card">
+      <h2>{{ editandoId ? 'Editar' : 'Nova' }} Ambulância</h2>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="form-group">
+          <label for="placa">Placa *</label>
+          <input 
+            id="placa"
+            type="text" 
+            formControlName="placa" 
+            placeholder="ABC-1234"
+            [disabled]="!!editandoId"
+            class="form-control" />
+          @if (form.get('placa')?.invalid && form.get('placa')?.touched) {
+            <span class="error-text">Placa inválida (ex: ABC-1234)</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tipo">Tipo *</label>
+            <select id="tipo" formControlName="tipo" class="form-control">
+              <option value="USA">USA - Avançada</option>
+              <option value="USB">USB - Básica</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="status">Status *</label>
+            <select id="status" formControlName="status" class="form-control">
+              <option value="DISPONIVEL">Disponível</option>
+              <option value="EM_ATENDIMENTO">Em Atendimento</option>
+              <option value="MANUTENCAO">Manutenção</option>
+              <option value="INATIVA">Inativa</option>
+              <option value="SEM_EQUIPE">Sem Equipe</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="bairro">Bairro</label>
+          <select id="bairro" formControlName="bairroId" class="form-control">
+            <option [value]="null">Sem bairro</option>
+            @for (bairro of bairros; track bairro.id) {
+              <option [value]="bairro.id">{{ bairro.nome }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="fecharFormulario()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+            {{ editandoId ? 'Atualizar' : 'Criar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (carregando) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+  } @else {
+    <div class="table-card">
+      @if (ambulancias.length === 0) {
+        <div class="empty-state">
+          <p>Nenhuma ambulância cadastrada</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Placa</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Bairro</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (amb of ambulancias; track amb.id) {
+                <tr>
+                  <td><strong>{{ amb.placa }}</strong></td>
+                  <td>{{ amb.tipo }}</td>
+                  <td>
+                    <span class="badge" [style.backgroundColor]="getStatusColor(amb.status)">
+                      {{ amb.status }}
+                    </span>
+                  </td>
+                  <td>{{ amb.bairro?.nome || '-' }}</td>
+                  <td class="actions">
+                    <button class="btn-icon" (click)="abrirFormulario(amb)" title="Editar">✏️</button>
+                    <button class="btn-icon btn-danger" (click)="excluir(amb.id!)" title="Excluir">🗑️</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

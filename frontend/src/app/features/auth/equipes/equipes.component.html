@@ -1,0 +1,149 @@
+<div class="equipes-wrapper">
+  <div class="page-header">
+    <h1>Equipes</h1>
+    <p>Gerenciamento e composição de equipes de atendimento</p>
+  </div>
+
+  @if (erro) {
+    <div class="alert alert-error">{{ erro }}</div>
+  }
+
+  <div class="page-controls">
+    <button 
+      class="btn btn-primary" 
+      (click)="abrirFormulario()"
+      [disabled]="mostraFormulario">
+      + Nova Equipe
+    </button>
+  </div>
+
+  @if (mostraFormulario) {
+    <div class="form-card">
+      <h2>{{ editandoId ? 'Editar' : 'Nova' }} Equipe</h2>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="form-group">
+          <label for="descricao">Descrição/Nome *</label>
+          <input 
+            id="descricao"
+            type="text" 
+            formControlName="descricao" 
+            placeholder="Ex: Equipe Alpha"
+            class="form-control" />
+          @if (form.get('descricao')?.invalid && form.get('descricao')?.touched) {
+            <span class="error-text">Descrição deve ter pelo menos 3 caracteres</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ambulancia">Ambulância *</label>
+            <select id="ambulancia" formControlName="ambulanciaId" class="form-control">
+              <option [value]="null">Selecione uma ambulância</option>
+              @for (amb of ambulancias; track amb.id) {
+                <option [value]="amb.id">{{ amb.placa }} ({{ amb.tipo }})</option>
+              }
+            </select>
+            @if (form.get('ambulanciaId')?.invalid && form.get('ambulanciaId')?.touched) {
+              <span class="error-text">Campo obrigatório</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="turno">Turno *</label>
+            <select id="turno" formControlName="turno" class="form-control">
+              <option value="MATUTINO">Matutino</option>
+              <option value="VESPERTINO">Vespertino</option>
+              <option value="NOTURNO">Noturno</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Profissionais *</label>
+          <div class="profissionais-selector">
+            @for (prof of profissionaisDisponiveis; track prof.id) {
+              <label class="checkbox-item">
+                <input 
+                  type="checkbox" 
+                  [checked]="isProfissionalSelecionado(prof)"
+                  (change)="toggleProfissional(prof)" />
+                <span>{{ getFuncaoEmoji(prof.funcao) }} {{ prof.nome }}</span>
+              </label>
+            }
+          </div>
+          <div class="selected-info">
+            <strong>Selecionados: {{ profissionaisSelecionados.length }}</strong>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="fecharFormulario()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+            {{ editandoId ? 'Atualizar' : 'Criar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <div class="filters-section">
+    <h3>Filtrar por Turno</h3>
+    <select [(ngModel)]="filtroTurno" class="filter-input">
+      <option value="">Todos</option>
+      <option value="MATUTINO">Matutino</option>
+      <option value="VESPERTINO">Vespertino</option>
+      <option value="NOTURNO">Noturno</option>
+    </select>
+  </div>
+
+  @if (carregando) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+  } @else {
+    <div class="equipes-list">
+      @if (equipesFiltradas.length === 0) {
+        <div class="empty-state">
+          <p>Nenhuma equipe encontrada</p>
+        </div>
+      } @else {
+        @for (equipe of equipesFiltradas; track equipe.id) {
+          <div class="equipe-card">
+            <div class="equipe-header">
+              <div>
+                <h3>{{ equipe.descricao }}</h3>
+                <p class="turno-badge">{{ equipe.turno }}</p>
+              </div>
+              <div class="card-actions">
+                <button class="btn-icon" (click)="abrirFormulario(equipe)" title="Editar">✏️</button>
+                <button class="btn-icon btn-danger" (click)="excluir(equipe.id!)" title="Excluir">🗑️</button>
+              </div>
+            </div>
+
+            <div class="equipe-body">
+              @if (equipe.ambulancia) {
+                <div class="ambulancia-info">
+                  <strong>🚑 Ambulância:</strong> {{ equipe.ambulancia.placa }} ({{ equipe.ambulancia.tipo }})
+                </div>
+              }
+
+              <div class="profissionais-list">
+                <strong>Equipe:</strong>
+                <div class="profs">
+                  @for (prof of equipe.profissionais; track prof.id) {
+                    <span class="prof-badge">
+                      {{ getFuncaoEmoji(prof.funcao) }} {{ prof.nome }}
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

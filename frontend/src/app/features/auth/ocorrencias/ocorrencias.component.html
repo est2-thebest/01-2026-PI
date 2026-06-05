@@ -1,0 +1,171 @@
+<div class="ocorrencias-wrapper">
+  <div class="page-header">
+    <h1>Ocorrências</h1>
+    <p>Central de gerenciamento de emergências</p>
+  </div>
+
+  @if (erro) {
+    <div class="alert alert-error">{{ erro }}</div>
+  }
+
+  <div class="page-controls">
+    <button 
+      class="btn btn-primary" 
+      (click)="abrirFormulario()"
+      [disabled]="mostraFormulario">
+      + Nova Ocorrência
+    </button>
+  </div>
+
+  @if (mostraFormulario) {
+    <div class="form-card">
+      <h2>Nova Ocorrência</h2>
+      <form [formGroup]="form" (ngSubmit)="criar()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tipo">Tipo *</label>
+            <input 
+              id="tipo"
+              type="text" 
+              formControlName="tipo" 
+              placeholder="Ex: Acidente, Infarto..."
+              class="form-control" />
+            @if (form.get('tipo')?.invalid && form.get('tipo')?.touched) {
+              <span class="error-text">Campo obrigatório</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="gravidade">Gravidade *</label>
+            <select id="gravidade" formControlName="gravidade" class="form-control">
+              <option value="ALTA">Alta</option>
+              <option value="MEDIA">Média</option>
+              <option value="BAIXA">Baixa</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="bairro">Bairro *</label>
+          <select id="bairro" formControlName="bairroId" class="form-control">
+            <option [value]="null">Selecione um bairro</option>
+            @for (bairro of bairros; track bairro.id) {
+              <option [value]="bairro.id">{{ bairro.nome }}</option>
+            }
+          </select>
+          @if (form.get('bairroId')?.invalid && form.get('bairroId')?.touched) {
+            <span class="error-text">Campo obrigatório</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="observacao">Observações</label>
+          <textarea 
+            id="observacao"
+            formControlName="observacao" 
+            placeholder="Informações adicionais..."
+            class="form-control"
+            rows="3"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="fecharFormulario()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+            Registrar
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <div class="filters-section">
+    <h3>Filtros</h3>
+    <div class="filters-row">
+      <input 
+        type="text" 
+        placeholder="Buscar por bairro..."
+        [(ngModel)]="filtroBairro"
+        class="filter-input">
+      
+      <select [(ngModel)]="filtroStatus" class="filter-input">
+        <option value="">Todos os Status</option>
+        <option value="ABERTA">Aberta</option>
+        <option value="DESPACHADA">Despachada</option>
+        <option value="EM_ANDAMENTO">Em Andamento</option>
+        <option value="CONCLUIDA">Concluída</option>
+        <option value="CANCELADA">Cancelada</option>
+      </select>
+
+      <select [(ngModel)]="filtroGravidade" class="filter-input">
+        <option value="">Todas as Gravidades</option>
+        <option value="ALTA">Alta</option>
+        <option value="MEDIA">Média</option>
+        <option value="BAIXA">Baixa</option>
+      </select>
+    </div>
+  </div>
+
+  @if (carregando) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+  } @else {
+    <div class="table-card">
+      @if (ocorrenciasFiltradas.length === 0) {
+        <div class="empty-state">
+          <p>Nenhuma ocorrência encontrada</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Bairro</th>
+                <th>Tipo</th>
+                <th>Gravidade</th>
+                <th>Status</th>
+                <th>Abertura</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (oc of ocorrenciasFiltradas; track oc.id) {
+                <tr>
+                  <td>#{{ oc.id }}</td>
+                  <td>{{ oc.bairro?.nome || '-' }}</td>
+                  <td>{{ oc.tipo }}</td>
+                  <td>
+                    <span class="badge" [style.backgroundColor]="getGravidadeColor(oc.gravidade)">
+                      {{ oc.gravidade }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [style.backgroundColor]="getStatusColor(oc.status)">
+                      {{ oc.status }}
+                    </span>
+                  </td>
+                  <td>{{ converterData(oc.dataHoraAbertura) | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="actions">
+                    @if (oc.status === 'ABERTA') {
+                      <button class="btn-action" (click)="despachar(oc.id!)" title="Despachar">📤</button>
+                    }
+                    @if (oc.status === 'DESPACHADA' || oc.status === 'EM_ANDAMENTO') {
+                      <button class="btn-action" (click)="concluir(oc.id!)" title="Concluir">✅</button>
+                    }
+                    @if (oc.status !== 'CONCLUIDA' && oc.status !== 'CANCELADA') {
+                      <button class="btn-action btn-danger" (click)="cancelar(oc.id!)" title="Cancelar">❌</button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

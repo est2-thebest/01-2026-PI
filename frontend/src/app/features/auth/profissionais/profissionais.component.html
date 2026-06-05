@@ -1,0 +1,149 @@
+<div class="profissionais-wrapper">
+  <div class="page-header">
+    <h1>Profissionais</h1>
+    <p>Gestão de recursos humanos</p>
+  </div>
+
+  @if (erro) {
+    <div class="alert alert-error">{{ erro }}</div>
+  }
+
+  <div class="page-controls">
+    <button 
+      class="btn btn-primary" 
+      (click)="abrirFormulario()"
+      [disabled]="mostraFormulario">
+      + Novo Profissional
+    </button>
+  </div>
+
+  @if (mostraFormulario) {
+    <div class="form-card">
+      <h2>{{ editandoId ? 'Editar' : 'Novo' }} Profissional</h2>
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="form-group">
+          <label for="nome">Nome *</label>
+          <input 
+            id="nome"
+            type="text" 
+            formControlName="nome" 
+            placeholder="Nome completo"
+            class="form-control" />
+          @if (form.get('nome')?.invalid && form.get('nome')?.touched) {
+            <span class="error-text">Nome deve ter pelo menos 3 caracteres</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="funcao">Função *</label>
+            <select id="funcao" formControlName="funcao" class="form-control">
+              <option value="MEDICO">Médico</option>
+              <option value="ENFERMEIRO">Enfermeiro</option>
+              <option value="MOTORISTA">Motorista</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="turno">Turno</label>
+            <select id="turno" formControlName="turno" class="form-control">
+              <option value="MATUTINO">Matutino</option>
+              <option value="VESPERTINO">Vespertino</option>
+              <option value="NOTURNO">Noturno</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contato">Contato</label>
+            <input 
+              id="contato"
+              type="tel" 
+              formControlName="contato" 
+              placeholder="(11) 99999-9999"
+              class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label for="ativo">Status</label>
+            <select id="ativo" formControlName="ativo" class="form-control">
+              <option [value]="true">Ativo</option>
+              <option [value]="false">Inativo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="fecharFormulario()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+            {{ editandoId ? 'Atualizar' : 'Criar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <div class="filters-section">
+    <h3>Filtrar por Função</h3>
+    <select [(ngModel)]="filtroFuncao" class="filter-input">
+      <option value="">Todas</option>
+      <option value="MEDICO">Médico</option>
+      <option value="ENFERMEIRO">Enfermeiro</option>
+      <option value="MOTORISTA">Motorista</option>
+    </select>
+  </div>
+
+  @if (carregando) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+  } @else {
+    <div class="table-card">
+      @if (profissionaisFiltrados.length === 0) {
+        <div class="empty-state">
+          <p>Nenhum profissional encontrado</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Função</th>
+                <th>Turno</th>
+                <th>Contato</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (prof of profissionaisFiltrados; track prof.id) {
+                <tr>
+                  <td><strong>{{ prof.nome }}</strong></td>
+                  <td>{{ getFuncaoLabel(prof.funcao) }}</td>
+                  <td>{{ prof.turno || '-' }}</td>
+                  <td>{{ prof.contato || '-' }}</td>
+                  <td>
+                    <span 
+                      class="badge status-badge" 
+                      [style.backgroundColor]="getStatusColor(prof.ativo)">
+                      {{ getStatusLabel(prof.ativo) }}
+                    </span>
+                  </td>
+                  <td class="actions">
+                    <button class="btn-icon" (click)="abrirFormulario(prof)" title="Editar">✏️</button>
+                    <button class="btn-icon btn-danger" (click)="excluir(prof.id!)" title="Excluir">🗑️</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>
