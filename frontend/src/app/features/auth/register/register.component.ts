@@ -1,0 +1,52 @@
+// src/app/features/auth/register/register.component.ts
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
+
+@Component({
+  selector: 'app-register',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.scss'
+})
+export class RegisterComponent {
+  form: FormGroup;
+  carregando = false;
+  mensagem: { tipo: 'success' | 'error'; texto: string } | null = null;
+
+  constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
+    this.form = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(3)]],
+      email:    ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+    });
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    this.carregando = true;
+    this.http.post(`${environment.apiUrl}/auth/register`, this.form.value).subscribe({
+      next: () => {
+        this.mensagem = { tipo: 'success', texto: 'Cadastro realizado! Redirecionando para login...' };
+        setTimeout(() => this.router.navigate(['/login']), 1500);
+      },
+      error: (err) => {
+        this.carregando = false;
+        this.mensagem = { tipo: 'error', texto: err?.error?.message || 'Erro ao realizar cadastro' };
+      }
+    });
+  }
+
+  temErro(campo: string): boolean { const c = this.form.get(campo); return !!(c?.invalid && c?.touched); }
+  erroMsg(campo: string): string {
+    const c = this.form.get(campo);
+    if (c?.errors?.['required']) return 'Campo obrigatório';
+    if (c?.errors?.['minlength']) return `Mínimo ${c.errors['minlength'].requiredLength} caracteres`;
+    if (c?.errors?.['email']) return 'E-mail inválido';
+    return '';
+  }
+}

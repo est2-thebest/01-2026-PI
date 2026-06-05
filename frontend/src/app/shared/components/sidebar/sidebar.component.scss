@@ -1,0 +1,67 @@
+.app-sidebar {
+  width: 250px; background: var(--bg-primary); box-shadow: var(--shadow-md);
+  height: 100vh; position: fixed; top: 0; left: 0;
+  display: flex; flex-direction: column;
+  transition: width .3s ease; overflow: hidden; z-index: 1000;
+  &.closed { width: 80px; }
+}
+
+.sidebar-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); min-height: 64px; position: relative;
+}
+
+.sidebar-logo {
+  font-weight: 700; font-size: 1.05rem; color: var(--primary); white-space: nowrap;
+  transition: opacity .3s ease;
+  .app-sidebar.closed & { opacity: 0; pointer-events: none; }
+}
+
+.sidebar-toggle {
+  background: transparent; border: none; cursor: pointer; color: var(--secondary);
+  padding: 6px; position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  .app-sidebar.closed & { right: 50%; transform: translate(50%, -50%); }
+}
+
+.sidebar-nav { display: flex; flex-direction: column; padding: 1.5rem 0; flex-grow: 1; }
+
+.sidebar-item {
+  display: flex; align-items: center; gap: 1.25rem; padding: 1rem 1.5rem;
+  text-decoration: none; color: var(--text-primary);
+  border-left: 3px solid transparent; transition: var(--transition);
+  &:hover { background: var(--bg-secondary); border-left-color: var(--secondary); }
+  &.active { background: rgba(0,114,196,.08); border-left-color: var(--secondary); color: var(--secondary); font-weight: 600; }
+  .app-sidebar.closed & { justify-content: center; padding: 1rem 0; }
+}
+
+.sidebar-label {
+  white-space: nowrap; transition: opacity .3s ease;
+  .app-sidebar.closed & { opacity: 0; width: 0; overflow: hidden; }
+}
+
+.sidebar-icon { width: 22px; text-align: center; flex-shrink: 0; font-size: 1.05rem; }
+.icon-dashboard    { color: #1976d2; }
+.icon-ocorrencias  { color: #d84315; }
+.icon-ambulancias  { color: #c62828; }
+.icon-equipes      { color: #7b1fa2; }
+.icon-profissionais{ color: #2e7d32; }
+.icon-despacho     { color: #f57f17; }
+.icon-relatorios   { color: #1565c0; }
+
+.sidebar-footer {
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+
+.sidebar-theme-btn, .sidebar-logout-btn {
+  background: transparent; border: none; cursor: pointer;
+  display: flex; align-items: center; gap: .75rem;
+  padding: .9rem 1.5rem; width: 100%; font-family: inherit; font-size: .9rem;
+  transition: var(--transition);
+  .app-sidebar.closed & { justify-content: center; padding: .9rem 0; }
+}
+.sidebar-theme-btn { color: var(--text-primary); &:hover { background: var(--bg-secondary); } }
+.sidebar-logout-btn {
+  color: var(--primary); background: rgba(164,22,26,.07);
+  &:hover { background: rgba(164,22,26,.15); }
+}
