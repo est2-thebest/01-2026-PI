@@ -54,7 +54,8 @@ public SecurityFilterChain securityFilterChain(
                             "/swagger/**",
                             "/swagger-ui/**",
                             "/swagger-ui.html",
-                            "/v3/api-docs/**"
+                            "/v3/api-docs/**",
+                            "/bairros/**"
                     ).permitAll()
                     .anyRequest()
                     .authenticated()
