@@ -17,7 +17,7 @@
     <div class="stats-grid">
       <!-- Profissionais -->
       <div class="stat-card card-profissionais">
-        <div class="stat-icon">👨‍⚕️</div>
+        <div class="stat-icon stat-icon-secondary"><i class="pi pi-user"></i></div>
         <div class="stat-content">
           <h3>{{ stats.profissionaisCadastrados }}</h3>
           <p>Profissionais</p>
@@ -26,7 +26,7 @@
 
       <!-- Ambulâncias Disponíveis -->
       <div class="stat-card card-ambulancias">
-        <div class="stat-icon">🚑</div>
+        <div class="stat-icon stat-icon-primary"><i class="pi pi-truck"></i></div>
         <div class="stat-content">
           <h3>{{ stats.ambulanciasDisponiveis }}/{{ stats.ambulanciasTotal }}</h3>
           <p>Ambulâncias Disponíveis</p>
@@ -35,7 +35,7 @@
 
       <!-- Equipes Ativas -->
       <div class="stat-card card-equipes">
-        <div class="stat-icon">👥</div>
+        <div class="stat-icon stat-icon-secondary"><i class="pi pi-users"></i></div>
         <div class="stat-content">
           <h3>{{ stats.equipesAtivas }}</h3>
           <p>Equipes Ativas</p>
@@ -44,8 +44,7 @@
 
       <!-- Ocorrências Abertas -->
       <div class="stat-card card-ocorrencias">
-        <div class="stat-icon">🚨</div>
-        <div class="stat-content">
+        <div class="stat-icon stat-icon-warning"><i class="pi pi-bell"></i></div>        <div class="stat-content">
           <h3>{{ stats.ocorrenciasAbertas }}</h3>
           <p>Ocorrências Abertas</p>
         </div>
@@ -53,8 +52,7 @@
 
       <!-- Atendimentos Hoje -->
       <div class="stat-card card-atendimentos">
-        <div class="stat-icon">✅</div>
-        <div class="stat-content">
+        <div class="stat-icon stat-icon-success"><i class="pi pi-check-circle"></i></div>        <div class="stat-content">
           <h3>{{ stats.atendimentosHoje }}</h3>
           <p>Atendimentos Hoje</p>
         </div>

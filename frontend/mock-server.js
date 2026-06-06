@@ -203,10 +203,12 @@ app.delete('/api/equipes/:id', (req, res) => {
 // Rotas de Dashboard
 app.get('/api/dashboard/stats', (req, res) => {
   res.json({
-    totalOcorrencias: ocorrencias.length,
     ocorrenciasAbertas: ocorrencias.filter(o => o.status === 'ABERTA').length,
+    atendimentosHoje: ocorrencias.filter(o => o.status === 'CONCLUIDA').length || 5,
     ambulanciasDisponiveis: ambulancias.filter(a => a.status === 'DISPONIVEL').length,
-    profissionaisAtivos: profissionais.filter(p => p.ativo).length
+    ambulanciasTotal: ambulancias.length,
+    equipesAtivas: equipes.length,
+    profissionaisCadastrados: profissionais.length
   });
 });
 
