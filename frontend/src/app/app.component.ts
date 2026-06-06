@@ -10,7 +10,7 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
   imports: [RouterOutlet],
   template: `<router-outlet />`
 })
-export class AppComponent {}
+export class AppComponent { }
 
 @Component({
   selector: 'app-main-layout',
