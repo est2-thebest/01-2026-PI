@@ -62,25 +62,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  getStatusColor(status: string): string {
-    const cores: Record<string, string> = {
-      'ABERTA': '#ff6b6b',
-      'DESPACHADA': '#ffd93d',
-      'EM_ANDAMENTO': '#6bcf7f',
-      'CONCLUIDA': '#4d96ff',
-      'CANCELADA': '#95a5a6'
-    };
-    return cores[status] || '#95a5a6';
-  }
 
-  getGravidadeColor(gravidade: string): string {
-    const cores: Record<string, string> = {
-      'ALTA': '#ff6b6b',
-      'MEDIA': '#ffd93d',
-      'BAIXA': '#95a5a6'
-    };
-    return cores[gravidade] || '#95a5a6';
-  }
 
   converterData(data: string | number[]): Date {
     if (Array.isArray(data)) {
