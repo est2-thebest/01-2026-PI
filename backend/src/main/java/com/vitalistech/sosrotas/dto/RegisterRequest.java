@@ -1,6 +1,6 @@
 package com.vitalistech.sosrotas.dto;
 
-import com.vitalistech.sosrotas.model.Enums.*;
+import com.vitalistech.sosrotas.model.enums.*;
 
 public record RegisterRequest(
         String nome,

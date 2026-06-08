@@ -1,6 +1,6 @@
 package com.vitalistech.sosrotas.model;
 
-import com.vitalistech.sosrotas.model.Enums.Role;
+import com.vitalistech.sosrotas.model.enums.Role;
 
 import jakarta.persistence.*;
 
