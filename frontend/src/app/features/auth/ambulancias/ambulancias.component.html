@@ -1,93 +1,103 @@
 <div class="ambulancias-wrapper">
-  <div class="page-header">
-    <h1>Ambulâncias</h1>
-    <p>Gerenciamento de veículos de emergência</p>
+
+  <!-- ===== BANNER ===== -->
+  <div class="page-banner">
+    <div class="page-banner-content">
+      <h1><i class="pi pi-truck banner-icon"></i> Frota de Ambulâncias</h1>
+      <p>Gerenciamento de veículos e status da frota</p>
+    </div>
   </div>
 
-  @if (erro) {
-    <div class="alert alert-error">{{ erro }}</div>
+  <!-- ===== ALERTA DE ERRO ===== -->
+  @if (erro && !mostraFormulario) {
+    <div class="alert-bar alert-error">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ erro }}
+      <button class="alert-close" (click)="erro = null"><i class="pi pi-times"></i></button>
+    </div>
   }
 
-  <div class="page-controls">
-    <button 
-      class="btn btn-primary" 
-      (click)="abrirFormulario()"
-      [disabled]="mostraFormulario">
-      + Nova Ambulância
+  <!-- ===== CARDS DE RESUMO ===== -->
+  @if (!carregando) {
+    <div class="stats-row">
+      <div class="stat-card stat-disponivel">
+        <i class="pi pi-check-circle stat-icon"></i>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalDisponiveis }}</span>
+          <span class="stat-label">Disponíveis</span>
+        </div>
+      </div>
+      <div class="stat-card stat-atendimento">
+        <i class="pi pi-truck stat-icon"></i>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalEmAtendimento }}</span>
+          <span class="stat-label">Em Atendimento</span>
+        </div>
+      </div>
+      <div class="stat-card stat-manutencao">
+        <i class="pi pi-wrench stat-icon"></i>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalManutencao }}</span>
+          <span class="stat-label">Em Manutenção</span>
+        </div>
+      </div>
+      <div class="stat-card stat-total">
+        <i class="pi pi-list stat-icon"></i>
+        <div class="stat-info">
+          <span class="stat-value">{{ ambulancias.length }}</span>
+          <span class="stat-label">Total da Frota</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===== BARRA DE AÇÕES ===== -->
+  <div class="action-bar">
+    <div class="search-group">
+      <i class="pi pi-search search-icon"></i>
+      <input
+        id="filtro-busca-amb"
+        type="text"
+        placeholder="Buscar por placa, bairro..."
+        [(ngModel)]="filtroBusca"
+        class="search-input" />
+    </div>
+
+    <div class="filter-selects">
+      <select id="filtro-status-amb" [(ngModel)]="filtroStatus" class="filter-select">
+        <option value="">Status — Todos</option>
+        <option value="DISPONIVEL">Disponível</option>
+        <option value="EM_ATENDIMENTO">Em Atendimento</option>
+        <option value="MANUTENCAO">Manutenção</option>
+        <option value="INATIVA">Inativa</option>
+        <option value="SEM_EQUIPE">Sem Equipe</option>
+      </select>
+
+      <select id="filtro-tipo-amb" [(ngModel)]="filtroTipo" class="filter-select">
+        <option value="">Tipo — Todos</option>
+        <option value="USA">USA — Avançado</option>
+        <option value="USB">USB — Básico</option>
+      </select>
+    </div>
+
+    <button id="btn-nova-ambulancia" class="btn btn-primary" (click)="abrirFormulario()">
+      <i class="pi pi-plus"></i> Nova Ambulância
     </button>
   </div>
 
-  @if (mostraFormulario) {
-    <div class="form-card">
-      <h2>{{ editandoId ? 'Editar' : 'Nova' }} Ambulância</h2>
-      <form [formGroup]="form" (ngSubmit)="salvar()">
-        <div class="form-group">
-          <label for="placa">Placa *</label>
-          <input 
-            id="placa"
-            type="text" 
-            formControlName="placa" 
-            placeholder="ABC-1234"
-            [disabled]="!!editandoId"
-            class="form-control" />
-          @if (form.get('placa')?.invalid && form.get('placa')?.touched) {
-            <span class="error-text">Placa inválida (ex: ABC-1234)</span>
-          }
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="tipo">Tipo *</label>
-            <select id="tipo" formControlName="tipo" class="form-control">
-              <option value="USA">USA - Avançada</option>
-              <option value="USB">USB - Básica</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="status">Status *</label>
-            <select id="status" formControlName="status" class="form-control">
-              <option value="DISPONIVEL">Disponível</option>
-              <option value="EM_ATENDIMENTO">Em Atendimento</option>
-              <option value="MANUTENCAO">Manutenção</option>
-              <option value="INATIVA">Inativa</option>
-              <option value="SEM_EQUIPE">Sem Equipe</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="bairro">Bairro</label>
-          <select id="bairro" formControlName="bairroId" class="form-control">
-            <option [value]="null">Sem bairro</option>
-            @for (bairro of bairros; track bairro.id) {
-              <option [value]="bairro.id">{{ bairro.nome }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="fecharFormulario()">
-            Cancelar
-          </button>
-          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-            {{ editandoId ? 'Atualizar' : 'Criar' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  }
-
+  <!-- ===== TABELA ===== -->
   @if (carregando) {
     <div class="loading-container">
-      <div class="spinner"></div>
-      <p>Carregando...</p>
+      <i class="pi pi-spin pi-spinner loading-spinner"></i>
+      <p>Carregando frota...</p>
     </div>
   } @else {
     <div class="table-card">
-      @if (ambulancias.length === 0) {
+      @if (ambulanciasFiltradas.length === 0) {
         <div class="empty-state">
-          <p>Nenhuma ambulância cadastrada</p>
+          <i class="pi pi-truck empty-icon"></i>
+          <p>Nenhuma ambulância encontrada</p>
+          <span>Tente ajustar os filtros ou cadastre uma nova ambulância</span>
         </div>
       } @else {
         <div class="table-container">
@@ -97,24 +107,36 @@
                 <th>Placa</th>
                 <th>Tipo</th>
                 <th>Status</th>
-                <th>Bairro</th>
+                <th>Localização</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody>
-              @for (amb of ambulancias; track amb.id) {
+              @for (amb of ambulanciasFiltradas; track amb.id) {
                 <tr>
                   <td><strong>{{ amb.placa }}</strong></td>
-                  <td>{{ amb.tipo }}</td>
                   <td>
-                    <span class="badge" [style.backgroundColor]="getStatusColor(amb.status)">
-                      {{ amb.status }}
-                    </span>
+                    <span class="badge badge-tipo" [ngClass]="amb.tipo">{{ amb.tipo }}</span>
                   </td>
-                  <td>{{ amb.bairro?.nome || '-' }}</td>
-                  <td class="actions">
-                    <button class="btn-icon" (click)="abrirFormulario(amb)" title="Editar">✏️</button>
-                    <button class="btn-icon btn-danger" (click)="excluir(amb.id!)" title="Excluir">🗑️</button>
+                  <td>
+                    <span class="badge" [ngClass]="amb.status">{{ labelStatus(amb.status) }}</span>
+                  </td>
+                  <td>{{ amb.bairro?.nome || '—' }}</td>
+                  <td class="col-actions">
+                    <button
+                      id="btn-editar-{{ amb.id }}"
+                      class="btn-action btn-edit"
+                      (click)="abrirFormulario(amb)"
+                      title="Editar ambulância">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button
+                      id="btn-excluir-{{ amb.id }}"
+                      class="btn-action btn-delete"
+                      (click)="excluir(amb)"
+                      title="Excluir ambulância">
+                      <i class="pi pi-trash"></i>
+                    </button>
                   </td>
                 </tr>
               }
@@ -124,4 +146,102 @@
       }
     </div>
   }
+
 </div>
+
+<!-- ===== MODAL FORMULÁRIO ===== -->
+@if (mostraFormulario) {
+  <div class="modal-overlay" (click)="fecharFormulario()">
+    <div class="modal-box" id="modal-formulario-amb" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h3>
+          <i class="pi" [ngClass]="editandoId ? 'pi-pencil' : 'pi-plus-circle'"></i>
+          {{ editandoId ? 'Editar Ambulância' : 'Nova Ambulância' }}
+        </h3>
+        <button class="btn-close" (click)="fecharFormulario()" title="Fechar">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (erro) {
+          <div class="alert-bar alert-error" style="margin-bottom: 1rem;">
+            <i class="pi pi-exclamation-triangle"></i> {{ erro }}
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="salvar()" id="form-ambulancia">
+
+          <!-- Placa -->
+          <div class="form-group">
+            <label for="campo-placa"><i class="pi pi-id-card"></i> Placa *</label>
+            <input
+              id="campo-placa"
+              type="text"
+              formControlName="placa"
+              class="form-control"
+              [class.input-error]="form.get('placa')?.invalid && form.get('placa')?.touched"
+              placeholder="ABC1234 ou ABC-1234"
+              [readonly]="!!editandoId" />
+            @if (form.get('placa')?.invalid && form.get('placa')?.touched) {
+              <span class="error-text"><i class="pi pi-exclamation-circle"></i> Placa inválida. Use o formato ABC1234.</span>
+            }
+            @if (editandoId) {
+              <span class="hint-text"><i class="pi pi-info-circle"></i> A placa não pode ser alterada após o cadastro.</span>
+            }
+          </div>
+
+          <!-- Tipo e Status -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="campo-tipo"><i class="pi pi-tag"></i> Tipo *</label>
+              <select id="campo-tipo" formControlName="tipo" class="form-control">
+                <option value="USA">USA — Suporte Avançado de Vida</option>
+                <option value="USB">USB — Suporte Básico de Vida</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="campo-status"><i class="pi pi-circle"></i> Status *</label>
+              <select id="campo-status" formControlName="status" class="form-control">
+                <option value="DISPONIVEL">Disponível</option>
+                <option value="EM_ATENDIMENTO">Em Atendimento</option>
+                <option value="MANUTENCAO">Manutenção</option>
+                <option value="INATIVA">Inativa</option>
+                <option value="SEM_EQUIPE">Sem Equipe</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Bairro / Localização -->
+          <div class="form-group">
+            <label for="campo-bairro"><i class="pi pi-map-marker"></i> Localização (Bairro)</label>
+            <select id="campo-bairro" formControlName="bairroId" class="form-control">
+              <option [ngValue]="null">— Sem localização definida —</option>
+              @for (bairro of bairros; track bairro.id) {
+                <option [ngValue]="bairro.id">{{ bairro.nome }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="fecharFormulario()">
+              <i class="pi pi-times"></i> Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || salvando">
+              @if (salvando) {
+                <i class="pi pi-spin pi-spinner"></i> Salvando...
+              } @else {
+                <i class="pi pi-check"></i> {{ editandoId ? 'Atualizar' : 'Cadastrar' }}
+              }
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+}
+
