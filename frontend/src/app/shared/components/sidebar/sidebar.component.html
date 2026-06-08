@@ -1,7 +1,10 @@
 <aside class="app-sidebar" [class.open]="isOpen" [class.closed]="!isOpen">
 
   <div class="sidebar-top">
-    <span class="sidebar-logo">🚑 SOS Rota</span>
+    <div class="sidebar-logo-wrap">
+      <img src="assets/logo-sp.svg" alt="Vitalis Tech" class="sidebar-logo-img" />
+      <span class="sidebar-logo-text">Vitalis Tech</span>
+    </div>
     <button class="sidebar-toggle" (click)="alternar()">
       <i class="pi" [class.pi-chevron-left]="isOpen" [class.pi-chevron-right]="!isOpen"></i>
     </button>
@@ -14,11 +17,11 @@
     </a>
     <a routerLink="/ocorrencias"  routerLinkActive="active" class="sidebar-item">
       <i class="pi pi-bell sidebar-icon icon-ocorrencias"></i>
-      <span class="sidebar-label">Ocorrências</span>
+      <span class="sidebar-label">Ocorrencias</span>
     </a>
     <a routerLink="/ambulancias"  routerLinkActive="active" class="sidebar-item">
       <i class="pi pi-truck sidebar-icon icon-ambulancias"></i>
-      <span class="sidebar-label">Ambulâncias</span>
+      <span class="sidebar-label">Ambulancias</span>
     </a>
     <a routerLink="/equipes"      routerLinkActive="active" class="sidebar-item">
       <i class="pi pi-users sidebar-icon icon-equipes"></i>
@@ -34,7 +37,7 @@
     </a>
     <a routerLink="/relatorios"   routerLinkActive="active" class="sidebar-item">
       <i class="pi pi-chart-bar sidebar-icon icon-relatorios"></i>
-      <span class="sidebar-label">Relatórios</span>
+      <span class="sidebar-label">Relatorios</span>
     </a>
   </nav>
 
