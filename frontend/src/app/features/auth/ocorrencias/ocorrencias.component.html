@@ -1,122 +1,70 @@
 <div class="ocorrencias-wrapper">
-  <div class="page-header">
-    <h1>Ocorrências</h1>
-    <p>Central de gerenciamento de emergências</p>
+
+  <!-- ===== BANNER ===== -->
+  <div class="page-banner">
+    <div class="page-banner-content">
+      <h1><i class="pi pi-bell banner-icon"></i> Central de Ocorrências</h1>
+      <p>Gerenciamento de chamados de emergência</p>
+    </div>
   </div>
 
+  <!-- ===== ALERTA DE ERRO ===== -->
   @if (erro) {
-    <div class="alert alert-error">{{ erro }}</div>
-  }
-
-  <div class="page-controls">
-    <button 
-      class="btn btn-primary" 
-      (click)="abrirFormulario()"
-      [disabled]="mostraFormulario">
-      + Nova Ocorrência
-    </button>
-  </div>
-
-  @if (mostraFormulario) {
-    <div class="form-card">
-      <h2>Nova Ocorrência</h2>
-      <form [formGroup]="form" (ngSubmit)="criar()">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="tipo">Tipo *</label>
-            <input 
-              id="tipo"
-              type="text" 
-              formControlName="tipo" 
-              placeholder="Ex: Acidente, Infarto..."
-              class="form-control" />
-            @if (form.get('tipo')?.invalid && form.get('tipo')?.touched) {
-              <span class="error-text">Campo obrigatório</span>
-            }
-          </div>
-
-          <div class="form-group">
-            <label for="gravidade">Gravidade *</label>
-            <select id="gravidade" formControlName="gravidade" class="form-control">
-              <option value="ALTA">Alta</option>
-              <option value="MEDIA">Média</option>
-              <option value="BAIXA">Baixa</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="bairro">Bairro *</label>
-          <select id="bairro" formControlName="bairroId" class="form-control">
-            <option [value]="null">Selecione um bairro</option>
-            @for (bairro of bairros; track bairro.id) {
-              <option [value]="bairro.id">{{ bairro.nome }}</option>
-            }
-          </select>
-          @if (form.get('bairroId')?.invalid && form.get('bairroId')?.touched) {
-            <span class="error-text">Campo obrigatório</span>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="observacao">Observações</label>
-          <textarea 
-            id="observacao"
-            formControlName="observacao" 
-            placeholder="Informações adicionais..."
-            class="form-control"
-            rows="3"></textarea>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="fecharFormulario()">
-            Cancelar
-          </button>
-          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-            Registrar
-          </button>
-        </div>
-      </form>
+    <div class="alert-bar alert-error">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ erro }}
+      <button class="alert-close" (click)="erro = null"><i class="pi pi-times"></i></button>
     </div>
   }
 
-  <div class="filters-section">
-    <h3>Filtros</h3>
-    <div class="filters-row">
-      <input 
-        type="text" 
-        placeholder="Buscar por bairro..."
-        [(ngModel)]="filtroBairro"
-        class="filter-input">
-      
-      <select [(ngModel)]="filtroStatus" class="filter-input">
-        <option value="">Todos os Status</option>
+  <!-- ===== BARRA DE AÇÕES ===== -->
+  <div class="action-bar">
+    <div class="search-group">
+      <i class="pi pi-search search-icon"></i>
+      <input
+        id="filtro-busca"
+        type="text"
+        placeholder="Buscar por bairro, tipo..."
+        [(ngModel)]="filtroBusca"
+        class="search-input" />
+    </div>
+
+    <div class="filter-selects">
+      <select id="filtro-status" [(ngModel)]="filtroStatus" class="filter-select">
+        <option value="">Status — Todos</option>
         <option value="ABERTA">Aberta</option>
         <option value="DESPACHADA">Despachada</option>
-        <option value="EM_ANDAMENTO">Em Andamento</option>
+        <option value="EM_ATENDIMENTO">Em Atendimento</option>
         <option value="CONCLUIDA">Concluída</option>
         <option value="CANCELADA">Cancelada</option>
       </select>
 
-      <select [(ngModel)]="filtroGravidade" class="filter-input">
-        <option value="">Todas as Gravidades</option>
+      <select id="filtro-gravidade" [(ngModel)]="filtroGravidade" class="filter-select">
+        <option value="">Gravidade — Todas</option>
         <option value="ALTA">Alta</option>
         <option value="MEDIA">Média</option>
         <option value="BAIXA">Baixa</option>
       </select>
     </div>
+
+    <button id="btn-nova-ocorrencia" class="btn btn-primary" (click)="abrirFormulario()">
+      <i class="pi pi-plus"></i> Nova Ocorrência
+    </button>
   </div>
 
+  <!-- ===== TABELA ===== -->
   @if (carregando) {
     <div class="loading-container">
-      <div class="spinner"></div>
-      <p>Carregando...</p>
+      <i class="pi pi-spin pi-spinner loading-spinner"></i>
+      <p>Carregando ocorrências...</p>
     </div>
   } @else {
     <div class="table-card">
       @if (ocorrenciasFiltradas.length === 0) {
         <div class="empty-state">
+          <i class="pi pi-inbox empty-icon"></i>
           <p>Nenhuma ocorrência encontrada</p>
+          <span>Tente ajustar os filtros ou registre uma nova ocorrência</span>
         </div>
       } @else {
         <div class="table-container">
@@ -134,31 +82,76 @@
             </thead>
             <tbody>
               @for (oc of ocorrenciasFiltradas; track oc.id) {
-                <tr>
-                  <td>#{{ oc.id }}</td>
-                  <td>{{ oc.bairro?.nome || '-' }}</td>
+                <tr [class.row-locked]="!podeEditar(oc.status)">
+                  <td class="col-id">#{{ oc.id }}</td>
+                  <td>{{ oc.bairro?.nome || '—' }}</td>
                   <td>{{ oc.tipo }}</td>
-                  <td>
-                    <span class="badge" [style.backgroundColor]="getGravidadeColor(oc.gravidade)">
-                      {{ oc.gravidade }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge" [style.backgroundColor]="getStatusColor(oc.status)">
-                      {{ oc.status }}
-                    </span>
-                  </td>
-                  <td>{{ converterData(oc.dataHoraAbertura) | date: 'dd/MM/yyyy HH:mm' }}</td>
-                  <td class="actions">
-                    @if (oc.status === 'ABERTA') {
-                      <button class="btn-action" (click)="despachar(oc.id!)" title="Despachar">📤</button>
+                  <td><span class="badge" [ngClass]="oc.gravidade">{{ oc.gravidade }}</span></td>
+                  <td><span class="badge" [ngClass]="oc.status">{{ labelStatus(oc.status) }}</span></td>
+                  <td class="col-data">{{ converterData(oc.dataHoraAbertura) | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="col-actions">
+
+                    <!-- Ver Detalhes -->
+                    <button
+                      id="btn-ver-{{ oc.id }}"
+                      class="btn-action btn-view"
+                      (click)="verDetalhes(oc.id!)"
+                      title="Ver detalhes">
+                      <i class="pi pi-eye"></i>
+                    </button>
+
+                    <!-- Editar — bloqueado se status não for ABERTA -->
+                    <button
+                      id="btn-editar-{{ oc.id }}"
+                      class="btn-action btn-edit"
+                      (click)="editar(oc)"
+                      [disabled]="!podeEditar(oc.status)"
+                      [title]="podeEditar(oc.status) ? 'Editar' : 'Não é possível editar: status ' + oc.status">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+
+                    <!-- Excluir -->
+                    <button
+                      id="btn-excluir-{{ oc.id }}"
+                      class="btn-action btn-danger"
+                      (click)="excluir(oc.id!)"
+                      title="Excluir">
+                      <i class="pi pi-trash"></i>
+                    </button>
+
+                    <!-- Confirmar Saída (DESPACHADA) -->
+                    @if (oc.status === 'DESPACHADA') {
+                      <button
+                        id="btn-saida-{{ oc.id }}"
+                        class="btn-action btn-success"
+                        (click)="confirmarSaida(oc.id!)"
+                        title="Confirmar Saída">
+                        <i class="pi pi-check"></i>
+                      </button>
                     }
-                    @if (oc.status === 'DESPACHADA' || oc.status === 'EM_ANDAMENTO') {
-                      <button class="btn-action" (click)="concluir(oc.id!)" title="Concluir">✅</button>
+
+                    <!-- Concluir (EM_ATENDIMENTO) -->
+                    @if (oc.status === 'EM_ATENDIMENTO') {
+                      <button
+                        id="btn-concluir-{{ oc.id }}"
+                        class="btn-action btn-success"
+                        (click)="concluir(oc.id!)"
+                        title="Concluir Atendimento">
+                        <i class="pi pi-flag"></i>
+                      </button>
                     }
-                    @if (oc.status !== 'CONCLUIDA' && oc.status !== 'CANCELADA') {
-                      <button class="btn-action btn-danger" (click)="cancelar(oc.id!)" title="Cancelar">❌</button>
+
+                    <!-- Cancelar (ABERTA ou DESPACHADA) -->
+                    @if (oc.status === 'ABERTA' || oc.status === 'DESPACHADA') {
+                      <button
+                        id="btn-cancelar-{{ oc.id }}"
+                        class="btn-action btn-cancel"
+                        (click)="cancelar(oc.id!)"
+                        title="Cancelar Ocorrência">
+                        <i class="pi pi-ban"></i>
+                      </button>
                     }
+
                   </td>
                 </tr>
               }
@@ -168,4 +161,281 @@
       }
     </div>
   }
+
 </div>
+
+<!-- ===== MODAL CADASTRO / EDIÇÃO ===== -->
+@if (mostraFormulario) {
+  <div class="modal-overlay" (click)="fecharPorOverlay($event)">
+    <div class="modal-box" id="modal-ocorrencia">
+
+      <div class="modal-header">
+        <h3>
+          <i class="pi" [ngClass]="ocorrenciaEditando ? 'pi-pencil' : 'pi-plus-circle'"></i>
+          {{ ocorrenciaEditando ? 'Editar Ocorrência' : 'Nova Ocorrência' }}
+        </h3>
+        <button class="btn-close" (click)="fecharFormulario()" title="Fechar">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="form" (ngSubmit)="salvar()" id="form-ocorrencia">
+
+          <div class="form-row">
+            <!-- Tipo -->
+            <div class="form-group">
+              <label for="campo-tipo"><i class="pi pi-tag"></i> Tipo *</label>
+              <select id="campo-tipo" formControlName="tipo" class="form-control"
+                [class.input-error]="form.get('tipo')?.invalid && form.get('tipo')?.touched">
+                <option value="">Selecione o tipo</option>
+                <option value="Acidente de Trânsito">Acidente de Trânsito</option>
+                <option value="Parada Cardíaca">Parada Cardíaca</option>
+                <option value="Queimadura">Queimadura</option>
+                <option value="Trauma">Trauma</option>
+                <option value="AVC">AVC</option>
+                <option value="Intoxicação">Intoxicação</option>
+                <option value="Outro">Outro</option>
+              </select>
+              @if (form.get('tipo')?.invalid && form.get('tipo')?.touched) {
+                <span class="error-text"><i class="pi pi-exclamation-circle"></i> Campo obrigatório</span>
+              }
+            </div>
+
+            <!-- Gravidade -->
+            <div class="form-group">
+              <label for="campo-gravidade"><i class="pi pi-exclamation-triangle"></i> Gravidade *</label>
+              <select id="campo-gravidade" formControlName="gravidade" class="form-control">
+                <option value="ALTA">Alta</option>
+                <option value="MEDIA">Média</option>
+                <option value="BAIXA">Baixa</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Bairro -->
+          <div class="form-group">
+            <label for="campo-bairro"><i class="pi pi-map-marker"></i> Bairro *</label>
+            <select id="campo-bairro" formControlName="bairroId" class="form-control"
+              [class.input-error]="form.get('bairroId')?.invalid && form.get('bairroId')?.touched">
+              <option [value]="null">Selecione um bairro</option>
+              @for (bairro of bairros; track bairro.id) {
+                <option [value]="bairro.id">{{ bairro.nome }}</option>
+              }
+            </select>
+            @if (form.get('bairroId')?.invalid && form.get('bairroId')?.touched) {
+              <span class="error-text"><i class="pi pi-exclamation-circle"></i> Campo obrigatório</span>
+            }
+          </div>
+
+          <!-- Observação -->
+          <div class="form-group">
+            <label for="campo-observacao"><i class="pi pi-align-left"></i> Observação (Opcional)</label>
+            <textarea
+              id="campo-observacao"
+              formControlName="observacao"
+              class="form-control"
+              placeholder="Descreva a situação da ocorrência..."
+              rows="3"></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="fecharFormulario()">
+              <i class="pi pi-times"></i> Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || salvando">
+              @if (salvando) {
+                <i class="pi pi-spin pi-spinner"></i> Salvando...
+              } @else {
+                <i class="pi pi-check"></i> Salvar
+              }
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ===== MODAL DETALHES (somente leitura) ===== -->
+@if (mostraDetalhes && detalheAtual) {
+  <div class="modal-overlay" (click)="fecharDetalhes()">
+    <div class="modal-box modal-box-lg" id="modal-detalhes" (click)="$event.stopPropagation()">
+
+      <div class="modal-header modal-header-light">
+        <div class="modal-header-title">
+          <h3>Ocorrência #{{ detalheAtual.ocorrencia.id }}</h3>
+          <div class="header-badges">
+            <span class="badge" [ngClass]="detalheAtual.ocorrencia.gravidade">{{ detalheAtual.ocorrencia.gravidade }}</span>
+            <span class="badge" [ngClass]="detalheAtual.ocorrencia.status">{{ labelStatus(detalheAtual.ocorrencia.status) }}</span>
+          </div>
+        </div>
+        <button class="btn-close-dark" (click)="fecharDetalhes()"><i class="pi pi-times"></i></button>
+      </div>
+
+      <div class="modal-body">
+
+        @if (carregandoDetalhes) {
+          <div class="loading-container" style="min-height:160px">
+            <i class="pi pi-spin pi-spinner loading-spinner"></i>
+            <p>Carregando detalhes...</p>
+          </div>
+        } @else {
+
+          <div class="detail-split-grid">
+            <!-- Localização -->
+            <div class="detail-column">
+              <h4 class="detail-section-title"><i class="pi pi-map-marker"></i> Localização</h4>
+              
+              <div class="detail-row">
+                <span class="detail-label">Bairro:</span>
+                <span class="detail-value">{{ detalheAtual.ocorrencia.bairro?.nome || '—' }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Tipo:</span>
+                <span class="detail-value">{{ detalheAtual.ocorrencia.tipo }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Observação:</span>
+                <span class="detail-value">{{ detalheAtual.ocorrencia.observacao || '-' }}</span>
+              </div>
+            </div>
+
+            <!-- Tempos -->
+            <div class="detail-column">
+              <h4 class="detail-section-title"><i class="pi pi-clock"></i> Tempos</h4>
+              
+              <div class="detail-row">
+                <span class="detail-label">Abertura:</span>
+                <span class="detail-value">{{ converterData(detalheAtual.ocorrencia.dataHoraAbertura) | date: 'dd/MM/yyyy, HH:mm:ss' }}</span>
+              </div>
+              @if (detalheAtual.ocorrencia.dataHoraFechamento) {
+                <div class="detail-row">
+                  <span class="detail-label">Fechamento:</span>
+                  <span class="detail-value">{{ converterData(detalheAtual.ocorrencia.dataHoraFechamento!) | date: 'dd/MM/yyyy, HH:mm:ss' }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Trajeto da Ambulância -->
+          <div class="detail-section">
+            <h4 class="detail-section-title"><i class="pi pi-map"></i> Trajeto da Ambulância</h4>
+            @if (detalheAtual.atendimento) {
+              <div class="timeline">
+                <!-- 1. Saída da Base -->
+                <div class="timeline-item">
+                  <div class="timeline-dot" style="margin-top: 0.2rem">
+                    <span class="badge" [ngClass]="'DESPACHADA'" style="display: flex; gap: 0.3rem; align-items: center;"><i class="pi pi-home"></i> Base Central</span>
+                  </div>
+                  <div class="timeline-info" style="margin-left: 0.5rem">
+                    <span class="timeline-from">Saída autorizada: <strong>Ambulância {{ detalheAtual.atendimento.ambulancia?.placa }}</strong></span>
+                    <span class="timeline-date">{{ detalheAtual.atendimento.dataHoraDespacho ? (converterData(detalheAtual.atendimento.dataHoraDespacho!) | date: 'dd/MM/yyyy HH:mm:ss') : 'Horário não registrado' }}</span>
+                    @if (detalheAtual.equipe) {
+                      <span class="timeline-obs">Equipe: {{ detalheAtual.equipe.descricao }}</span>
+                    }
+                  </div>
+                </div>
+
+                <!-- 2. Chegada / Status Atual -->
+                <div class="timeline-item">
+                  <div class="timeline-dot" style="margin-top: 0.2rem">
+                    <span class="badge" [ngClass]="detalheAtual.ocorrencia.status === 'CONCLUIDA' ? 'CONCLUIDA' : 'EM_ATENDIMENTO'" style="display: flex; gap: 0.3rem; align-items: center;">
+                      <i class="pi pi-map-marker"></i> {{ detalheAtual.ocorrencia.bairro?.nome || 'Local da Ocorrência' }}
+                    </span>
+                  </div>
+                  <div class="timeline-info" style="margin-left: 0.5rem">
+                    @if (detalheAtual.ocorrencia.status === 'CONCLUIDA') {
+                      <span class="timeline-from">Chegou ao local e <strong>finalizou atendimento</strong></span>
+                      <span class="timeline-date">{{ detalheAtual.ocorrencia.dataHoraFechamento ? (converterData(detalheAtual.ocorrencia.dataHoraFechamento!) | date: 'dd/MM/yyyy HH:mm:ss') : 'Horário não registrado' }}</span>
+                    } @else {
+                      <span class="timeline-from">Ambulância <strong>em deslocamento / no local</strong></span>
+                      <span class="timeline-date">Distância estimada: {{ detalheAtual.atendimento.distanciaKm || '?' }} km</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="route-box text-center" style="color: var(--text-secondary); font-style: italic;">
+                Nenhum trajeto iniciado (ambulância não despachada).
+              </div>
+            }
+          </div>
+
+          <!-- Recursos Alocados -->
+          <div class="detail-section">
+            <h4 class="detail-section-title"><i class="pi pi-truck"></i> Recursos Alocados</h4>
+            
+            @if (detalheAtual.atendimento && detalheAtual.atendimento.ambulancia) {
+              <div class="resource-card">
+                <div class="resource-card-header">
+                  <h5>Ambulância {{ detalheAtual.atendimento.ambulancia.placa }}</h5>
+                  <span class="resource-type">{{ detalheAtual.atendimento.ambulancia.tipo || 'USA' }}</span>
+                </div>
+                
+                <div class="resource-info">
+                  <span class="info-item"><strong>Base:</strong> Base Central</span>
+                  @if (detalheAtual.atendimento.distanciaKm) {
+                    <span class="info-item"><strong>Distância:</strong> {{ detalheAtual.atendimento.distanciaKm }} km</span>
+                  }
+                </div>
+
+                @if (detalheAtual.equipe) {
+                  <div class="team-subcard">
+                    <div class="team-header">
+                      <i class="pi pi-users"></i> Equipe: {{ detalheAtual.equipe.descricao }}
+                    </div>
+                    @if (detalheAtual.equipe.profissionais?.length) {
+                      <div class="team-members">
+                        @for (p of detalheAtual.equipe.profissionais; track p.id) {
+                          <span class="team-member">{{ p.nome }} ({{ p.funcao | slice:0:3 | uppercase }})</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="route-box text-center">Nenhum recurso alocado ainda.</div>
+            }
+          </div>
+
+          <!-- Histórico de Status -->
+          @if (detalheAtual.historico?.length) {
+            <div class="detail-section">
+              <h4 class="detail-section-title"><i class="pi pi-history"></i> Histórico de Status</h4>
+              <div class="timeline">
+                @for (h of detalheAtual.historico; track h.id) {
+                  <div class="timeline-item">
+                    <div class="timeline-dot">
+                      <span class="badge" [ngClass]="h.statusNovo">{{ labelStatus(h.statusNovo) }}</span>
+                    </div>
+                    <div class="timeline-info">
+                      @if (h.statusAnterior) {
+                        <span class="timeline-from">De: <strong>{{ labelStatus(h.statusAnterior) }}</strong></span>
+                      }
+                      <span class="timeline-date">{{ converterData(h.dataHora) | date: 'dd/MM/yyyy HH:mm' }}</span>
+                      @if (h.observacao) {
+                        <span class="timeline-obs">{{ h.observacao }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fecharDetalhes()">
+          <i class="pi pi-times"></i> Fechar
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

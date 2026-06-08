@@ -149,7 +149,7 @@ a { color: var(--primary); text-decoration: none; }
   /* Status Ocorrência — conforme Ocorrencia.java */
   &.ABERTA      { background: var(--secondary); }
   &.DESPACHADA  { background: var(--secondary-light); }
-  &.EM_ANDAMENTO { background: var(--primary); }   /* ← backend usa EM_ANDAMENTO */
+  &.EM_ATENDIMENTO { background: var(--primary); }   /* ← backend usa EM_ATENDIMENTO */
   &.CONCLUIDA   { background: var(--success); }
   &.CANCELADA   { background: var(--text-secondary); }
 

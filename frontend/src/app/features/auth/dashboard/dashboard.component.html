@@ -1,7 +1,10 @@
 <div class="dashboard-wrapper">
-  <div class="dashboard-header">
-    <h1>Dashboard</h1>
-    <p>Visão geral do sistema de emergências</p>
+  <!-- ===== BANNER ===== -->
+  <div class="page-banner">
+    <div class="page-banner-content">
+      <h1><i class="pi pi-chart-bar banner-icon"></i> Dashboard</h1>
+      <p>Visão geral do sistema de emergências</p>
+    </div>
   </div>
 
   @if (erro) {
@@ -60,12 +63,13 @@
     </div>
 
     <!-- Histórico Recente -->
-    <div class="section-container">
+    <div class="table-card">
       <div class="section-header">
         <h2>Ocorrências Recentes</h2>
       </div>
       @if (historicoOcorrencias.length === 0) {
         <div class="empty-state">
+          <i class="pi pi-inbox" style="font-size: 2.8rem; color: var(--text-light); margin-bottom: 0.6rem;"></i>
           <p>Nenhuma ocorrência registrada</p>
         </div>
       } @else {
@@ -88,12 +92,12 @@
                   <td>{{ oc.bairro?.nome || 'N/A' }}</td>
                   <td>{{ oc.tipo }}</td>
                   <td>
-                    <span class="badge" [style.backgroundColor]="getGravidadeColor(oc.gravidade)">
+                    <span class="badge" [ngClass]="oc.gravidade">
                       {{ oc.gravidade }}
                     </span>
                   </td>
                   <td>
-                    <span class="badge" [style.backgroundColor]="getStatusColor(oc.status)">
+                    <span class="badge" [ngClass]="oc.status">
                       {{ oc.status }}
                     </span>
                   </td>

@@ -2,7 +2,7 @@
 // MODELOS VERIFICADOS CONTRA OS ARQUIVOS JAVA DO BACKEND
 //
 // Ambulancia.java   → status: DISPONIVEL | EM_ATENDIMENTO | MANUTENCAO | INATIVA | SEM_EQUIPE
-// Ocorrencia.java   → status: ABERTA | DESPACHADA | EM_ANDAMENTO | CONCLUIDA | CANCELADA
+// Ocorrencia.java   → status: ABERTA | DESPACHADA | EM_ATENDIMENTO | CONCLUIDA | CANCELADA
 // Profissional.java → campos: id, nome, funcao, contato, ativo, turno  (SEM campo cref)
 // Turno.java (enum) → MATUTINO | VESPERTINO | NOTURNO
 // JwtResponse.java  → retorna {token, username, role} — NOT nested user object
@@ -52,13 +52,13 @@ export interface Equipe {
   turno: 'MATUTINO' | 'VESPERTINO' | 'NOTURNO';
 }
 
-// Ocorrencia.java — ciclo de vida: ABERTA→DESPACHADA→EM_ANDAMENTO→CONCLUIDA
+// Ocorrencia.java — ciclo de vida: ABERTA→DESPACHADA→EM_ATENDIMENTO→CONCLUIDA
 export interface Ocorrencia {
   id?: number;
   tipo: string;
   gravidade: 'ALTA' | 'MEDIA' | 'BAIXA';
   bairro?: Bairro | null;
-  status: 'ABERTA' | 'DESPACHADA' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
+  status: 'ABERTA' | 'DESPACHADA' | 'EM_ATENDIMENTO' | 'CONCLUIDA' | 'CANCELADA';
   dataHoraAbertura: string | number[];   // array ou ISO string, tratado pelo date.helper
   dataHoraFechamento?: string | number[] | null;
   observacao: string;
