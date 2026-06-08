@@ -11,10 +11,19 @@
   padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); min-height: 64px; position: relative;
 }
 
-.sidebar-logo {
-  font-weight: 700; font-size: 1.05rem; color: var(--primary); white-space: nowrap;
+.sidebar-logo-wrap {
+  display: flex; align-items: center; gap: 0.5rem; overflow: hidden; flex: 1; min-width: 0;
+}
+
+.sidebar-logo-img {
+  height: 32px; width: auto; flex-shrink: 0;
+  .app-sidebar.closed & { margin: 0 auto; }
+}
+
+.sidebar-logo-text {
+  font-weight: 700; font-size: 1rem; color: var(--primary); white-space: nowrap;
   transition: opacity .3s ease;
-  .app-sidebar.closed & { opacity: 0; pointer-events: none; }
+  .app-sidebar.closed & { opacity: 0; width: 0; overflow: hidden; }
 }
 
 .sidebar-toggle {

@@ -51,7 +51,7 @@ export class AmbulanciasComponent implements OnInit {
     private confirmService: ConfirmModalService
   ) {
     this.form = this.fb.group({
-      placa:    ['', [Validators.required, Validators.pattern(/^[A-Z]{3}\d{4}$|^[A-Z]{3}-\d{4}$/)]],
+      placa:    ['', [Validators.required, Validators.pattern(/^[A-Z]{3}\d[A-Z]\d{2}$|^[A-Z]{3}\d{4}$/)]],
       tipo:     ['USA', Validators.required],
       status:   ['DISPONIVEL', Validators.required],
       bairroId: [null]
