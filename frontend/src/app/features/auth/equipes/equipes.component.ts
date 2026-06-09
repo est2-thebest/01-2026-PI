@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { EquipeService } from '../../../services/equipe.service';
 import { AmbulanciaService } from '../../../services/ambulancia.service';
 import { ProfissionalService } from '../../../services/profissional.service';
+import { ConfirmModalService } from '../../../shared/components/modals/confirm.service';
 import { Equipe, Ambulancia, Profissional } from '../../../shared/models';
 
 @Component({
@@ -18,26 +19,42 @@ export class EquipesComponent implements OnInit {
   equipes: Equipe[] = [];
   ambulancias: Ambulancia[] = [];
   profissionaisDisponiveis: Profissional[] = [];
-  
+
   carregando = true;
+  salvando = false;
   erro: string | null = null;
+
+  filtroBusca = '';
+  filtroTurno = '';
 
   form: FormGroup;
   mostraFormulario = false;
   editandoId: number | null = null;
-  filtroTurno = '';
   profissionaisSelecionados: Profissional[] = [];
+
+  readonly TURNO_LABELS: Record<string, string> = {
+    MATUTINO:   'Matutino',
+    VESPERTINO: 'Vespertino',
+    NOTURNO:    'Noturno'
+  };
+
+  readonly FUNCAO_ABBREV: Record<string, string> = {
+    MEDICO:     'M',
+    ENFERMEIRO: 'E',
+    MOTORISTA:  'Mo'
+  };
 
   constructor(
     private equipeService: EquipeService,
     private ambulanciaService: AmbulanciaService,
     private profissionalService: ProfissionalService,
+    private confirmService: ConfirmModalService,
     private fb: FormBuilder
   ) {
     this.form = this.fb.group({
-      descricao: ['', [Validators.required, Validators.minLength(3)]],
-      ambulanciaId: [null, Validators.required],
-      turno: ['MATUTINO', Validators.required]
+      descricao:    ['', [Validators.required, Validators.minLength(3)]],
+      ambulanciaId: [null],
+      turno:        ['MATUTINO', Validators.required]
     });
   }
 
@@ -47,55 +64,89 @@ export class EquipesComponent implements OnInit {
 
   carregarDados(): void {
     this.carregando = true;
-    
-    this.ambulanciaService.listar().subscribe({
-      next: (ambul) => {
-        this.ambulancias = ambul.filter(a => a.status === 'DISPONIVEL' || a.status === 'SEM_EQUIPE');
-      }
-    });
+    this.erro = null;
 
-    this.profissionalService.listar().subscribe({
-      next: (profs) => {
-        this.profissionaisDisponiveis = profs.filter(p => p.ativo);
-      }
-    });
-
-    this.equipeService.listar().subscribe({
-      next: (equipes) => {
-        this.equipes = equipes;
-        this.carregando = false;
+    forkJoin({
+      ambulancias:   this.ambulanciaService.listar(),
+      profissionais: this.profissionalService.listar()
+    }).subscribe({
+      next: ({ ambulancias, profissionais }) => {
+        this.ambulancias = ambulancias;
+        this.profissionaisDisponiveis = (profissionais as any[])
+          .map(p => ({ ...p, funcao: p.funcao || p.role || null }))
+          .filter((p: any) => p.ativo);
+        this.carregarEquipes();
       },
-      error: (err) => {
-        console.error('Erro ao carregar equipes:', err);
-        this.erro = 'Erro ao carregar equipes';
+      error: () => {
+        this.erro = 'Não foi possível carregar os dados. Verifique a conexão com o servidor.';
         this.carregando = false;
       }
     });
   }
 
-  get equipesFiltradas(): Equipe[] {
-    return this.equipes.filter(e => 
-      !this.filtroTurno || e.turno === this.filtroTurno
+  private carregarEquipes(): void {
+    this.equipeService.listar().subscribe({
+      next: (responses: any[]) => {
+        this.equipes = responses.map(r => ({
+          id:           r.id,
+          descricao:    r.descricao,
+          turno:        r.turno,
+          ambulancia:   this.ambulancias.find(a => a.id === r.ambulanciaId) || null,
+          profissionais: (r.profissionais || []).map((p: any) => ({ ...p, funcao: p.funcao || p.role || null }))
+        }));
+        this.carregando = false;
+      },
+      error: () => {
+        this.erro = 'Não foi possível carregar as equipes. Verifique a conexão com o servidor.';
+        this.carregando = false;
+      }
+    });
+  }
+
+  get ambulanciasDisponiveis(): Ambulancia[] {
+    const editingAmbId = this.editandoId ? this.form.get('ambulanciaId')?.value : null;
+    return this.ambulancias.filter(a =>
+      a.status === 'DISPONIVEL' || a.status === 'SEM_EQUIPE' ||
+      (editingAmbId !== null && a.id === editingAmbId)
     );
   }
 
+  get equipesFiltradas(): Equipe[] {
+    const busca = this.filtroBusca.toLowerCase().trim();
+    return this.equipes.filter(e => {
+      const matchBusca = !busca || e.descricao.toLowerCase().includes(busca);
+      const matchTurno = !this.filtroTurno || e.turno === this.filtroTurno;
+      return matchBusca && matchTurno;
+    });
+  }
+
+  labelTurno(turno: string): string {
+    return this.TURNO_LABELS[turno] || turno;
+  }
+
+  abrevFuncao(funcao: string | null | undefined): string {
+    if (!funcao) return '';
+    return this.FUNCAO_ABBREV[funcao] || funcao.charAt(0);
+  }
+
   abrirFormulario(equipe?: Equipe): void {
-    this.form.reset();
+    this.form.reset({ descricao: '', ambulanciaId: null, turno: 'MATUTINO' });
     this.profissionaisSelecionados = [];
-    this.mostraFormulario = true;
+    this.erro = null;
 
     if (equipe) {
       this.editandoId = equipe.id || null;
       this.form.patchValue({
-        descricao: equipe.descricao,
-        ambulanciaId: equipe.ambulancia?.id,
-        turno: equipe.turno
+        descricao:    equipe.descricao,
+        ambulanciaId: equipe.ambulancia?.id || null,
+        turno:        equipe.turno
       });
-      this.profissionaisSelecionados = equipe.profissionais || [];
+      this.profissionaisSelecionados = [...(equipe.profissionais || [])];
     } else {
       this.editandoId = null;
-      this.form.patchValue({ turno: 'MATUTINO' });
     }
+
+    this.mostraFormulario = true;
   }
 
   fecharFormulario(): void {
@@ -103,107 +154,74 @@ export class EquipesComponent implements OnInit {
     this.form.reset();
     this.editandoId = null;
     this.profissionaisSelecionados = [];
+    this.erro = null;
   }
 
-  toggleProfissional(profissional: Profissional): void {
-    const index = this.profissionaisSelecionados.findIndex(p => p.id === profissional.id);
-    if (index >= 0) {
-      this.profissionaisSelecionados.splice(index, 1);
+  toggleProfissional(prof: Profissional): void {
+    const idx = this.profissionaisSelecionados.findIndex(p => p.id === prof.id);
+    if (idx >= 0) {
+      this.profissionaisSelecionados.splice(idx, 1);
     } else {
-      this.profissionaisSelecionados.push(profissional);
+      this.profissionaisSelecionados.push(prof);
     }
   }
 
-  isProfissionalSelecionado(profissional: Profissional): boolean {
-    return this.profissionaisSelecionados.some(p => p.id === profissional.id);
-  }
-
-  validarEquipe(): string | null {
-    if (this.profissionaisSelecionados.length === 0) {
-      return 'Selecione pelo menos um profissional';
-    }
-
-    const ambulancia = this.ambulancias.find(a => a.id === this.form.get('ambulanciaId')?.value);
-    if (!ambulancia) {
-      return 'Selecione uma ambulância';
-    }
-
-    const medicos = this.profissionaisSelecionados.filter(p => p.funcao === 'MEDICO').length;
-    const enfermeiros = this.profissionaisSelecionados.filter(p => p.funcao === 'ENFERMEIRO').length;
-    const motoristas = this.profissionaisSelecionados.filter(p => p.funcao === 'MOTORISTA').length;
-
-    if (ambulancia.tipo === 'USA') {
-      if (medicos !== 1) return 'USA requer exatamente 1 Médico';
-      if (enfermeiros !== 1) return 'USA requer exatamente 1 Enfermeiro';
-      if (motoristas !== 1) return 'USA requer exatamente 1 Motorista';
-    } else {
-      if (medicos > 0) return 'USB não deve ter Médico';
-      if (enfermeiros !== 1) return 'USB requer exatamente 1 Enfermeiro';
-      if (motoristas !== 1) return 'USB requer exatamente 1 Motorista';
-    }
-
-    return null;
+  isProfissionalSelecionado(prof: Profissional): boolean {
+    return this.profissionaisSelecionados.some(p => p.id === prof.id);
   }
 
   salvar(): void {
     if (this.form.invalid) return;
+    this.salvando = true;
+    this.erro = null;
 
-    const erro = this.validarEquipe();
-    if (erro) {
-      this.erro = erro;
-      return;
-    }
-
-    const ambulancia = this.ambulancias.find(a => a.id === this.form.get('ambulanciaId')?.value);
-    const dados: Equipe = {
-      descricao: this.form.get('descricao')?.value,
-      ambulancia,
-      profissionais: this.profissionaisSelecionados,
-      turno: this.form.get('turno')?.value
+    const payload = {
+      descricao:       this.form.get('descricao')?.value,
+      ambulanciaId:    this.form.get('ambulanciaId')?.value || null,
+      turno:           this.form.get('turno')?.value,
+      profissionalIds: this.profissionaisSelecionados.map(p => p.id!)
     };
 
     if (this.editandoId) {
-      this.equipeService.atualizar(this.editandoId, dados).subscribe({
-        next: () => {
-          this.carregarDados();
-          this.fecharFormulario();
-        },
-        error: (err) => {
-          this.erro = 'Erro ao atualizar equipe';
+      this.equipeService.atualizar(this.editandoId, payload).subscribe({
+        next: () => { this.salvando = false; this.carregarDados(); this.fecharFormulario(); },
+        error: (err: any) => {
+          this.salvando = false;
+          this.erro = err?.error?.message || 'Erro ao atualizar equipe. Tente novamente.';
         }
       });
     } else {
-      this.equipeService.criar(dados).subscribe({
-        next: () => {
-          this.carregarDados();
-          this.fecharFormulario();
-        },
-        error: (err) => {
-          this.erro = 'Erro ao criar equipe';
+      this.equipeService.criar(payload).subscribe({
+        next: () => { this.salvando = false; this.carregarDados(); this.fecharFormulario(); },
+        error: (err: any) => {
+          this.salvando = false;
+          this.erro = err?.error?.message || 'Erro ao cadastrar equipe. Verifique os dados.';
         }
       });
     }
   }
 
-  excluir(id: number): void {
-    if (confirm('Tem certeza que deseja excluir esta equipe?')) {
-      this.equipeService.excluir(id).subscribe({
-        next: () => {
-          this.carregarDados();
-        },
-        error: (err) => {
-          this.erro = 'Erro ao excluir equipe';
+  async excluir(equipe: Equipe): Promise<void> {
+    const confirmado = await this.confirmService.abrir({
+      titulo:      'Excluir Equipe',
+      mensagem:    `Tem certeza que deseja excluir a equipe "${equipe.descricao}"? Esta ação não pode ser desfeita.`,
+      tipo:        'perigo',
+      confirmText: 'Sim, excluir',
+      cancelText:  'Nao, cancelar'
+    });
+    if (confirmado) {
+      this.equipeService.excluir(equipe.id!).subscribe({
+        next: () => this.carregarDados(),
+        error: (err: any) => {
+          const msg = err?.error?.message || 'Não foi possível excluir esta equipe. Verifique se há ocorrências vinculadas.';
+          this.confirmService.abrir({
+            titulo:      'Erro ao excluir',
+            mensagem:    msg,
+            tipo:        'info',
+            confirmText: 'OK, entendi'
+          });
         }
       });
     }
-  }
-
-  getFuncaoEmoji(funcao: string): string {
-    const emojis: Record<string, string> = {
-      'MEDICO': '👨‍⚕️',
-      'ENFERMEIRO': '🩺',
-      'MOTORISTA': '🚗'
-    };
-    return emojis[funcao] || '👤';
   }
 }

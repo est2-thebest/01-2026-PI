@@ -279,6 +279,7 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #fff;
+  background: var(--text-secondary); // fallback para funcao desconhecida
 
   /* Funcao */
   &.MEDICO     { background: var(--secondary); }
