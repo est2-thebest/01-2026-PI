@@ -100,24 +100,27 @@
                       <i class="pi pi-eye"></i>
                     </button>
 
-                    <!-- Editar — bloqueado se status não for ABERTA -->
-                    <button
-                      id="btn-editar-{{ oc.id }}"
-                      class="btn-action btn-edit"
-                      (click)="editar(oc)"
-                      [disabled]="!podeEditar(oc.status)"
-                      [title]="podeEditar(oc.status) ? 'Editar' : 'Não é possível editar: status ' + oc.status">
-                      <i class="pi pi-pencil"></i>
-                    </button>
+                    <!-- Editar — só aparece quando ABERTA -->
+                    @if (oc.status === 'ABERTA') {
+                      <button
+                        id="btn-editar-{{ oc.id }}"
+                        class="btn-action btn-edit"
+                        (click)="editar(oc)"
+                        title="Editar ocorrência">
+                        <i class="pi pi-pencil"></i>
+                      </button>
+                    }
 
-                    <!-- Excluir -->
-                    <button
-                      id="btn-excluir-{{ oc.id }}"
-                      class="btn-action btn-danger"
-                      (click)="excluir(oc.id!)"
-                      title="Excluir">
-                      <i class="pi pi-trash"></i>
-                    </button>
+                    <!-- Excluir — só aparece quando ABERTA -->
+                    @if (oc.status === 'ABERTA') {
+                      <button
+                        id="btn-excluir-{{ oc.id }}"
+                        class="btn-action btn-danger"
+                        (click)="excluir(oc.id!)"
+                        title="Excluir">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    }
 
                     <!-- Confirmar Saída (DESPACHADA) -->
                     @if (oc.status === 'DESPACHADA') {
@@ -141,8 +144,8 @@
                       </button>
                     }
 
-                    <!-- Cancelar (ABERTA ou DESPACHADA) -->
-                    @if (oc.status === 'ABERTA' || oc.status === 'DESPACHADA') {
+                    <!-- Cancelar — só aparece quando DESPACHADA -->
+                    @if (oc.status === 'DESPACHADA') {
                       <button
                         id="btn-cancelar-{{ oc.id }}"
                         class="btn-action btn-cancel"
@@ -218,9 +221,9 @@
             <label for="campo-bairro"><i class="pi pi-map-marker"></i> Bairro *</label>
             <select id="campo-bairro" formControlName="bairroId" class="form-control"
               [class.input-error]="form.get('bairroId')?.invalid && form.get('bairroId')?.touched">
-              <option [value]="null">Selecione um bairro</option>
+              <option [ngValue]="null">Selecione um bairro</option>
               @for (bairro of bairros; track bairro.id) {
-                <option [value]="bairro.id">{{ bairro.nome }}</option>
+                <option [ngValue]="bairro.id">{{ bairro.nome }}</option>
               }
             </select>
             @if (form.get('bairroId')?.invalid && form.get('bairroId')?.touched) {

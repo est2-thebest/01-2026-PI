@@ -18,7 +18,7 @@ import { Equipe, Ambulancia, Profissional } from '../../../shared/models';
 export class EquipesComponent implements OnInit {
   equipes: Equipe[] = [];
   ambulancias: Ambulancia[] = [];
-  profissionaisDisponiveis: Profissional[] = [];
+  private _profissionaisAtivos: Profissional[] = [];
 
   carregando = true;
   salvando = false;
@@ -60,6 +60,10 @@ export class EquipesComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarDados();
+    this.form.get('turno')?.valueChanges.subscribe(() => {
+      const turno = this.form.get('turno')?.value;
+      this.profissionaisSelecionados = this.profissionaisSelecionados.filter(p => p.turno === turno);
+    });
   }
 
   carregarDados(): void {
@@ -72,7 +76,7 @@ export class EquipesComponent implements OnInit {
     }).subscribe({
       next: ({ ambulancias, profissionais }) => {
         this.ambulancias = ambulancias;
-        this.profissionaisDisponiveis = (profissionais as any[])
+        this._profissionaisAtivos = (profissionais as any[])
           .map(p => ({ ...p, funcao: p.funcao || p.role || null }))
           .filter((p: any) => p.ativo);
         this.carregarEquipes();
@@ -91,7 +95,7 @@ export class EquipesComponent implements OnInit {
           id:           r.id,
           descricao:    r.descricao,
           turno:        r.turno,
-          ambulancia:   this.ambulancias.find(a => a.id === r.ambulanciaId) || null,
+          ambulancia:   this.ambulancias.find(a => a.id === r.ambulanciaId) || r.ambulancia || null,
           profissionais: (r.profissionais || []).map((p: any) => ({ ...p, funcao: p.funcao || p.role || null }))
         }));
         this.carregando = false;
@@ -103,12 +107,20 @@ export class EquipesComponent implements OnInit {
     });
   }
 
+  // Somente ambulâncias sem equipe aparecem para seleção (+ a atual ao editar)
   get ambulanciasDisponiveis(): Ambulancia[] {
-    const editingAmbId = this.editandoId ? this.form.get('ambulanciaId')?.value : null;
+    const editingAmbId: number | null = this.editandoId ? this.form.get('ambulanciaId')?.value : null;
     return this.ambulancias.filter(a =>
-      a.status === 'DISPONIVEL' || a.status === 'SEM_EQUIPE' ||
+      a.status === 'SEM_EQUIPE' ||
       (editingAmbId !== null && a.id === editingAmbId)
     );
+  }
+
+  // Filtra profissionais pelo turno selecionado no formulário
+  get profissionaisDisponiveis(): Profissional[] {
+    const turno = this.form.get('turno')?.value;
+    if (!turno) return this._profissionaisAtivos;
+    return this._profissionaisAtivos.filter(p => p.turno === turno);
   }
 
   get equipesFiltradas(): Equipe[] {
@@ -118,6 +130,11 @@ export class EquipesComponent implements OnInit {
       const matchTurno = !this.filtroTurno || e.turno === this.filtroTurno;
       return matchBusca && matchTurno;
     });
+  }
+
+  // Não pode excluir se a ambulância da equipe estiver em atendimento ativo
+  podeExcluir(equipe: Equipe): boolean {
+    return !equipe.ambulancia || equipe.ambulancia.status !== 'EM_ATENDIMENTO';
   }
 
   labelTurno(turno: string): string {
@@ -182,9 +199,32 @@ export class EquipesComponent implements OnInit {
       profissionalIds: this.profissionaisSelecionados.map(p => p.id!)
     };
 
+    // Captura IDs antes do save para atualizar status das ambulâncias depois
+    const newAmbId: number | null = payload.ambulanciaId;
+    const oldAmbId: number | null = this.editandoId
+      ? (this.equipes.find(e => e.id === this.editandoId)?.ambulancia?.id ?? null)
+      : null;
+
+    const onSuccess = () => {
+      // Atualiza status das ambulâncias se houve troca
+      if (newAmbId !== oldAmbId) {
+        if (newAmbId) {
+          const newAmb = this.ambulancias.find(a => a.id === newAmbId);
+          if (newAmb) this.ambulanciaService.atualizar(newAmbId, { ...newAmb, status: 'DISPONIVEL' }).subscribe();
+        }
+        if (oldAmbId) {
+          const oldAmb = this.ambulancias.find(a => a.id === oldAmbId);
+          if (oldAmb) this.ambulanciaService.atualizar(oldAmbId, { ...oldAmb, status: 'SEM_EQUIPE' }).subscribe();
+        }
+      }
+      this.salvando = false;
+      this.carregarDados();
+      this.fecharFormulario();
+    };
+
     if (this.editandoId) {
       this.equipeService.atualizar(this.editandoId, payload).subscribe({
-        next: () => { this.salvando = false; this.carregarDados(); this.fecharFormulario(); },
+        next: onSuccess,
         error: (err: any) => {
           this.salvando = false;
           this.erro = err?.error?.message || 'Erro ao atualizar equipe. Tente novamente.';
@@ -192,7 +232,7 @@ export class EquipesComponent implements OnInit {
       });
     } else {
       this.equipeService.criar(payload).subscribe({
-        next: () => { this.salvando = false; this.carregarDados(); this.fecharFormulario(); },
+        next: onSuccess,
         error: (err: any) => {
           this.salvando = false;
           this.erro = err?.error?.message || 'Erro ao cadastrar equipe. Verifique os dados.';
@@ -210,8 +250,17 @@ export class EquipesComponent implements OnInit {
       cancelText:  'Nao, cancelar'
     });
     if (confirmado) {
+      const ambId   = equipe.ambulancia?.id;
+      const ambData = ambId ? this.ambulancias.find(a => a.id === ambId) : null;
+
       this.equipeService.excluir(equipe.id!).subscribe({
-        next: () => this.carregarDados(),
+        next: () => {
+          // Reverte status da ambulância vinculada para SEM_EQUIPE
+          if (ambId && ambData) {
+            this.ambulanciaService.atualizar(ambId, { ...ambData, status: 'SEM_EQUIPE' }).subscribe();
+          }
+          this.carregarDados();
+        },
         error: (err: any) => {
           const msg = err?.error?.message || 'Não foi possível excluir esta equipe. Verifique se há ocorrências vinculadas.';
           this.confirmService.abrir({

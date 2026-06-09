@@ -106,11 +106,36 @@
                       title="Editar profissional">
                       <i class="pi pi-pencil"></i>
                     </button>
+
+                    <!-- Inativar — visível quando ativo -->
+                    @if (prof.ativo) {
+                      <button
+                        id="btn-inativar-{{ prof.id }}"
+                        class="btn-action btn-warning"
+                        (click)="inativar(prof)"
+                        title="Inativar profissional">
+                        <i class="pi pi-ban"></i>
+                      </button>
+                    }
+
+                    <!-- Reativar — visível quando inativo -->
+                    @if (!prof.ativo) {
+                      <button
+                        id="btn-reativar-{{ prof.id }}"
+                        class="btn-action btn-success"
+                        (click)="reativar(prof)"
+                        title="Reativar profissional">
+                        <i class="pi pi-check-circle"></i>
+                      </button>
+                    }
+
+                    <!-- Excluir — desabilitado se estiver em alguma equipe -->
                     <button
                       id="btn-excluir-{{ prof.id }}"
                       class="btn-action btn-delete"
                       (click)="excluir(prof)"
-                      title="Excluir profissional">
+                      [disabled]="estaEmEquipe(prof)"
+                      [title]="estaEmEquipe(prof) ? 'Não é possível excluir: profissional está em uma equipe' : 'Excluir profissional'">
                       <i class="pi pi-trash"></i>
                     </button>
                   </td>

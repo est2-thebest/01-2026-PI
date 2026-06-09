@@ -128,7 +128,7 @@ export class OcorrenciasComponent implements OnInit {
     this.form.patchValue({
       tipo:       oc.tipo,
       gravidade:  oc.gravidade,
-      bairroId:   oc.bairro?.id,
+      bairroId:   oc.bairro?.id ?? null,
       observacao: oc.observacao
     });
     this.mostraFormulario = true;
@@ -154,11 +154,15 @@ export class OcorrenciasComponent implements OnInit {
     }
 
     this.salvando = true;
-    const bairro = this.bairros.find(b => b.id === Number(this.form.get('bairroId')?.value));
-    const dados: Ocorrencia = {
+    const bairroId: number | null = this.form.get('bairroId')?.value ?? null;
+    const bairro = bairroId ? this.bairros.find(b => b.id === bairroId) : undefined;
+    // Envia bairroId para compatibilidade com o mock (que usa bairroId como FK)
+    // e bairro para o backend real (que aceita o objeto embutido)
+    const dados: any = {
       tipo:             this.form.get('tipo')?.value,
       gravidade:        this.form.get('gravidade')?.value,
-      bairro,
+      bairroId,
+      bairro:           bairro ?? null,
       status:           'ABERTA',
       dataHoraAbertura: new Date().toISOString(),
       observacao:       this.form.get('observacao')?.value

@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { ProfissionalService } from '../../../services/profissional.service';
+import { EquipeService } from '../../../services/equipe.service';
 import { ConfirmModalService } from '../../../shared/components/modals/confirm.service';
-import { Profissional } from '../../../shared/models';
+import { Profissional, Equipe } from '../../../shared/models';
 
 @Component({
   selector: 'app-profissionais',
@@ -14,6 +16,7 @@ import { Profissional } from '../../../shared/models';
 })
 export class ProfissionaisComponent implements OnInit {
   profissionais: Profissional[] = [];
+  equipes: Equipe[] = [];
   carregando = true;
   salvando = false;
   erro: string | null = null;
@@ -40,6 +43,7 @@ export class ProfissionaisComponent implements OnInit {
 
   constructor(
     private profissionalService: ProfissionalService,
+    private equipeService: EquipeService,
     private confirmService: ConfirmModalService,
     private fb: FormBuilder
   ) {
@@ -74,9 +78,13 @@ export class ProfissionaisComponent implements OnInit {
   carregarDados(): void {
     this.carregando = true;
     this.erro = null;
-    this.profissionalService.listar().subscribe({
-      next: (profissionais: any[]) => {
-        this.profissionais = profissionais.map(p => ({ ...p, funcao: p.funcao || p.role || null }));
+    forkJoin({
+      profissionais: this.profissionalService.listar(),
+      equipes:       this.equipeService.listar()
+    }).subscribe({
+      next: ({ profissionais, equipes }) => {
+        this.profissionais = (profissionais as any[]).map(p => ({ ...p, funcao: p.funcao || p.role || null }));
+        this.equipes = equipes;
         this.carregando = false;
       },
       error: () => {
@@ -94,6 +102,10 @@ export class ProfissionaisComponent implements OnInit {
       const matchTurno  = !this.filtroTurno  || prof.turno  === this.filtroTurno;
       return matchBusca && matchFuncao && matchTurno;
     });
+  }
+
+  estaEmEquipe(prof: Profissional): boolean {
+    return this.equipes.some(e => e.profissionais?.some(p => p.id === prof.id));
   }
 
   get placeholderDocumento(): string {
@@ -165,11 +177,13 @@ export class ProfissionaisComponent implements OnInit {
     if (profissional) {
       this.editandoId = profissional.id || null;
       this.form.patchValue({
-        nome:    profissional.nome,
-        funcao:  profissional.funcao,
-        turno:   profissional.turno || 'MATUTINO',
-        contato: this.aplicarMascara(profissional.contato || ''),
-        ativo:   profissional.ativo
+        nome:          profissional.nome,
+        funcao:        profissional.funcao,
+        turno:         profissional.turno || 'MATUTINO',
+        contato:       this.aplicarMascara(profissional.contato || ''),
+        ativo:         profissional.ativo,
+        tipoDocumento: profissional.tipoDocumento || 'CPF',
+        documento:     profissional.documento || ''
       });
     } else {
       this.editandoId = null;
@@ -190,11 +204,13 @@ export class ProfissionaisComponent implements OnInit {
     this.erro = null;
 
     const dados: Profissional = {
-      nome:    this.form.get('nome')?.value,
-      funcao:  this.form.get('funcao')?.value,
-      turno:   this.form.get('turno')?.value,
-      contato: this.form.get('contato')?.value || null,
-      ativo:   this.form.get('ativo')?.value
+      nome:          this.form.get('nome')?.value,
+      funcao:        this.form.get('funcao')?.value,
+      turno:         this.form.get('turno')?.value,
+      contato:       this.form.get('contato')?.value || null,
+      ativo:         this.form.get('ativo')?.value,
+      tipoDocumento: this.form.get('tipoDocumento')?.value || null,
+      documento:     this.form.get('documento')?.value || null
     };
 
     if (this.editandoId) {
@@ -206,6 +222,38 @@ export class ProfissionaisComponent implements OnInit {
       this.profissionalService.criar(dados).subscribe({
         next: () => { this.salvando = false; this.carregarDados(); this.fecharFormulario(); },
         error: () => { this.salvando = false; this.erro = 'Erro ao cadastrar profissional. Verifique os dados.'; }
+      });
+    }
+  }
+
+  async inativar(prof: Profissional): Promise<void> {
+    const confirmado = await this.confirmService.abrir({
+      titulo:      'Inativar Profissional',
+      mensagem:    `Inativar ${prof.nome}? O profissional não poderá ser adicionado a novas equipes, mas permanece no histórico.`,
+      tipo:        'aviso',
+      confirmText: 'Sim, inativar',
+      cancelText:  'Cancelar'
+    });
+    if (confirmado) {
+      this.profissionalService.atualizar(prof.id!, { ...prof, ativo: false }).subscribe({
+        next: () => this.carregarDados(),
+        error: () => { this.erro = 'Erro ao inativar profissional.'; }
+      });
+    }
+  }
+
+  async reativar(prof: Profissional): Promise<void> {
+    const confirmado = await this.confirmService.abrir({
+      titulo:      'Reativar Profissional',
+      mensagem:    `Reativar ${prof.nome}? O profissional voltará a estar disponível para novas equipes.`,
+      tipo:        'info',
+      confirmText: 'Sim, reativar',
+      cancelText:  'Cancelar'
+    });
+    if (confirmado) {
+      this.profissionalService.atualizar(prof.id!, { ...prof, ativo: true }).subscribe({
+        next: () => this.carregarDados(),
+        error: () => { this.erro = 'Erro ao reativar profissional.'; }
       });
     }
   }

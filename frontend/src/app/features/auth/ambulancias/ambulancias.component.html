@@ -130,11 +130,25 @@
                       title="Editar ambulância">
                       <i class="pi pi-pencil"></i>
                     </button>
+
+                    <!-- Inativar — somente quando SEM_EQUIPE ou MANUTENCAO -->
+                    @if (podeInativar(amb)) {
+                      <button
+                        id="btn-inativar-{{ amb.id }}"
+                        class="btn-action btn-warning"
+                        (click)="inativar(amb)"
+                        title="Inativar ambulância">
+                        <i class="pi pi-ban"></i>
+                      </button>
+                    }
+
+                    <!-- Excluir — desabilitado quando DISPONIVEL ou EM_ATENDIMENTO -->
                     <button
                       id="btn-excluir-{{ amb.id }}"
                       class="btn-action btn-delete"
                       (click)="excluir(amb)"
-                      title="Excluir ambulância">
+                      [disabled]="!podeExcluir(amb)"
+                      [title]="!podeExcluir(amb) ? 'Não é possível excluir: ambulância está em serviço ou vinculada a uma equipe' : 'Excluir ambulância'">
                       <i class="pi pi-trash"></i>
                     </button>
                   </td>
@@ -192,7 +206,7 @@
             }
           </div>
 
-          <!-- Tipo e Status -->
+          <!-- Tipo e Status (status apenas no edit) -->
           <div class="form-row">
             <div class="form-group">
               <label for="campo-tipo"><i class="pi pi-tag"></i> Tipo *</label>
@@ -202,27 +216,45 @@
               </select>
             </div>
 
-            <div class="form-group">
-              <label for="campo-status"><i class="pi pi-circle"></i> Status *</label>
-              <select id="campo-status" formControlName="status" class="form-control">
-                <option value="DISPONIVEL">Disponível</option>
-                <option value="EM_ATENDIMENTO">Em Atendimento</option>
-                <option value="MANUTENCAO">Manutenção</option>
-                <option value="INATIVA">Inativa</option>
-                <option value="SEM_EQUIPE">Sem Equipe</option>
-              </select>
-            </div>
+            <!-- Status só aparece no modo de edição -->
+            @if (editandoId) {
+              <div class="form-group">
+                <label for="campo-status"><i class="pi pi-circle"></i> Status *</label>
+                <select id="campo-status" formControlName="status" class="form-control">
+                  <!-- Status gerenciados pelo sistema aparecem como opção informativa -->
+                  @if (statusSistemaAtual) {
+                    <option [value]="statusAtualAoEditar" disabled>
+                      {{ labelStatus(statusAtualAoEditar || '') }} (gerenciado pelo sistema)
+                    </option>
+                  }
+                  <option value="MANUTENCAO">Manutenção</option>
+                  <option value="INATIVA">Inativa</option>
+                </select>
+                @if (statusSistemaAtual) {
+                  <span class="hint-text"><i class="pi pi-info-circle"></i>
+                    Status atual é gerenciado pelas equipes. Você pode colocar em Manutenção ou Inativar.
+                  </span>
+                }
+              </div>
+            }
           </div>
 
-          <!-- Bairro / Localização -->
+          <!-- Bairro / Localização (obrigatório) -->
           <div class="form-group">
-            <label for="campo-bairro"><i class="pi pi-map-marker"></i> Localização (Bairro)</label>
-            <select id="campo-bairro" formControlName="bairroId" class="form-control">
-              <option [ngValue]="null">— Sem localização definida —</option>
+            <label for="campo-bairro"><i class="pi pi-map-marker"></i> Localização (Bairro) *</label>
+            <select
+              id="campo-bairro"
+              formControlName="bairroId"
+              class="form-control"
+              [class.input-error]="form.get('bairroId')?.invalid && form.get('bairroId')?.touched">
+              <option [ngValue]="null">Selecione o bairro</option>
               @for (bairro of bairros; track bairro.id) {
                 <option [ngValue]="bairro.id">{{ bairro.nome }}</option>
               }
             </select>
+            @if (form.get('bairroId')?.invalid && form.get('bairroId')?.touched) {
+              <span class="error-text"><i class="pi pi-exclamation-circle"></i> Selecione a localização da ambulância.</span>
+            }
           </div>
 
           <div class="modal-footer">
@@ -244,4 +276,3 @@
     </div>
   </div>
 }
-

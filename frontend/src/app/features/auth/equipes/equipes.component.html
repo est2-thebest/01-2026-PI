@@ -111,7 +111,8 @@
                       id="btn-excluir-{{ equipe.id }}"
                       class="btn-action btn-delete"
                       (click)="excluir(equipe)"
-                      title="Excluir equipe">
+                      [disabled]="!podeExcluir(equipe)"
+                      [title]="!podeExcluir(equipe) ? 'Não é possível excluir: ambulância em atendimento' : 'Excluir equipe'">
                       <i class="pi pi-trash"></i>
                     </button>
                   </td>

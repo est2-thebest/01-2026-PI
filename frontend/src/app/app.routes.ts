@@ -20,7 +20,7 @@ export const routes: Routes = [
        { path: 'ambulancias',  loadComponent: () => import('./features/auth/ambulancias/ambulancias.component').then(m => m.AmbulanciasComponent) },
        { path: 'equipes',      loadComponent: () => import('./features/auth/equipes/equipes.component').then(m => m.EquipesComponent) },
        { path: 'profissionais',loadComponent: () => import('./features/auth/profissionais/profissionais.component').then(m => m.ProfissionaisComponent) },
-    //   { path: 'despacho',     loadComponent: () => import('./features/auth/despacho/despacho.component').then(m => m.DespachoComponent) },
+       { path: 'despacho',     loadComponent: () => import('./features/auth/despacho/despacho.component').then(m => m.DespachoComponent) },
     //   { path: 'relatorios',   loadComponent: () => import('./features/auth/relatorios/relatorios.component').then(m => m.RelatoriosComponent) },
      ]
   },

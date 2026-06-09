@@ -1,0 +1,331 @@
+<div class="despacho-wrapper">
+
+  <!-- ===== BANNER ===== -->
+  <div class="page-banner">
+    <div class="page-banner-content">
+      <h1><i class="pi pi-send banner-icon"></i> Despacho</h1>
+      <p>O sistema calcula automaticamente a melhor ambulância disponível pelo menor caminho</p>
+    </div>
+  </div>
+
+  <!-- ===== ALERTAS ===== -->
+  @if (erro) {
+    <div class="alert-bar alert-error">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ erro }}
+      <button class="alert-close" (click)="erro = null"><i class="pi pi-times"></i></button>
+    </div>
+  }
+  @if (sucesso) {
+    <div class="alert-bar alert-success">
+      <i class="pi pi-check-circle"></i>
+      {{ sucesso }}
+      <button class="alert-close" (click)="sucesso = null"><i class="pi pi-times"></i></button>
+    </div>
+  }
+
+  <!-- ===== LOADING ===== -->
+  @if (carregando) {
+    <div class="loading-container">
+      <i class="pi pi-spin pi-spinner loading-spinner"></i>
+      <p>Carregando central de despacho...</p>
+    </div>
+  } @else {
+
+    <!-- ===== LAYOUT ===== -->
+    <div class="despacho-layout" [class.layout-com-mapa]="!!ambulanciaRecomendada">
+
+      <!-- ── COLUNA ESQUERDA: Ocorrências Abertas ── -->
+      <div class="col-ocorrencias">
+        <div class="col-header">
+          <h2><i class="pi pi-list"></i> Ocorrências Abertas</h2>
+          <span class="count-badge">{{ ocorrenciasAbertasData.length }}</span>
+        </div>
+
+        @if (ocorrenciasAbertasData.length === 0) {
+          <div class="empty-state">
+            <i class="pi pi-inbox empty-icon"></i>
+            <p>Nenhuma ocorrência aberta</p>
+            <span>Todas as ocorrências foram atendidas</span>
+          </div>
+        } @else {
+          <div class="ocorrencias-list">
+            @for (oc of ocorrenciasAbertasData; track oc.id) {
+              <div
+                class="ocorrencia-card"
+                [class.selected]="ocorrenciaSelecionada?.id === oc.id"
+                (click)="selecionarOcorrencia(oc)">
+
+                <div class="card-top">
+                  <span class="card-id">#{{ oc.id }}</span>
+                  <span class="badge" [ngClass]="oc.gravidade">{{ GRAVIDADE_LABELS[oc.gravidade] }}</span>
+                </div>
+
+                <div class="card-tipo">{{ oc.tipo }}</div>
+
+                <div class="card-meta">
+                  <span><i class="pi pi-map-marker"></i> {{ oc.bairro?.nome || 'Bairro não informado' }}</span>
+                  <span><i class="pi pi-clock"></i> {{ formatarData(oc.dataHoraAbertura) }}</span>
+                </div>
+
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ── COLUNA DIREITA: Painel de Despacho ── -->
+      <div class="col-painel">
+
+        @if (!ocorrenciaSelecionada) {
+          <div class="painel-vazio">
+            <i class="pi pi-arrow-left"></i>
+            <p>Selecione uma ocorrência</p>
+            <span>O sistema calculará automaticamente a ambulância mais próxima</span>
+          </div>
+
+        } @else {
+
+          <!-- Seção 1: Ocorrência -->
+          <div class="painel-secao">
+            <div class="secao-header">
+              <i class="pi pi-file-check" style="color: var(--primary)"></i>
+              <h3>Ocorrência Selecionada</h3>
+            </div>
+            <div class="ocorrencia-detalhe-grid">
+              <div class="detalhe-item">
+                <span class="detalhe-label">ID</span>
+                <span class="detalhe-valor">#{{ ocorrenciaSelecionada.id }}</span>
+              </div>
+              <div class="detalhe-item">
+                <span class="detalhe-label">Tipo</span>
+                <span class="detalhe-valor">{{ ocorrenciaSelecionada.tipo }}</span>
+              </div>
+              <div class="detalhe-item">
+                <span class="detalhe-label">Local</span>
+                <span class="detalhe-valor">{{ ocorrenciaSelecionada.bairro?.nome || '—' }}</span>
+              </div>
+              <div class="detalhe-item">
+                <span class="detalhe-label">Gravidade</span>
+                <span class="badge" [ngClass]="ocorrenciaSelecionada.gravidade">
+                  {{ GRAVIDADE_LABELS[ocorrenciaSelecionada.gravidade] }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção 2: Recomendação -->
+          <div class="painel-secao">
+            <div class="secao-header">
+              <i class="pi pi-star-fill" style="color: var(--success)"></i>
+              <h3>Ambulância Recomendada pelo Sistema</h3>
+            </div>
+
+            @if (ambulanciasDisponiveis.length === 0) {
+              <div class="sem-ambulancia">
+                <i class="pi pi-ban sem-ambulancia-icon"></i>
+                <p>Nenhuma ambulância disponível no momento</p>
+                <span>Aguarde uma equipe retornar ao status disponível</span>
+              </div>
+
+            } @else if (!ambulanciaRecomendada) {
+              <div class="sem-ambulancia">
+                <i class="pi pi-spin pi-spinner sem-ambulancia-icon"></i>
+                <p>Calculando rota...</p>
+              </div>
+
+            } @else {
+              <div class="rec-card">
+                <div class="rec-top">
+                  <span class="rec-badge">
+                    <i class="pi pi-check-circle"></i> Melhor Rota
+                  </span>
+                  <div class="rec-metricas">
+                    <span class="metrica">
+                      <i class="pi pi-map"></i>
+                      <strong>{{ distanciaKm }} km</strong>
+                    </span>
+                    <span class="metrica-sep">·</span>
+                    <span class="metrica">
+                      <i class="pi pi-clock"></i>
+                      <strong>~{{ tempoEstimado }} min</strong>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="rec-placa">{{ ambulanciaRecomendada.placa }}</div>
+
+                <div class="rec-info">
+                  <span class="badge badge-tipo" [ngClass]="ambulanciaRecomendada.tipo">
+                    {{ TIPO_LABELS[ambulanciaRecomendada.tipo] || ambulanciaRecomendada.tipo }}
+                  </span>
+                  @if (ambulanciaRecomendada.bairro) {
+                    <span class="rec-origem">
+                      <i class="pi pi-map-marker"></i>
+                      Saindo de: {{ ambulanciaRecomendada.bairro.nome }}
+                    </span>
+                  }
+                </div>
+
+                @if (ocorrenciaSelecionada.gravidade === 'ALTA' && ambulanciaRecomendada.tipo === 'USB') {
+                  <div class="rec-aviso">
+                    <i class="pi pi-exclamation-triangle"></i>
+                    Nenhuma USA disponível — despachando USB como contingência
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Seção 3: Botão único de confirmação -->
+          <div class="painel-secao painel-acao">
+            @if (despachando) {
+              <button class="btn btn-primary" disabled>
+                <i class="pi pi-spin pi-spinner"></i> Despachando...
+              </button>
+            } @else if (!ambulanciaRecomendada) {
+              <button class="btn btn-disabled" disabled>
+                <i class="pi pi-ban"></i> Sem ambulância disponível
+              </button>
+            } @else {
+              <button class="btn btn-success" (click)="confirmarDespacho()">
+                <i class="pi pi-send"></i>
+                Confirmar Despacho — {{ ambulanciaRecomendada.placa }}
+              </button>
+            }
+          </div>
+
+        }
+      </div>
+
+      <!-- ── MAPA (terceira coluna quando há recomendação) ── -->
+      @if (ambulanciaRecomendada) {
+        <div class="col-mapa">
+          <div class="col-header">
+            <h2>
+              <i class="pi pi-map"></i> Mapa de Rotas
+              <span class="pi pi-info-circle" title="Posicionamento fictício para visualização"></span>
+            </h2>
+            <span class="rota-badge">
+              {{ rotaCaminho.length > 1 ? rotaCaminho.length - 1 + ' trechos' : 'direto' }}
+            </span>
+          </div>
+
+          <div class="mapa-container">
+
+            <!-- SVG principal -->
+            <svg class="mapa-svg" viewBox="0 0 560 420" preserveAspectRatio="xMidYMid meet">
+
+              <!-- Defs: sombra verde para rota -->
+              <defs>
+                <filter id="glow-rota" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+                  <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- Fundo do mapa -->
+              <rect x="0" y="0" width="560" height="420" rx="0" class="mapa-bg"/>
+
+              <!-- Grid sutil de referência -->
+              <g class="mapa-grid">
+                @for (gx of [112,224,336,448]; track gx) {
+                  <line [attr.x1]="gx" y1="0" [attr.x2]="gx" y2="420" class="grid-line"/>
+                }
+                @for (gy of [84,168,252,336]; track gy) {
+                  <line x1="0" [attr.y1]="gy" x2="560" [attr.y2]="gy" class="grid-line"/>
+                }
+              </g>
+
+              <!-- Arestas base (cinza, renderizadas primeiro) -->
+              @for (e of arestasVisuais; track $index) {
+                @if (!isEdgeRota(e[0], e[1])) {
+                  <line
+                    [attr.x1]="pos(e[0])[0]"
+                    [attr.y1]="pos(e[0])[1]"
+                    [attr.x2]="pos(e[1])[0]"
+                    [attr.y2]="pos(e[1])[1]"
+                    class="edge-base"/>
+                }
+              }
+
+              <!-- Arestas da rota (verde, em cima das cinzas) -->
+              @for (e of arestasVisuais; track $index) {
+                @if (isEdgeRota(e[0], e[1])) {
+                  <line
+                    [attr.x1]="pos(e[0])[0]"
+                    [attr.y1]="pos(e[0])[1]"
+                    [attr.x2]="pos(e[1])[0]"
+                    [attr.y2]="pos(e[1])[1]"
+                    class="edge-rota"/>
+                }
+              }
+
+              <!-- Nós de bairro -->
+              @for (b of bairrosMapa; track b.id) {
+                <g [attr.transform]="'translate(' + pos(b.id)[0] + ',' + pos(b.id)[1] + ')'">
+
+                  <!-- Anel pulsante para nós especiais -->
+                  @if (nodeClass(b.id) === 'node-origem') {
+                    <circle r="14" class="pulse-ring pulse-ring-origem">
+                      <animate attributeName="r" values="10;18;10" dur="1.8s" repeatCount="indefinite"/>
+                      <animate attributeName="opacity" values="0.7;0;0.7" dur="1.8s" repeatCount="indefinite"/>
+                    </circle>
+                  }
+                  @if (nodeClass(b.id) === 'node-destino') {
+                    <circle r="14" class="pulse-ring pulse-ring-destino">
+                      <animate attributeName="r" values="10;18;10" dur="1.4s" repeatCount="indefinite"/>
+                      <animate attributeName="opacity" values="0.7;0;0.7" dur="1.4s" repeatCount="indefinite"/>
+                    </circle>
+                  }
+
+                  <!-- Círculo do nó -->
+                  <circle [class]="nodeClass(b.id)"
+                    [attr.r]="(nodeClass(b.id) === 'node-origem' || nodeClass(b.id) === 'node-destino') ? 9 : (nodeClass(b.id) === 'node-rota' ? 6 : 4.5)"/>
+
+                  <!-- Ícone de texto nos nós especiais -->
+                  @if (nodeClass(b.id) === 'node-origem') {
+                    <text dy="4" text-anchor="middle" class="node-icon">A</text>
+                  }
+                  @if (nodeClass(b.id) === 'node-destino') {
+                    <text dy="4" text-anchor="middle" class="node-icon">O</text>
+                  }
+
+                  <!-- Label do bairro -->
+                  <text
+                    [attr.dy]="labelDy(b.id)"
+                    [attr.text-anchor]="labelAnchor(b.id)"
+                    [class]="'node-label ' + nodeClass(b.id) + '-label'">{{ b.abrev }}</text>
+
+                </g>
+              }
+
+            </svg>
+
+            <!-- Legenda -->
+            <div class="mapa-legenda">
+              <div class="leg-item">
+                <span class="leg-dot leg-origem">A</span>
+                <span>Ambulância ({{ ambulanciaRecomendada.placa }})</span>
+              </div>
+              <div class="leg-item">
+                <span class="leg-dot leg-destino">O</span>
+                <span>Ocorrência ({{ ocorrenciaSelecionada?.bairro?.nome }})</span>
+              </div>
+              <div class="leg-item">
+                <span class="leg-line-sample"></span>
+                <span>Rota calculada ({{ distanciaKm }} km)</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+
+</div>
