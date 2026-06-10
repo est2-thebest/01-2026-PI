@@ -31,18 +31,20 @@ public class ProfissionalService {
 
     @Transactional
     public ProfissionalResponse salvar(ProfissionalRequest request) {
-        Profissional profissional = new Profissional();
-        profissional.setNome(request.nome());
-        profissional.setContato(request.contato());
-        profissional.setAtivo(request.ativo() == null ? true : request.ativo());
-        profissional.setFuncao(request.funcao());
-        profissional.setTurno(request.turno());
+        // Validação de obrigatoriedade mínima
+        validarDocumentos(request);
 
+        Profissional profissional = new Profissional();
+        copiarDadosParaEntidade(request, profissional);
+        
         return toResponseDTO(repository.save(profissional));
     }
 
     @Transactional
     public ProfissionalResponse atualizar(Integer id, ProfissionalRequest request) {
+        // REUTILIZA A MESMA REGRA: Se o JSON do PUT vier sem CPF e sem CNPJ, barra aqui
+        validarDocumentos(request);
+        
         Profissional existente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Profissional não encontrado"));
 
@@ -53,8 +55,46 @@ public class ProfissionalService {
         }
         existente.setFuncao(request.funcao());
         existente.setTurno(request.turno());
+        
+        // Atualiza os novos campos no banco
+        existente.setCpf(request.cpf());
+        existente.setCnpj(request.cnpj());
 
         return toResponseDTO(repository.save(existente));
+    }
+
+    // Método auxiliar para evitar repetição de código
+    private void copiarDadosParaEntidade(ProfissionalRequest request, Profissional entidade) {
+        entidade.setNome(request.nome());
+        entidade.setContato(request.contato());
+        entidade.setAtivo(request.ativo() == null ? true : request.ativo());
+        entidade.setFuncao(request.funcao());
+        entidade.setTurno(request.turno());
+        entidade.setCpf(request.cpf());
+        entidade.setCnpj(request.cnpj());
+    }
+
+    private void validarDocumentos(ProfissionalRequest request) {
+        boolean cpfVazio = request.cpf() == null || request.cpf().isBlank();
+        boolean cnpjVazio = request.cnpj() == null || request.cnpj().isBlank();
+
+        if (cpfVazio && cnpjVazio) {
+            throw new IllegalArgumentException("É obrigatório informar ao menos um documento (CPF ou CNPJ).");
+        }
+    }
+
+    // Atualize também o mapeador de resposta
+    public ProfissionalResponse toResponseDTO(Profissional profissional) {
+        return new ProfissionalResponse(
+                profissional.getId(),
+                profissional.getNome(),
+                profissional.getContato(),
+                profissional.getAtivo(),
+                profissional.getFuncao(),
+                profissional.getTurno(),
+                profissional.getCpf(),
+                profissional.getCnpj()
+        );
     }
 
     @Transactional
@@ -63,17 +103,5 @@ public class ProfissionalService {
             throw new RuntimeException("Profissional não encontrado");
         }
         repository.deleteById(id);
-    }
-
-    // Método utilitário de mapeamento interno
-    public ProfissionalResponse toResponseDTO(Profissional profissional) {
-        return new ProfissionalResponse(
-                profissional.getId(),
-                profissional.getNome(),
-                profissional.getContato(),
-                profissional.getAtivo(),
-                profissional.getFuncao(),
-                profissional.getTurno()
-        );
     }
 }

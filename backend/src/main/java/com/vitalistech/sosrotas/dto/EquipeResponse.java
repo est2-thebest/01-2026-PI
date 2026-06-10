@@ -1,6 +1,7 @@
 package com.vitalistech.sosrotas.dto;
 
 import com.vitalistech.sosrotas.model.enums.Turno;
+import com.vitalistech.sosrotas.model.enums.StatusEquipe;
 import java.util.List;
 
 /**
@@ -12,6 +13,7 @@ public record EquipeResponse(
         String descricao,
         Integer ambulanciaId,
         Turno turno,
+        StatusEquipe status, // Entrega mapeado para o Front
         List<ProfissionalResponse> profissionais
 ) {
 }

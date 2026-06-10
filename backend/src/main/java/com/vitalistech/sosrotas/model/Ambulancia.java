@@ -2,6 +2,8 @@ package com.vitalistech.sosrotas.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vitalistech.sosrotas.model.enums.*;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
 @Entity
@@ -24,8 +26,9 @@ public class Ambulancia {
     private StatusAmbulancia status;
 
     @ManyToOne
-    @JoinColumn(name = "bairro_id")
-    private Bairro bairro;
+    @JoinColumn(name = "bairro_base_id")
+    @Schema(description = "Vínculo de estacionamento ou ponto base fixo da ambulância")
+    private Bairro bairroBase;
 
     public Ambulancia() {
     }
@@ -35,13 +38,13 @@ public class Ambulancia {
             String placa,
             TipoAmbulancia tipo,
             StatusAmbulancia status,
-            Bairro bairro) {
+            Bairro bairroBase) {
 
         this.id = id;
         this.placa = placa;
         this.tipo = tipo;
         this.status = status;
-        this.bairro = bairro;
+        this.bairroBase = bairroBase;
     }
 
     // getters e setters
@@ -80,11 +83,11 @@ public class Ambulancia {
         this.status = status;
     }
 
-    public Bairro getBairro() {
-        return bairro;
+    public Bairro getBairroBase() {
+        return bairroBase;
     }
 
-    public void setBairro(Bairro bairro) {
-        this.bairro = bairro;
+    public void setBairroBase(Bairro bairroBase) {
+        this.bairroBase = bairroBase;
     }
 }

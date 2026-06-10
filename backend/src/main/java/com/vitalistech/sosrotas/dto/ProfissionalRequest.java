@@ -8,5 +8,7 @@ public record ProfissionalRequest(
         String contato,
         Boolean ativo,
         FuncaoProfissional funcao,
-        Turno turno
+        Turno turno,
+        String cpf,
+        String cnpj
 ) {}

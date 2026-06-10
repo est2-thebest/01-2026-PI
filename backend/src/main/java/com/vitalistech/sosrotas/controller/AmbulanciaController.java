@@ -1,11 +1,14 @@
 package com.vitalistech.sosrotas.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.vitalistech.sosrotas.dto.AmbulanciaRequest;
+import com.vitalistech.sosrotas.dto.AmbulanciaResponse;
 import com.vitalistech.sosrotas.model.Ambulancia;
 import com.vitalistech.sosrotas.service.AmbulanciaService;
 
@@ -19,91 +22,49 @@ public class AmbulanciaController {
         this.ambulanciaService = ambulanciaService;
     }
 
-    /**
-     * Lista todas as ambulâncias.
-     *
-     * GET /ambulancias
-     */
     @GetMapping
-    public ResponseEntity<List<Ambulancia>> listarTodas() {
-
-        List<Ambulancia> ambulancias =
-                ambulanciaService.listarTodas();
-
-        return ResponseEntity.ok(ambulancias);
+    public ResponseEntity<List<AmbulanciaResponse>> listarTodas() {
+        List<AmbulanciaResponse> responses = ambulanciaService.listarTodas()
+                .stream()
+                .map(AmbulanciaResponse::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Busca ambulância por ID.
-     *
-     * GET /ambulancias/{id}
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<Ambulancia> buscarPorId(
-            @PathVariable Integer id) {
-
-        Ambulancia ambulancia =
-                ambulanciaService.buscarPorId(id);
-
+    public ResponseEntity<AmbulanciaResponse> buscarPorId(@PathVariable Integer id) {
+        Ambulancia ambulancia = ambulanciaService.buscarPorId(id);
         if (ambulancia == null) {
             return ResponseEntity.notFound().build();
         }
-
-        return ResponseEntity.ok(ambulancia);
+        return ResponseEntity.ok(new AmbulanciaResponse(ambulancia));
     }
 
-    /**
-     * Cadastra nova ambulância.
-     *
-     * POST /ambulancias
-     */
     @PostMapping
-    public ResponseEntity<Ambulancia> salvar(
-            @RequestBody Ambulancia ambulancia) {
-
-            System.out.println("POST CHEGOU NO CONTROLLER");
-
-        Ambulancia novaAmbulancia =
-                ambulanciaService.salvar(ambulancia);
-
+    public ResponseEntity<AmbulanciaResponse> salvar(@RequestBody AmbulanciaRequest request) {
+        Ambulancia nova = ambulanciaService.salvar(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(novaAmbulancia);
+                .body(new AmbulanciaResponse(nova));
     }
 
-    /**
-     * Atualiza uma ambulância existente.
-     *
-     * PUT /ambulancias/{id}
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<Ambulancia> atualizar(
+    public ResponseEntity<AmbulanciaResponse> atualizar(
             @PathVariable Integer id,
-            @RequestBody Ambulancia ambulancia) {
+            @RequestBody AmbulanciaRequest request) {
 
-        Ambulancia ambulanciaAtualizada =
-                ambulanciaService.atualizar(
-                        id,
-                        ambulancia
-                );
-
-        return ResponseEntity.ok(
-                ambulanciaAtualizada
-        );
+        Ambulancia atualizada = ambulanciaService.atualizar(id, request);
+        return ResponseEntity.ok(new AmbulanciaResponse(atualizada));
     }
 
-    /**
-     * Remove uma ambulância.
-     *
-     * DELETE /ambulancias/{id}
-     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(
-            @PathVariable Integer id) {
-
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         ambulanciaService.deletar(id);
-
         return ResponseEntity.noContent().build();
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
 }

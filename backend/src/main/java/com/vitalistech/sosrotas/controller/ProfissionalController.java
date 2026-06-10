@@ -33,10 +33,13 @@ public class ProfissionalController {
         return ResponseEntity.status(HttpStatus.CREATED).body(profissionalService.salvar(request));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<ProfissionalResponse> atualizar(
-            @PathVariable Integer id,
-            @RequestBody ProfissionalRequest request) {
+    public ResponseEntity<ProfissionalResponse> atualizar(@PathVariable Integer id, @RequestBody ProfissionalRequest request) {
         return ResponseEntity.ok(profissionalService.atualizar(id, request));
     }
 
