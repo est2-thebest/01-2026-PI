@@ -3,6 +3,8 @@ package com.vitalistech.sosrotas.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.vitalistech.sosrotas.model.enums.StatusAmbulancia;
@@ -28,5 +30,11 @@ public interface IAmbulanciaRepository extends JpaRepository<Ambulancia, Integer
      * Busca uma ambulância pela placa.
      */
     Ambulancia findByPlaca(String placa);
+
+    /**
+     * ATUALIZAÇÃO: Verifica se a ambulância possui histórico associado na tabela de atendimentos.
+     */
+    @Query("SELECT COUNT(at) > 0 FROM Atendimento at WHERE at.ambulancia.id = :ambulanciaId")
+    boolean existsHistoricoByAmbulanciaId(@Param("ambulanciaId") Integer ambulanciaId);
 
 }

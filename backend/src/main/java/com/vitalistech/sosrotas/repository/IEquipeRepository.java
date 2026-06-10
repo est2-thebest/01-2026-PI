@@ -40,4 +40,6 @@ public interface IEquipeRepository
     boolean existsByProfissionaisContaining(
             Profissional profissional
     );
+
+    List<Equipe> findByProfissionaisId(Integer profissionalId);
 }
