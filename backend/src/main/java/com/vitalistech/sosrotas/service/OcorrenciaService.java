@@ -275,6 +275,13 @@ public class OcorrenciaService {
         if (atendimento != null) {
             Ambulancia ambulancia = atendimento.getAmbulancia();
             if (ambulancia != null) {
+                // Sincroniza e libera também o status da equipe para DISPONIVEL no retorno à base
+                equipeRepository.findFirstByAmbulancia(ambulancia).ifPresent(equipe -> {
+                    equipe.setStatus(StatusEquipe.DISPONIVEL);
+                    equipeRepository.save(equipe);
+                    logger.info("Equipe ID {} vinculada à Ambulância retornou ao status DISPONIVEL.", equipe.getId());
+                });
+
                 ambulancia.setStatus(StatusAmbulancia.DISPONIVEL);
                 ambulanciaRepository.save(ambulancia);
                 logger.info("Recurso Prefixo {} desalocado e reposicionado na sua base operacional.", ambulancia.getId());
@@ -310,17 +317,7 @@ public class OcorrenciaService {
             
             logger.info("Ocorrencia {} concluída operacionalmente com sucesso.", id);
 
-            // Sincroniza o status da equipe de volta para DISPONIVEL ao finalizar o chamado
-            Atendimento atendimento = atendimentoRepository.findFirstByOcorrenciaOrderByIdDesc(saved);
-            if (atendimento != null && atendimento.getAmbulancia() != null) {
-                equipeRepository.findFirstByAmbulancia(atendimento.getAmbulancia()).ifPresent(equipe -> {
-                    equipe.setStatus(StatusEquipe.DISPONIVEL);
-                    equipeRepository.save(equipe);
-                    logger.info("Equipe ID {} retornou ao status DISPONIVEL.", equipe.getId());
-                });
-            }
-
-            // CORRIGIDO: Usando o método real 'liberarAmbulancia' que já existe na sua service
+            // CORRIGIDO: Usando o método real 'liberarAmbulancia' que já existe na sua service (com a sincronização da equipe inclusa)
             liberarAmbulancia(saved);
             
             return saved;

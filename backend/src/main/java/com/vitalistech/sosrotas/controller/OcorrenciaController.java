@@ -111,11 +111,17 @@ public class OcorrenciaController {
         return ResponseEntity.ok(ocorrenciaAtualizada);
     }
 
+    /**
+     * Endpoint de despacho manual e direto regulado por ID via URL.
+     * Mapeamento otimizado que remove artefatos corporativos ou payloads vazios (additionalProp) no Swagger UI.
+     */
     @PostMapping("/{ocorrenciaId}/despachar")
+    @Operation(summary = "Despachar ocorrência via parâmetros", description = "Efetiva o despacho operacional por ID sem necessidade de corpo JSON (Body), trafegando dados por Path e Query.")
     public ResponseEntity<Ocorrencia> despachar(
-        @PathVariable Integer ocorrenciaId, 
-        @RequestParam Integer ambulanciaId) {
-    return ResponseEntity.ok(ocorrenciaService.confirmarDespachoSemiautomatico(ocorrenciaId, ambulanciaId));
+            @PathVariable Integer ocorrenciaId, 
+            @RequestParam Integer ambulanciaId) {
+        logger.info("Executando despacho direto para Ocorrencia ID: {} com Ambulancia ID: {}", ocorrenciaId, ambulanciaId);
+        return ResponseEntity.ok(ocorrenciaService.confirmarDespachoSemiautomatico(ocorrenciaId, ambulanciaId));
     }
 
     /**
