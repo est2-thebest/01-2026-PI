@@ -295,6 +295,11 @@
   /* Funcao desconhecida (mock sem funcao definida) */
   &.SEM_FUNCAO { background: var(--text-secondary); color: #fff; }
 
+  /* Status da equipe */
+  &.ATIVA          { background: var(--success); }
+  &.EM_ATENDIMENTO { background: var(--secondary); }
+  &.INATIVA        { background: var(--text-secondary); }
+
   /* Ambulancia na tabela */
   &.badge-amb {
     background: rgba(164, 22, 26, 0.1);
@@ -349,6 +354,18 @@
     background: rgba(0, 79, 138, 0.1);
     color: var(--secondary);
     &:hover { background: var(--secondary); color: #fff; }
+  }
+
+  &.btn-warning {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--warning);
+    &:hover { background: var(--warning); color: #1a1a1a; }
+  }
+
+  &.btn-success {
+    background: rgba(39, 174, 96, 0.1);
+    color: var(--success);
+    &:hover { background: var(--success); color: #fff; }
   }
 
   &.btn-delete {

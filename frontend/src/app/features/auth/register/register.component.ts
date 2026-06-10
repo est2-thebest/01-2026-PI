@@ -21,7 +21,7 @@ export class RegisterComponent {
   constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.form = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
-      email:    ['', [Validators.required, Validators.email]],
+      email:    ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
@@ -41,12 +41,19 @@ export class RegisterComponent {
     });
   }
 
+  formatarEmail(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const limpo = input.value.toLowerCase().replace(/\s/g, '');
+    input.value = limpo;
+    this.form.get('email')?.setValue(limpo, { emitEvent: false });
+  }
+
   temErro(campo: string): boolean { const c = this.form.get(campo); return !!(c?.invalid && c?.touched); }
   erroMsg(campo: string): string {
     const c = this.form.get(campo);
-    if (c?.errors?.['required']) return 'Campo obrigatório';
-    if (c?.errors?.['minlength']) return `Mínimo ${c.errors['minlength'].requiredLength} caracteres`;
-    if (c?.errors?.['email']) return 'E-mail inválido';
+    if (c?.errors?.['required'])   return 'Campo obrigatório';
+    if (c?.errors?.['minlength'])  return `Mínimo ${c.errors['minlength'].requiredLength} caracteres`;
+    if (c?.errors?.['pattern'])    return campo === 'email' ? 'E-mail inválido. Ex: nome@dominio.com' : 'Formato inválido';
     return '';
   }
 }

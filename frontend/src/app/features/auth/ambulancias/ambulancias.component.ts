@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { AmbulanciaService } from '../../../services/ambulancia.service';
 import { BairroService } from '../../../services/bairro.service';
 import { Ambulancia, Bairro } from '../../../shared/models';
@@ -20,29 +21,29 @@ export class AmbulanciasComponent implements OnInit {
   salvando = false;
   erro: string | null = null;
 
-  // Filtros
   filtroBusca = '';
   filtroStatus = '';
   filtroTipo = '';
 
-  // Modal
   form: FormGroup;
   mostraFormulario = false;
   editandoId: number | null = null;
-
+  statusAtualAoEditar: string | null = null;
 
   readonly STATUS_LABELS: Record<string, string> = {
-    DISPONIVEL:    'Disponível',
-    EM_ATENDIMENTO:'Em Atendimento',
-    MANUTENCAO:    'Manutenção',
-    INATIVA:       'Inativa',
-    SEM_EQUIPE:    'Sem Equipe'
+    DISPONIVEL:     'Disponível',
+    EM_ATENDIMENTO: 'Em Atendimento',
+    MANUTENCAO:     'Manutenção',
+    INATIVA:        'Inativa',
+    SEM_EQUIPE:     'Sem Equipe'
   };
 
   readonly TIPO_LABELS: Record<string, string> = {
     USA: 'USA — Avançado',
     USB: 'USB — Básico'
   };
+
+  private readonly STATUS_SISTEMA = ['DISPONIVEL', 'EM_ATENDIMENTO', 'SEM_EQUIPE'];
 
   constructor(
     private ambulanciaService: AmbulanciaService,
@@ -53,8 +54,8 @@ export class AmbulanciasComponent implements OnInit {
     this.form = this.fb.group({
       placa:    ['', [Validators.required, Validators.pattern(/^[A-Z]{3}\d[A-Z]\d{2}$|^[A-Z]{3}-?\d{4}$/)]],
       tipo:     ['USA', Validators.required],
-      status:   ['DISPONIVEL', Validators.required],
-      bairroId: [null]
+      status:   ['SEM_EQUIPE', Validators.required],
+      bairroId: [null, Validators.required]
     });
   }
 
@@ -66,18 +67,17 @@ export class AmbulanciasComponent implements OnInit {
     this.carregando = true;
     this.erro = null;
 
-    this.bairroService.listar().subscribe({
-      next: (bairros) => { this.bairros = bairros; },
-      error: () => { /* bairros são opcionais */ }
-    });
-
-    this.ambulanciaService.listar().subscribe({
-      next: (ambulancias) => {
+    forkJoin({
+      bairros:     this.bairroService.listar(),
+      ambulancias: this.ambulanciaService.listar()
+    }).subscribe({
+      next: ({ bairros, ambulancias }) => {
+        this.bairros    = bairros;
         this.ambulancias = ambulancias;
         this.carregando = false;
       },
       error: () => {
-        this.erro = 'Não foi possível carregar as ambulâncias. Verifique a conexão com o servidor.';
+        this.erro = 'Não foi possível carregar os dados. Verifique a conexão com o servidor.';
         this.carregando = false;
       }
     });
@@ -86,7 +86,7 @@ export class AmbulanciasComponent implements OnInit {
   get ambulanciasFiltradas(): Ambulancia[] {
     const busca = this.filtroBusca.toLowerCase().trim();
     return this.ambulancias.filter(amb => {
-      const matchBusca = !busca ||
+      const matchBusca  = !busca ||
         amb.placa.toLowerCase().includes(busca) ||
         (amb.bairro?.nome || '').toLowerCase().includes(busca);
       const matchStatus = !this.filtroStatus || amb.status === this.filtroStatus;
@@ -95,37 +95,52 @@ export class AmbulanciasComponent implements OnInit {
     });
   }
 
-  get totalDisponiveis(): number {
-    return this.ambulancias.filter(a => a.status === 'DISPONIVEL').length;
-  }
-  get totalEmAtendimento(): number {
-    return this.ambulancias.filter(a => a.status === 'EM_ATENDIMENTO').length;
-  }
-  get totalManutencao(): number {
-    return this.ambulancias.filter(a => a.status === 'MANUTENCAO').length;
+  get totalDisponiveis(): number   { return this.ambulancias.filter(a => a.status === 'DISPONIVEL').length; }
+  get totalEmAtendimento(): number { return this.ambulancias.filter(a => a.status === 'EM_ATENDIMENTO').length; }
+  get totalManutencao(): number    { return this.ambulancias.filter(a => a.status === 'MANUTENCAO').length; }
+
+  // Status definido pelo sistema — não editável manualmente
+  get statusSistemaAtual(): boolean {
+    return this.statusAtualAoEditar !== null && this.STATUS_SISTEMA.includes(this.statusAtualAoEditar);
   }
 
-  labelStatus(status: string): string {
-    return this.STATUS_LABELS[status] || status;
+  podeEditar(amb: Ambulancia): boolean {
+    return amb.status === 'SEM_EQUIPE' || amb.status === 'DISPONIVEL';
   }
-  labelTipo(tipo: string): string {
-    return this.TIPO_LABELS[tipo] || tipo;
+
+  podeInativar(amb: Ambulancia): boolean {
+    return amb.status === 'SEM_EQUIPE' || amb.status === 'MANUTENCAO';
   }
+
+  podeReativar(amb: Ambulancia): boolean {
+    return amb.status === 'INATIVA';
+  }
+
+  podeExcluir(amb: Ambulancia): boolean {
+    return amb.status === 'SEM_EQUIPE' || amb.status === 'DISPONIVEL';
+  }
+
+  labelStatus(status: string): string { return this.STATUS_LABELS[status] || status; }
+  labelTipo(tipo: string): string     { return this.TIPO_LABELS[tipo] || tipo; }
 
   abrirFormulario(ambulancia?: Ambulancia): void {
-    this.form.reset({ tipo: 'USA', status: 'DISPONIVEL', bairroId: null });
+    this.form.reset({ tipo: 'USA', status: 'SEM_EQUIPE', bairroId: null });
     this.mostraFormulario = true;
+    this.erro = null;
+
     if (ambulancia) {
       this.editandoId = ambulancia.id || null;
+      this.statusAtualAoEditar = ambulancia.status;
       this.form.patchValue({
         placa:    ambulancia.placa,
         tipo:     ambulancia.tipo,
         status:   ambulancia.status,
-        bairroId: ambulancia.bairro?.id || null
+        bairroId: ambulancia.bairro?.id ?? null
       });
       this.form.get('placa')?.disable();
     } else {
       this.editandoId = null;
+      this.statusAtualAoEditar = null;
       this.form.get('placa')?.enable();
     }
   }
@@ -134,6 +149,7 @@ export class AmbulanciasComponent implements OnInit {
     this.mostraFormulario = false;
     this.form.reset();
     this.editandoId = null;
+    this.statusAtualAoEditar = null;
     this.erro = null;
   }
 
@@ -142,14 +158,17 @@ export class AmbulanciasComponent implements OnInit {
     this.salvando = true;
     this.erro = null;
 
-    const bairroId = this.form.get('bairroId')?.value;
-    const bairro = bairroId ? this.bairros.find(b => b.id === +bairroId) : null;
+    const bairroId: number | null = this.form.get('bairroId')?.value ?? null;
+    const bairro = bairroId ? (this.bairros.find(b => b.id === bairroId) ?? null) : null;
 
-    const dados: Ambulancia = {
-      placa:  this.form.get('placa')?.value || '',
-      tipo:   this.form.get('tipo')?.value,
-      status: this.form.get('status')?.value,
-      bairro: bairro ?? null
+    const dados: any = {
+      placa:    this.editandoId
+        ? (this.ambulancias.find(a => a.id === this.editandoId)?.placa ?? '')
+        : this.form.get('placa')?.value,
+      tipo:     this.form.get('tipo')?.value,
+      status:   this.editandoId ? this.form.get('status')?.value : 'SEM_EQUIPE',
+      bairroId: bairroId,
+      bairro:   bairro
     };
 
     if (this.editandoId) {
@@ -165,14 +184,47 @@ export class AmbulanciasComponent implements OnInit {
     }
   }
 
-   // ─── Excluir ──────────────────────────────────────────────────────────────
+  async inativar(ambulancia: Ambulancia): Promise<void> {
+    const confirmado = await this.confirmService.abrir({
+      titulo:      'Inativar Ambulância',
+      mensagem:    `Inativar a ambulância ${ambulancia.placa}? Ela não estará disponível para equipes enquanto inativa.`,
+      tipo:        'aviso',
+      confirmText: 'Sim, inativar',
+      cancelText:  'Cancelar'
+    });
+    if (confirmado) {
+      const payload: any = { ...ambulancia, status: 'INATIVA', bairroId: ambulancia.bairro?.id ?? null };
+      this.ambulanciaService.atualizar(ambulancia.id!, payload).subscribe({
+        next: () => this.carregarDados(),
+        error: () => { this.erro = 'Erro ao inativar ambulância.'; }
+      });
+    }
+  }
+
+  async reativar(ambulancia: Ambulancia): Promise<void> {
+    const confirmado = await this.confirmService.abrir({
+      titulo:      'Reativar Ambulância',
+      mensagem:    `Reativar a ambulância ${ambulancia.placa}? Ela voltará a ficar disponível para equipes.`,
+      tipo:        'info',
+      confirmText: 'Sim, reativar',
+      cancelText:  'Cancelar'
+    });
+    if (confirmado) {
+      const payload: any = { ...ambulancia, status: 'SEM_EQUIPE', bairroId: ambulancia.bairro?.id ?? null };
+      this.ambulanciaService.atualizar(ambulancia.id!, payload).subscribe({
+        next: () => this.carregarDados(),
+        error: () => { this.erro = 'Erro ao reativar ambulância.'; }
+      });
+    }
+  }
+
   async excluir(ambulancia: Ambulancia): Promise<void> {
     const confirmado = await this.confirmService.abrir({
-      titulo: 'Excluir Ambulância',
-      mensagem: `Tem certeza que deseja excluir a ambulância ${ambulancia.placa} (${this.labelTipo(ambulancia.tipo)})? Esta ação não pode ser desfeita.`,
-      tipo: 'perigo',
+      titulo:      'Excluir Ambulância',
+      mensagem:    `Tem certeza que deseja excluir a ambulância ${ambulancia.placa} (${this.labelTipo(ambulancia.tipo)})? Esta ação não pode ser desfeita.`,
+      tipo:        'perigo',
       confirmText: 'Sim, excluir',
-      cancelText: 'Não, cancelar'
+      cancelText:  'Não, cancelar'
     });
     if (confirmado) {
       this.ambulanciaService.excluir(ambulancia.id!).subscribe({
@@ -180,9 +232,9 @@ export class AmbulanciasComponent implements OnInit {
         error: (err) => {
           const msg = err?.error?.message || 'Não foi possível excluir esta ambulância. Verifique se há atendimento vinculado.';
           this.confirmService.abrir({
-            titulo: 'Erro ao excluir',
-            mensagem: msg,
-            tipo: 'info',
+            titulo:      'Erro ao excluir',
+            mensagem:    msg,
+            tipo:        'info',
             confirmText: 'OK, entendi'
           });
         }

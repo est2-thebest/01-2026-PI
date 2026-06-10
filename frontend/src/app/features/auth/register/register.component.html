@@ -1,6 +1,6 @@
 <div class="login-container">
   <div class="login-box">
-    <div class="login-logo">🚑 SOS Rota</div>
+    <div class="login-logo"><img src="assets/logo-p.svg" alt="Vitalis Tech" class="login-logo-img" /></div>
     <div class="login-header"><h1>Cadastro</h1><p>Crie sua conta para acessar o sistema</p></div>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
       @if (mensagem) {
@@ -15,7 +15,7 @@
       </div>
       <div class="form-group">
         <label>E-mail</label>
-        <input type="email" formControlName="email" placeholder="seu@email.com" [class.input-error]="temErro('email')" />
+        <input type="email" formControlName="email" placeholder="seu@email.com" [class.input-error]="temErro('email')" (input)="formatarEmail($event)" autocomplete="email" />
         @if (temErro('email')) { <span class="error-text">{{ erroMsg('email') }}</span> }
       </div>
       <div class="form-group">

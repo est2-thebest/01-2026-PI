@@ -36,7 +36,12 @@ export class OcorrenciaService {
   atualizar(id: number, o: Ocorrencia): Observable<Ocorrencia> { return this.http.put<Ocorrencia>(`${this.url}/${id}`, o); }
   excluir(id: number): Observable<void> { return this.http.delete<void>(`${this.url}/${id}`); }
 
-  // Muda status para EM_ANDAMENTO e registra atendimento com Dijkstra
+  // Mock: PUT /api/ocorrencias/:id/despachar → status = DESPACHADA + atualiza ambulância
+  despachar(id: number, ambulanciaId?: number): Observable<any> {
+    return this.http.put<any>(`${this.url}/${id}/despachar`, { ambulanciaId: ambulanciaId ?? null });
+  }
+
+  // Real backend: POST /api/ocorrencias/:id/confirmar-saida → status = EM_ANDAMENTO + Dijkstra
   confirmarSaida(id: number): Observable<void> { return this.http.post<void>(`${this.url}/${id}/confirmar-saida`, {}); }
   concluirAtendimento(id: number): Observable<void> { return this.http.post<void>(`${this.url}/${id}/concluir`, {}); }
   cancelar(id: number, justificativa?: string): Observable<void> {

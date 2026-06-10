@@ -106,13 +106,39 @@
                       title="Editar profissional">
                       <i class="pi pi-pencil"></i>
                     </button>
-                    <button
-                      id="btn-excluir-{{ prof.id }}"
-                      class="btn-action btn-delete"
-                      (click)="excluir(prof)"
-                      title="Excluir profissional">
-                      <i class="pi pi-trash"></i>
-                    </button>
+
+                    <!-- Inativar — visível quando ativo -->
+                    @if (prof.ativo) {
+                      <button
+                        id="btn-inativar-{{ prof.id }}"
+                        class="btn-action btn-warning"
+                        (click)="inativar(prof)"
+                        title="Inativar profissional">
+                        <i class="pi pi-ban"></i>
+                      </button>
+                    }
+
+                    <!-- Reativar — visível quando inativo -->
+                    @if (!prof.ativo) {
+                      <button
+                        id="btn-reativar-{{ prof.id }}"
+                        class="btn-action btn-success"
+                        (click)="reativar(prof)"
+                        title="Reativar profissional">
+                        <i class="pi pi-check-circle"></i>
+                      </button>
+                    }
+
+                    <!-- Excluir — oculto se estiver em alguma equipe -->
+                    @if (!estaEmEquipe(prof)) {
+                      <button
+                        id="btn-excluir-{{ prof.id }}"
+                        class="btn-action btn-delete"
+                        (click)="excluir(prof)"
+                        title="Excluir profissional">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    }
                   </td>
                 </tr>
               }
@@ -188,7 +214,7 @@
           <!-- Tipo Documento e Numero -->
           <div class="form-row">
             <div class="form-group">
-              <label for="campo-tipo-documento"><i class="pi pi-id-card"></i> Tipo de Documento</label>
+              <label for="campo-tipo-documento"><i class="pi pi-id-card"></i> Tipo de Documento *</label>
               <select id="campo-tipo-documento" formControlName="tipoDocumento" class="form-control">
                 <option value="CPF">CPF</option>
                 <option value="CNPJ">CNPJ</option>
@@ -196,7 +222,7 @@
             </div>
 
             <div class="form-group">
-              <label for="campo-documento"><i class="pi pi-credit-card"></i> Numero do Documento</label>
+              <label for="campo-documento"><i class="pi pi-credit-card"></i> Numero do Documento *</label>
               <input
                 id="campo-documento"
                 type="text"
@@ -205,6 +231,9 @@
                 [class.input-error]="form.get('documento')?.invalid && form.get('documento')?.touched"
                 [placeholder]="placeholderDocumento"
                 (input)="formatarDocumento($event)" />
+              @if (form.get('documento')?.hasError('required') && form.get('documento')?.touched) {
+                <span class="error-text"><i class="pi pi-exclamation-circle"></i> Campo obrigatório.</span>
+              }
               @if (form.get('documento')?.hasError('documentoInvalido') && form.get('documento')?.touched) {
                 <span class="error-text"><i class="pi pi-exclamation-circle"></i> {{ labelDocumentoInvalido }}</span>
               }
@@ -214,7 +243,7 @@
           <!-- Contato e Status -->
           <div class="form-row">
             <div class="form-group">
-              <label for="campo-contato"><i class="pi pi-phone"></i> Contato</label>
+              <label for="campo-contato"><i class="pi pi-phone"></i> Contato *</label>
               <input
                 id="campo-contato"
                 type="tel"
@@ -223,7 +252,10 @@
                 [class.input-error]="form.get('contato')?.invalid && form.get('contato')?.touched"
                 placeholder="(62) 99999-9999"
                 (input)="formatarContato($event)" />
-              @if (form.get('contato')?.invalid && form.get('contato')?.touched) {
+              @if (form.get('contato')?.hasError('required') && form.get('contato')?.touched) {
+                <span class="error-text"><i class="pi pi-exclamation-circle"></i> Campo obrigatório.</span>
+              }
+              @if (form.get('contato')?.hasError('pattern') && form.get('contato')?.touched) {
                 <span class="error-text"><i class="pi pi-exclamation-circle"></i> Formato invalido. Ex: (62) 99999-9999</span>
               }
             </div>

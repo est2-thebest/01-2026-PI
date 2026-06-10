@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { DashboardService } from '../../../services/dashboard.service';
 import { OcorrenciaService } from '../../../services/ocorrencia.service';
-import { DashboardStats, Ocorrencia } from '../../../shared/models';
+import { AmbulanciaService } from '../../../services/ambulancia.service';
+import { EquipeService } from '../../../services/equipe.service';
+import { DashboardStats, Ocorrencia, Ambulancia, Equipe } from '../../../shared/models';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,12 +25,15 @@ export class DashboardComponent implements OnInit {
   };
 
   historicoOcorrencias: Ocorrencia[] = [];
+  ambulanciasEmAtendimento: { ambulancia: Ambulancia; equipe: Equipe | null }[] = [];
   carregando = true;
   erro: string | null = null;
 
   constructor(
     private dashboardService: DashboardService,
-    private ocorrenciaService: OcorrenciaService
+    private ocorrenciaService: OcorrenciaService,
+    private ambulanciaService: AmbulanciaService,
+    private equipeService: EquipeService
   ) {}
 
   ngOnInit(): void {
@@ -37,28 +43,32 @@ export class DashboardComponent implements OnInit {
   carregarDados(): void {
     this.carregando = true;
     this.erro = null;
-    
+
     this.dashboardService.getStats().subscribe({
-      next: (dados) => {
-        this.stats = dados;
-      },
-      error: (err) => {
-        console.error('Erro ao carregar estatísticas:', err);
-        this.erro = 'Erro ao carregar dashboard';
-      }
+      next: (dados) => { this.stats = dados; },
+      error: () => { this.erro = 'Erro ao carregar dashboard'; }
     });
 
-    this.ocorrenciaService.listarTodas().subscribe({
-      next: (ocorrencias) => {
+    forkJoin({
+      ocorrencias: this.ocorrenciaService.listarTodas(),
+      ambulancias: this.ambulanciaService.listar(),
+      equipes:     this.equipeService.listar()
+    }).subscribe({
+      next: ({ ocorrencias, ambulancias, equipes }) => {
         this.historicoOcorrencias = ocorrencias
           .sort((a, b) => (b.id || 0) - (a.id || 0))
           .slice(0, 10);
+
+        this.ambulanciasEmAtendimento = ambulancias
+          .filter(a => a.status === 'EM_ATENDIMENTO')
+          .map(a => ({
+            ambulancia: a,
+            equipe: equipes.find(e => e.ambulancia?.id === a.id) ?? null
+          }));
+
         this.carregando = false;
       },
-      error: (err) => {
-        console.error('Erro ao carregar ocorrências:', err);
-        this.carregando = false;
-      }
+      error: () => { this.carregando = false; }
     });
   }
 
