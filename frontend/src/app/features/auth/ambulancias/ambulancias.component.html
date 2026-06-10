@@ -123,15 +123,18 @@
                   </td>
                   <td>{{ amb.bairro?.nome || '—' }}</td>
                   <td class="col-actions">
-                    <button
-                      id="btn-editar-{{ amb.id }}"
-                      class="btn-action btn-edit"
-                      (click)="abrirFormulario(amb)"
-                      title="Editar ambulância">
-                      <i class="pi pi-pencil"></i>
-                    </button>
+                    <!-- Editar — apenas SEM_EQUIPE e DISPONIVEL -->
+                    @if (podeEditar(amb)) {
+                      <button
+                        id="btn-editar-{{ amb.id }}"
+                        class="btn-action btn-edit"
+                        (click)="abrirFormulario(amb)"
+                        title="Editar ambulância">
+                        <i class="pi pi-pencil"></i>
+                      </button>
+                    }
 
-                    <!-- Inativar — somente quando SEM_EQUIPE ou MANUTENCAO -->
+                    <!-- Inativar — apenas SEM_EQUIPE ou MANUTENCAO -->
                     @if (podeInativar(amb)) {
                       <button
                         id="btn-inativar-{{ amb.id }}"
@@ -142,15 +145,16 @@
                       </button>
                     }
 
-                    <!-- Excluir — desabilitado quando DISPONIVEL ou EM_ATENDIMENTO -->
-                    <button
-                      id="btn-excluir-{{ amb.id }}"
-                      class="btn-action btn-delete"
-                      (click)="excluir(amb)"
-                      [disabled]="!podeExcluir(amb)"
-                      [title]="!podeExcluir(amb) ? 'Não é possível excluir: ambulância está em serviço ou vinculada a uma equipe' : 'Excluir ambulância'">
-                      <i class="pi pi-trash"></i>
-                    </button>
+                    <!-- Excluir — apenas SEM_EQUIPE e DISPONIVEL -->
+                    @if (podeExcluir(amb)) {
+                      <button
+                        id="btn-excluir-{{ amb.id }}"
+                        class="btn-action btn-delete"
+                        (click)="excluir(amb)"
+                        title="Excluir ambulância">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    }
                   </td>
                 </tr>
               }

@@ -38,10 +38,16 @@ export class EquipesComponent implements OnInit {
     NOTURNO:    'Noturno'
   };
 
+  readonly STATUS_LABELS: Record<string, string> = {
+    ATIVA:          'Ativa',
+    EM_ATENDIMENTO: 'Em Atendimento',
+    INATIVA:        'Inativa'
+  };
+
   readonly FUNCAO_ABBREV: Record<string, string> = {
     MEDICO:     'M',
     ENFERMEIRO: 'E',
-    MOTORISTA:  'Mo'
+    MOTORISTA:  'MO'
   };
 
   constructor(
@@ -53,7 +59,7 @@ export class EquipesComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       descricao:    ['', [Validators.required, Validators.minLength(3)]],
-      ambulanciaId: [null],
+      ambulanciaId: [null, Validators.required],
       turno:        ['MATUTINO', Validators.required]
     });
   }
@@ -92,11 +98,13 @@ export class EquipesComponent implements OnInit {
     this.equipeService.listar().subscribe({
       next: (responses: any[]) => {
         this.equipes = responses.map(r => ({
-          id:           r.id,
-          descricao:    r.descricao,
-          turno:        r.turno,
-          ambulancia:   this.ambulancias.find(a => a.id === r.ambulanciaId) || r.ambulancia || null,
-          profissionais: (r.profissionais || []).map((p: any) => ({ ...p, funcao: p.funcao || p.role || null }))
+          id:              r.id,
+          descricao:       r.descricao,
+          turno:           r.turno,
+          ativo:           r.ativo !== false,
+          possuiHistorico: r.possuiHistorico || false,
+          ambulancia:      this.ambulancias.find(a => a.id === r.ambulanciaId) || r.ambulancia || null,
+          profissionais:   (r.profissionais || []).map((p: any) => ({ ...p, funcao: p.funcao || p.role || null }))
         }));
         this.carregando = false;
       },
@@ -116,11 +124,25 @@ export class EquipesComponent implements OnInit {
     );
   }
 
-  // Filtra profissionais pelo turno selecionado no formulário
+  // IDs de profissionais já vinculados a outras equipes (ignora a equipe sendo editada)
+  private get profissionaisEmUso(): Set<number> {
+    const emUso = new Set<number>();
+    for (const eq of this.equipes) {
+      if (eq.id === this.editandoId) continue;
+      for (const p of eq.profissionais || []) {
+        if (p.id != null) emUso.add(p.id);
+      }
+    }
+    return emUso;
+  }
+
+  // Filtra profissionais pelo turno e exclui os já em outra equipe
   get profissionaisDisponiveis(): Profissional[] {
     const turno = this.form.get('turno')?.value;
-    if (!turno) return this._profissionaisAtivos;
-    return this._profissionaisAtivos.filter(p => p.turno === turno);
+    const emUso = this.profissionaisEmUso;
+    return this._profissionaisAtivos.filter(p =>
+      (!turno || p.turno === turno) && !emUso.has(p.id!)
+    );
   }
 
   get equipesFiltradas(): Equipe[] {
@@ -132,9 +154,26 @@ export class EquipesComponent implements OnInit {
     });
   }
 
-  // Não pode excluir se a ambulância da equipe estiver em atendimento ativo
+  statusEquipe(equipe: Equipe): 'ATIVA' | 'EM_ATENDIMENTO' | 'INATIVA' {
+    if (equipe.ambulancia?.status === 'EM_ATENDIMENTO') return 'EM_ATENDIMENTO';
+    if (equipe.ativo === false) return 'INATIVA';
+    return 'ATIVA';
+  }
+
+  podeEditar(equipe: Equipe): boolean {
+    return this.statusEquipe(equipe) === 'ATIVA';
+  }
+
+  podeInativar(equipe: Equipe): boolean {
+    return this.statusEquipe(equipe) === 'ATIVA';
+  }
+
+  podeReativar(equipe: Equipe): boolean {
+    return this.statusEquipe(equipe) === 'INATIVA';
+  }
+
   podeExcluir(equipe: Equipe): boolean {
-    return !equipe.ambulancia || equipe.ambulancia.status !== 'EM_ATENDIMENTO';
+    return this.statusEquipe(equipe) !== 'EM_ATENDIMENTO' && !equipe.possuiHistorico;
   }
 
   labelTurno(turno: string): string {
@@ -188,7 +227,17 @@ export class EquipesComponent implements OnInit {
   }
 
   salvar(): void {
+    this.form.markAllAsTouched();
     if (this.form.invalid) return;
+
+    const medicos     = this.profissionaisSelecionados.filter(p => p.funcao === 'MEDICO');
+    const enfermeiros = this.profissionaisSelecionados.filter(p => p.funcao === 'ENFERMEIRO');
+    const motoristas  = this.profissionaisSelecionados.filter(p => p.funcao === 'MOTORISTA');
+    if (medicos.length !== 1 || enfermeiros.length !== 1 || motoristas.length !== 1) {
+      this.erro = 'A equipe deve ter exatamente 1 médico, 1 enfermeiro(a) e 1 motorista.';
+      return;
+    }
+
     this.salvando = true;
     this.erro = null;
 
@@ -239,6 +288,48 @@ export class EquipesComponent implements OnInit {
         }
       });
     }
+  }
+
+  async inativar(equipe: Equipe): Promise<void> {
+    const confirmado = await this.confirmService.abrir({
+      titulo:      'Inativar Equipe',
+      mensagem:    `Inativar a equipe "${equipe.descricao}"? Ela não ficará disponível para novos despachos.`,
+      tipo:        'aviso',
+      confirmText: 'Sim, inativar',
+      cancelText:  'Cancelar'
+    });
+    if (!confirmado) return;
+
+    const ambId   = equipe.ambulancia?.id;
+    const ambData = ambId ? this.ambulancias.find(a => a.id === ambId) : null;
+    const obs: Record<string, any> = { equipe: this.equipeService.atualizar(equipe.id!, { ...equipe, ativo: false }) };
+    if (ambId && ambData) obs['amb'] = this.ambulanciaService.atualizar(ambId, { ...ambData, status: 'SEM_EQUIPE' });
+
+    forkJoin(obs).subscribe({
+      next: () => this.carregarDados(),
+      error: () => { this.erro = 'Erro ao inativar equipe.'; }
+    });
+  }
+
+  async reativar(equipe: Equipe): Promise<void> {
+    const confirmado = await this.confirmService.abrir({
+      titulo:      'Reativar Equipe',
+      mensagem:    `Reativar a equipe "${equipe.descricao}"? Ela voltará a ficar disponível para despacho.`,
+      tipo:        'info',
+      confirmText: 'Sim, reativar',
+      cancelText:  'Cancelar'
+    });
+    if (!confirmado) return;
+
+    const ambId   = equipe.ambulancia?.id;
+    const ambData = ambId ? this.ambulancias.find(a => a.id === ambId) : null;
+    const obs: Record<string, any> = { equipe: this.equipeService.atualizar(equipe.id!, { ...equipe, ativo: true }) };
+    if (ambId && ambData) obs['amb'] = this.ambulanciaService.atualizar(ambId, { ...ambData, status: 'DISPONIVEL' });
+
+    forkJoin(obs).subscribe({
+      next: () => this.carregarDados(),
+      error: () => { this.erro = 'Erro ao reativar equipe.'; }
+    });
   }
 
   async excluir(equipe: Equipe): Promise<void> {

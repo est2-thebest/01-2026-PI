@@ -53,6 +53,8 @@ export interface Equipe {
   ambulancia?: Ambulancia | null;
   profissionais: Profissional[];
   turno: 'MATUTINO' | 'VESPERTINO' | 'NOTURNO';
+  ativo?: boolean;
+  possuiHistorico?: boolean;
 }
 
 // Ocorrencia.java — ciclo de vida: ABERTA→DESPACHADA→EM_ATENDIMENTO→CONCLUIDA

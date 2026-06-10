@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { OcorrenciaService } from '../../../services/ocorrencia.service';
 import { AmbulanciaService } from '../../../services/ambulancia.service';
+import { EquipeService } from '../../../services/equipe.service';
 import { ConfirmModalService } from '../../../shared/components/modals/confirm.service';
-import { Ocorrencia, Ambulancia } from '../../../shared/models';
+import { Ocorrencia, Ambulancia, Equipe } from '../../../shared/models';
 import { formatarData } from '../../../shared/utils/date.helper';
 
 // Arestas do grafo (bidirecional) — fonte: ruas_conexoes.csv  [origem, destino, km]
@@ -118,6 +119,7 @@ const BAIRROS_MAPA: { id: number; abrev: string }[] = [
 export class DespachoComponent implements OnInit {
   ocorrenciasAbertasData: Ocorrencia[] = [];
   ambulanciasDisponiveis: Ambulancia[] = [];
+  private _equipes: Equipe[] = [];
 
   carregando  = true;
   despachando = false;
@@ -126,6 +128,7 @@ export class DespachoComponent implements OnInit {
 
   ocorrenciaSelecionada: Ocorrencia | null = null;
   ambulanciaRecomendada: Ambulancia | null = null;
+  equipeRecomendada:     Equipe     | null = null;
   distanciaKm   = 0;
   tempoEstimado = 0;
 
@@ -156,6 +159,7 @@ export class DespachoComponent implements OnInit {
   constructor(
     private ocorrenciaService: OcorrenciaService,
     private ambulanciaService: AmbulanciaService,
+    private equipeService: EquipeService,
     private confirmService: ConfirmModalService
   ) {}
 
@@ -166,11 +170,13 @@ export class DespachoComponent implements OnInit {
     this.erro = null;
     forkJoin({
       ocorrencias: this.ocorrenciaService.listarTodas(),
-      ambulancias: this.ambulanciaService.listar()
+      ambulancias: this.ambulanciaService.listar(),
+      equipes:     this.equipeService.listar()
     }).subscribe({
-      next: ({ ocorrencias, ambulancias }) => {
+      next: ({ ocorrencias, ambulancias, equipes }) => {
         this.ocorrenciasAbertasData = ocorrencias.filter(o => o.status === 'ABERTA');
         this.ambulanciasDisponiveis = ambulancias.filter(a => a.status === 'DISPONIVEL');
+        this._equipes = equipes;
         this.carregando = false;
       },
       error: () => {
@@ -184,6 +190,7 @@ export class DespachoComponent implements OnInit {
     const mesmaSelecionada = this.ocorrenciaSelecionada?.id === oc.id;
     this.ocorrenciaSelecionada = mesmaSelecionada ? null : oc;
     this.ambulanciaRecomendada = null;
+    this.equipeRecomendada     = null;
     this.rotaCaminho = [];
     this._rotaEdges  = new Set();
     this.sucesso = null;
@@ -210,6 +217,7 @@ export class DespachoComponent implements OnInit {
 
     const melhor = comRota[0];
     this.ambulanciaRecomendada = melhor.amb;
+    this.equipeRecomendada     = this._equipes.find(e => e.ambulancia?.id === melhor.amb.id) ?? null;
     this.distanciaKm   = melhor.distancia;
     this.tempoEstimado = Math.round(melhor.distancia);
     this.rotaCaminho   = melhor.caminho;
@@ -270,6 +278,7 @@ export class DespachoComponent implements OnInit {
         this.despachando = false;
         this.ocorrenciaSelecionada = null;
         this.ambulanciaRecomendada = null;
+        this.equipeRecomendada     = null;
         this.rotaCaminho = [];
         this._rotaEdges  = new Set();
         this.carregarDados();

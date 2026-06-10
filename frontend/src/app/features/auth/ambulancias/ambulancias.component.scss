@@ -410,6 +410,12 @@
     &:hover { background: var(--secondary); color: #fff; }
   }
 
+  &.btn-warning {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--warning);
+    &:hover { background: var(--warning); color: #1a1a1a; }
+  }
+
   &.btn-delete {
     background: rgba(164, 22, 26, 0.08);
     color: var(--danger);

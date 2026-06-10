@@ -104,14 +104,16 @@ export class AmbulanciasComponent implements OnInit {
     return this.statusAtualAoEditar !== null && this.STATUS_SISTEMA.includes(this.statusAtualAoEditar);
   }
 
-  // Pode ser inativada (somente quando sem equipe ou em manutenção)
+  podeEditar(amb: Ambulancia): boolean {
+    return amb.status === 'SEM_EQUIPE' || amb.status === 'DISPONIVEL';
+  }
+
   podeInativar(amb: Ambulancia): boolean {
     return amb.status === 'SEM_EQUIPE' || amb.status === 'MANUTENCAO';
   }
 
-  // Pode ser excluída (não pode estar vinculada a equipe nem em atendimento)
   podeExcluir(amb: Ambulancia): boolean {
-    return amb.status !== 'DISPONIVEL' && amb.status !== 'EM_ATENDIMENTO';
+    return amb.status === 'SEM_EQUIPE' || amb.status === 'DISPONIVEL';
   }
 
   labelStatus(status: string): string { return this.STATUS_LABELS[status] || status; }

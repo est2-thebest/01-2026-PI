@@ -62,6 +62,43 @@
       </div>
     </div>
 
+    <!-- Ambulâncias em Serviço -->
+    @if (ambulanciasEmAtendimento.length > 0) {
+      <div class="table-card" style="margin-bottom: 1.5rem;">
+        <div class="section-header">
+          <h2><i class="pi pi-truck" style="margin-right: 0.4rem;"></i> Ambulâncias em Serviço</h2>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Placa</th>
+                <th>Tipo</th>
+                <th>Equipe</th>
+                <th>Turno</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of ambulanciasEmAtendimento; track item.ambulancia.id) {
+                <tr>
+                  <td><strong>{{ item.ambulancia.placa }}</strong></td>
+                  <td><span class="badge" [ngClass]="item.ambulancia.tipo">{{ item.ambulancia.tipo }}</span></td>
+                  <td>{{ item.equipe?.descricao || '—' }}</td>
+                  <td>
+                    @if (item.equipe?.turno) {
+                      <span class="badge" [ngClass]="item.equipe!.turno">{{ item.equipe!.turno }}</span>
+                    } @else {
+                      <span>—</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
     <!-- Histórico Recente -->
     <div class="table-card">
       <div class="section-header">

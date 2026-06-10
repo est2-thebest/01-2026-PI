@@ -59,8 +59,8 @@ const profissionais = [
 ];
 
 const equipes = [
-  { id: 1, descricao: 'Equipe Alpha', turno: 'MATUTINO', ambulanciaId: 1, profissionaisIds: [1, 2, 3] },
-  { id: 2, descricao: 'Equipe Beta',  turno: 'MATUTINO', ambulanciaId: 2, profissionaisIds: [4] }
+  { id: 1, descricao: 'Equipe Alpha', turno: 'MATUTINO', ambulanciaId: 1, profissionaisIds: [1, 2, 3], ativo: true, possuiHistorico: false },
+  { id: 2, descricao: 'Equipe Beta',  turno: 'MATUTINO', ambulanciaId: 2, profissionaisIds: [4],       ativo: true, possuiHistorico: false }
 ];
 
 // ──────────────────────────────────────────────────────────
@@ -139,8 +139,13 @@ app.put('/api/ocorrencias/:id/despachar', (req, res) => {
     oc.status = 'DESPACHADA';
     oc.dataDespacho = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
     if (req.body && req.body.ambulanciaId) {
+      oc.ambulanciaId = req.body.ambulanciaId;
       const amb = ambulancias.find(a => a.id === req.body.ambulanciaId);
-      if (amb) amb.status = 'EM_ATENDIMENTO';
+      if (amb) {
+        amb.status = 'EM_ATENDIMENTO';
+        const eq = equipes.find(e => e.ambulanciaId === amb.id);
+        if (eq) eq.possuiHistorico = true;
+      }
     }
     res.json(resolverOcorrencia(oc));
   } else {
@@ -195,8 +200,37 @@ app.post('/api/ocorrencias/:id/cancelar', (req, res) => {
 
 app.get('/api/ocorrencias/:id/detalhes', (req, res) => {
   const oc = ocorrencias.find(o => o.id == req.params.id);
-  if (oc) res.json({ ocorrencia: resolverOcorrencia(oc), atendimento: null, equipe: null, historico: [] });
-  else res.status(404).json({ message: 'Ocorrência não encontrada' });
+  if (!oc) return res.status(404).json({ message: 'Ocorrência não encontrada' });
+
+  let atendimento = null;
+  let equipe = null;
+
+  if (oc.ambulanciaId) {
+    const amb = ambulancias.find(a => a.id === oc.ambulanciaId);
+    if (amb) {
+      atendimento = {
+        id: oc.id,
+        ambulancia: resolverAmbulancia(amb),
+        dataHoraDespacho: oc.dataDespacho || null,
+        dataHoraChegada: oc.dataHoraFechamento || null,
+        distanciaKm: null,
+        tempoEstimado: null,
+        rota: null
+      };
+      equipe = equipes.find(e => e.ambulanciaId === amb.id) || null;
+      if (equipe) equipe = resolverEquipe(equipe);
+    }
+  }
+
+  const historico = [];
+  if (oc.dataDespacho) {
+    historico.push({ id: 1, statusAnterior: 'ABERTA', statusNovo: 'DESPACHADA', dataHora: oc.dataDespacho, observacao: '' });
+  }
+  if (oc.dataHoraFechamento) {
+    historico.push({ id: 2, statusAnterior: oc.dataDespacho ? 'DESPACHADA' : 'ABERTA', statusNovo: oc.status, dataHora: oc.dataHoraFechamento, observacao: '' });
+  }
+
+  res.json({ ocorrencia: resolverOcorrencia(oc), atendimento, equipe, historico });
 });
 
 app.get('/api/ocorrencias/:id/historico', (req, res) => {

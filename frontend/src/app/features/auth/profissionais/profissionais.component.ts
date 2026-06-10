@@ -51,10 +51,10 @@ export class ProfissionaisComponent implements OnInit {
       nome:          ['', [Validators.required, Validators.minLength(3)]],
       funcao:        ['MEDICO', Validators.required],
       turno:         ['MATUTINO'],
-      contato:       ['', [Validators.pattern(/^\(\d{2}\)\s\d{4,5}-\d{4}$/)]],
+      contato:       ['', [Validators.required, Validators.pattern(/^\(\d{2}\)\s\d{4,5}-\d{4}$/)]],
       ativo:         [true, Validators.required],
       tipoDocumento: ['CPF'],
-      documento:     ['', [(control: AbstractControl): ValidationErrors | null => {
+      documento:     ['', [Validators.required, (control: AbstractControl): ValidationErrors | null => {
         const valor = control.value as string;
         if (!valor) return null;
         const tipo = control.parent?.get('tipoDocumento')?.value;
@@ -199,6 +199,7 @@ export class ProfissionaisComponent implements OnInit {
   }
 
   salvar(): void {
+    this.form.markAllAsTouched();
     if (this.form.invalid) return;
     this.salvando = true;
     this.erro = null;

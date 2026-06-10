@@ -63,6 +63,7 @@
             <thead>
               <tr>
                 <th>Descricao</th>
+                <th>Status</th>
                 <th>Turno</th>
                 <th>Ambulancia</th>
                 <th>Profissionais</th>
@@ -73,6 +74,16 @@
               @for (equipe of equipesFiltradas; track equipe.id) {
                 <tr>
                   <td><strong>{{ equipe.descricao }}</strong></td>
+                  <td>
+                    <span class="badge" [ngClass]="statusEquipe(equipe)">
+                      @switch (statusEquipe(equipe)) {
+                        @case ('EM_ATENDIMENTO') { <i class="pi pi-send"></i> }
+                        @case ('INATIVA')        { <i class="pi pi-ban"></i>  }
+                        @default                 { <i class="pi pi-check-circle"></i> }
+                      }
+                      {{ STATUS_LABELS[statusEquipe(equipe)] }}
+                    </span>
+                  </td>
                   <td>
                     <span class="badge" [ngClass]="equipe.turno">{{ labelTurno(equipe.turno) }}</span>
                   </td>
@@ -100,21 +111,51 @@
                     </div>
                   </td>
                   <td class="col-actions">
-                    <button
-                      id="btn-editar-{{ equipe.id }}"
-                      class="btn-action btn-edit"
-                      (click)="abrirFormulario(equipe)"
-                      title="Editar equipe">
-                      <i class="pi pi-pencil"></i>
-                    </button>
-                    <button
-                      id="btn-excluir-{{ equipe.id }}"
-                      class="btn-action btn-delete"
-                      (click)="excluir(equipe)"
-                      [disabled]="!podeExcluir(equipe)"
-                      [title]="!podeExcluir(equipe) ? 'Não é possível excluir: ambulância em atendimento' : 'Excluir equipe'">
-                      <i class="pi pi-trash"></i>
-                    </button>
+
+                    <!-- Editar — oculto quando EM_ATENDIMENTO -->
+                    @if (podeEditar(equipe)) {
+                      <button
+                        id="btn-editar-{{ equipe.id }}"
+                        class="btn-action btn-edit"
+                        (click)="abrirFormulario(equipe)"
+                        title="Editar equipe">
+                        <i class="pi pi-pencil"></i>
+                      </button>
+                    }
+
+                    <!-- Inativar — visível quando ATIVA -->
+                    @if (podeInativar(equipe)) {
+                      <button
+                        id="btn-inativar-{{ equipe.id }}"
+                        class="btn-action btn-warning"
+                        (click)="inativar(equipe)"
+                        title="Inativar equipe">
+                        <i class="pi pi-ban"></i>
+                      </button>
+                    }
+
+                    <!-- Reativar — visível quando INATIVA -->
+                    @if (podeReativar(equipe)) {
+                      <button
+                        id="btn-reativar-{{ equipe.id }}"
+                        class="btn-action btn-success"
+                        (click)="reativar(equipe)"
+                        title="Reativar equipe">
+                        <i class="pi pi-check-circle"></i>
+                      </button>
+                    }
+
+                    <!-- Excluir — oculto quando em atendimento ou com histórico -->
+                    @if (podeExcluir(equipe)) {
+                      <button
+                        id="btn-excluir-{{ equipe.id }}"
+                        class="btn-action btn-delete"
+                        (click)="excluir(equipe)"
+                        title="Excluir equipe">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    }
+
                   </td>
                 </tr>
               }
@@ -178,13 +219,20 @@
             </div>
 
             <div class="form-group">
-              <label for="campo-ambulancia"><i class="pi pi-truck"></i> Ambulancia</label>
-              <select id="campo-ambulancia" formControlName="ambulanciaId" class="form-control">
-                <option [ngValue]="null">Sem ambulancia vinculada</option>
+              <label for="campo-ambulancia"><i class="pi pi-truck"></i> Ambulancia *</label>
+              <select
+                id="campo-ambulancia"
+                formControlName="ambulanciaId"
+                class="form-control"
+                [class.input-error]="form.get('ambulanciaId')?.invalid && form.get('ambulanciaId')?.touched">
+                <option [ngValue]="null" disabled>Selecione uma ambulancia</option>
                 @for (amb of ambulanciasDisponiveis; track amb.id) {
                   <option [ngValue]="amb.id">{{ amb.placa }} &mdash; {{ amb.tipo }}</option>
                 }
               </select>
+              @if (form.get('ambulanciaId')?.invalid && form.get('ambulanciaId')?.touched) {
+                <span class="error-text"><i class="pi pi-exclamation-circle"></i> Selecione uma ambulancia para a equipe.</span>
+              }
             </div>
           </div>
 

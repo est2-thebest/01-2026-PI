@@ -165,6 +165,12 @@
                       Saindo de: {{ ambulanciaRecomendada.bairro.nome }}
                     </span>
                   }
+                  @if (equipeRecomendada) {
+                    <span class="rec-origem">
+                      <i class="pi pi-users"></i>
+                      Equipe: <strong>{{ equipeRecomendada.descricao }}</strong>
+                    </span>
+                  }
                 </div>
 
                 @if (ocorrenciaSelecionada.gravidade === 'ALTA' && ambulanciaRecomendada.tipo === 'USB') {
