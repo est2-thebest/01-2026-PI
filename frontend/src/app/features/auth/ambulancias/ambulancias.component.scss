@@ -416,6 +416,12 @@
     &:hover { background: var(--warning); color: #1a1a1a; }
   }
 
+  &.btn-success {
+    background: rgba(22, 163, 74, 0.1);
+    color: var(--success);
+    &:hover { background: var(--success); color: #fff; }
+  }
+
   &.btn-delete {
     background: rgba(164, 22, 26, 0.08);
     color: var(--danger);

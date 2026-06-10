@@ -145,6 +145,17 @@
                       </button>
                     }
 
+                    <!-- Reativar — apenas INATIVA -->
+                    @if (podeReativar(amb)) {
+                      <button
+                        id="btn-reativar-{{ amb.id }}"
+                        class="btn-action btn-success"
+                        (click)="reativar(amb)"
+                        title="Reativar ambulância">
+                        <i class="pi pi-check-circle"></i>
+                      </button>
+                    }
+
                     <!-- Excluir — apenas SEM_EQUIPE e DISPONIVEL -->
                     @if (podeExcluir(amb)) {
                       <button

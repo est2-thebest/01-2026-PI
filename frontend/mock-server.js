@@ -17,9 +17,15 @@ const usuarios = [
 ];
 
 const ocorrencias = [
-  { id: 1, tipo: 'Acidente', gravidade: 'ALTA', status: 'ABERTA', bairroId: 5, dataHoraAbertura: [2026, 6, 9, 8, 15, 0], observacao: 'Colisão entre veículos' },
-  { id: 2, tipo: 'Mal súbito', gravidade: 'MEDIA', status: 'ABERTA', bairroId: 16, dataHoraAbertura: [2026, 6, 9, 9, 40, 0], observacao: 'Paciente inconsciente' },
-  { id: 3, tipo: 'Incêndio', gravidade: 'ALTA', status: 'DESPACHADA', bairroId: 13, dataHoraAbertura: [2026, 6, 9, 7, 0, 0], dataDespacho: [2026, 6, 9, 7, 8, 0], observacao: 'Vítimas com queimaduras' }
+  { id: 1, tipo: 'Acidente',   gravidade: 'ALTA',  status: 'ABERTA',    bairroId: 5,  dataHoraAbertura: [2026, 6, 9, 8, 15, 0], observacao: 'Colisão entre veículos',
+    historico: [{ id: 1, statusAnterior: null, statusNovo: 'ABERTA', dataHora: [2026, 6, 9, 8, 15, 0], observacao: '' }] },
+  { id: 2, tipo: 'Mal súbito', gravidade: 'MEDIA', status: 'ABERTA',    bairroId: 16, dataHoraAbertura: [2026, 6, 9, 9, 40, 0], observacao: 'Paciente inconsciente',
+    historico: [{ id: 1, statusAnterior: null, statusNovo: 'ABERTA', dataHora: [2026, 6, 9, 9, 40, 0], observacao: '' }] },
+  { id: 3, tipo: 'Incêndio',   gravidade: 'ALTA',  status: 'DESPACHADA', bairroId: 13, dataHoraAbertura: [2026, 6, 9, 7, 0, 0], dataDespacho: [2026, 6, 9, 7, 8, 0], observacao: 'Vítimas com queimaduras',
+    historico: [
+      { id: 1, statusAnterior: null,    statusNovo: 'ABERTA',    dataHora: [2026, 6, 9, 7,  0, 0], observacao: '' },
+      { id: 2, statusAnterior: 'ABERTA', statusNovo: 'DESPACHADA', dataHora: [2026, 6, 9, 7, 8, 0], observacao: '' }
+    ] }
 ];
 
 const ambulancias = [
@@ -104,11 +110,13 @@ app.get('/api/ocorrencias/:id', (req, res) => {
 });
 
 app.post('/api/ocorrencias', (req, res) => {
+  const agora = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
   const novaOcorrencia = {
     id: nextId(ocorrencias),
     ...req.body,
     status: 'ABERTA',
-    dataHoraAbertura: [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0]
+    dataHoraAbertura: agora,
+    historico: [{ id: 1, statusAnterior: null, statusNovo: 'ABERTA', dataHora: agora, observacao: '' }]
   };
   ocorrencias.push(novaOcorrencia);
   res.status(201).json(resolverOcorrencia(novaOcorrencia));
@@ -136,8 +144,12 @@ app.put('/api/ocorrencias/:id', (req, res) => {
 app.put('/api/ocorrencias/:id/despachar', (req, res) => {
   const oc = ocorrencias.find(o => o.id == req.params.id);
   if (oc) {
+    const agora = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
+    const statusAnterior = oc.status;
     oc.status = 'DESPACHADA';
-    oc.dataDespacho = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
+    oc.dataDespacho = agora;
+    if (!oc.historico) oc.historico = [];
+    oc.historico.push({ id: oc.historico.length + 1, statusAnterior, statusNovo: 'DESPACHADA', dataHora: agora, observacao: '' });
     if (req.body && req.body.ambulanciaId) {
       oc.ambulanciaId = req.body.ambulanciaId;
       const amb = ambulancias.find(a => a.id === req.body.ambulanciaId);
@@ -157,7 +169,11 @@ app.put('/api/ocorrencias/:id/despachar', (req, res) => {
 app.post('/api/ocorrencias/:id/confirmar-saida', (req, res) => {
   const oc = ocorrencias.find(o => o.id == req.params.id);
   if (oc) {
+    const agora = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
+    const statusAnterior = oc.status;
     oc.status = 'EM_ATENDIMENTO';
+    if (!oc.historico) oc.historico = [];
+    oc.historico.push({ id: oc.historico.length + 1, statusAnterior, statusNovo: 'EM_ATENDIMENTO', dataHora: agora, observacao: '' });
     res.json(resolverOcorrencia(oc));
   } else {
     res.status(404).json({ message: 'Ocorrência não encontrada' });
@@ -165,33 +181,43 @@ app.post('/api/ocorrencias/:id/confirmar-saida', (req, res) => {
 });
 
 // concluir: EM_ATENDIMENTO → CONCLUIDA (aceita POST e PUT)
+function concluirOcorrencia(oc) {
+  const agora = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
+  const statusAnterior = oc.status;
+  oc.status = 'CONCLUIDA';
+  oc.dataHoraFechamento = agora;
+  if (!oc.historico) oc.historico = [];
+  oc.historico.push({ id: oc.historico.length + 1, statusAnterior, statusNovo: 'CONCLUIDA', dataHora: agora, observacao: '' });
+  // Libera a ambulância e a equipe
+  if (oc.ambulanciaId) {
+    const amb = ambulancias.find(a => a.id === oc.ambulanciaId);
+    if (amb) {
+      amb.status = 'DISPONIVEL';
+    }
+  }
+}
+
 app.post('/api/ocorrencias/:id/concluir', (req, res) => {
   const oc = ocorrencias.find(o => o.id == req.params.id);
-  if (oc) {
-    oc.status = 'CONCLUIDA';
-    oc.dataHoraFechamento = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
-    res.json(resolverOcorrencia(oc));
-  } else {
-    res.status(404).json({ message: 'Ocorrência não encontrada' });
-  }
+  if (oc) { concluirOcorrencia(oc); res.json(resolverOcorrencia(oc)); }
+  else res.status(404).json({ message: 'Ocorrência não encontrada' });
 });
 app.put('/api/ocorrencias/:id/concluir', (req, res) => {
   const oc = ocorrencias.find(o => o.id == req.params.id);
-  if (oc) {
-    oc.status = 'CONCLUIDA';
-    oc.dataHoraFechamento = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
-    res.json(resolverOcorrencia(oc));
-  } else {
-    res.status(404).json({ message: 'Ocorrência não encontrada' });
-  }
+  if (oc) { concluirOcorrencia(oc); res.json(resolverOcorrencia(oc)); }
+  else res.status(404).json({ message: 'Ocorrência não encontrada' });
 });
 
 // cancelar: qualquer status → CANCELADA
 app.post('/api/ocorrencias/:id/cancelar', (req, res) => {
   const oc = ocorrencias.find(o => o.id == req.params.id);
   if (oc) {
+    const agora = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
+    const statusAnterior = oc.status;
     oc.status = 'CANCELADA';
-    oc.dataHoraFechamento = [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate(), new Date().getHours(), new Date().getMinutes(), 0];
+    oc.dataHoraFechamento = agora;
+    if (!oc.historico) oc.historico = [];
+    oc.historico.push({ id: oc.historico.length + 1, statusAnterior, statusNovo: 'CANCELADA', dataHora: agora, observacao: '' });
     res.json(resolverOcorrencia(oc));
   } else {
     res.status(404).json({ message: 'Ocorrência não encontrada' });
@@ -222,13 +248,7 @@ app.get('/api/ocorrencias/:id/detalhes', (req, res) => {
     }
   }
 
-  const historico = [];
-  if (oc.dataDespacho) {
-    historico.push({ id: 1, statusAnterior: 'ABERTA', statusNovo: 'DESPACHADA', dataHora: oc.dataDespacho, observacao: '' });
-  }
-  if (oc.dataHoraFechamento) {
-    historico.push({ id: 2, statusAnterior: oc.dataDespacho ? 'DESPACHADA' : 'ABERTA', statusNovo: oc.status, dataHora: oc.dataHoraFechamento, observacao: '' });
-  }
+  const historico = oc.historico || [];
 
   res.json({ ocorrencia: resolverOcorrencia(oc), atendimento, equipe, historico });
 });

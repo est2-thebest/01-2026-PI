@@ -112,6 +112,10 @@ export class AmbulanciasComponent implements OnInit {
     return amb.status === 'SEM_EQUIPE' || amb.status === 'MANUTENCAO';
   }
 
+  podeReativar(amb: Ambulancia): boolean {
+    return amb.status === 'INATIVA';
+  }
+
   podeExcluir(amb: Ambulancia): boolean {
     return amb.status === 'SEM_EQUIPE' || amb.status === 'DISPONIVEL';
   }
@@ -193,6 +197,23 @@ export class AmbulanciasComponent implements OnInit {
       this.ambulanciaService.atualizar(ambulancia.id!, payload).subscribe({
         next: () => this.carregarDados(),
         error: () => { this.erro = 'Erro ao inativar ambulância.'; }
+      });
+    }
+  }
+
+  async reativar(ambulancia: Ambulancia): Promise<void> {
+    const confirmado = await this.confirmService.abrir({
+      titulo:      'Reativar Ambulância',
+      mensagem:    `Reativar a ambulância ${ambulancia.placa}? Ela voltará a ficar disponível para equipes.`,
+      tipo:        'info',
+      confirmText: 'Sim, reativar',
+      cancelText:  'Cancelar'
+    });
+    if (confirmado) {
+      const payload: any = { ...ambulancia, status: 'SEM_EQUIPE', bairroId: ambulancia.bairro?.id ?? null };
+      this.ambulanciaService.atualizar(ambulancia.id!, payload).subscribe({
+        next: () => this.carregarDados(),
+        error: () => { this.erro = 'Erro ao reativar ambulância.'; }
       });
     }
   }

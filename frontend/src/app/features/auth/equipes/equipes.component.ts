@@ -324,7 +324,10 @@ export class EquipesComponent implements OnInit {
     const ambId   = equipe.ambulancia?.id;
     const ambData = ambId ? this.ambulancias.find(a => a.id === ambId) : null;
     const obs: Record<string, any> = { equipe: this.equipeService.atualizar(equipe.id!, { ...equipe, ativo: true }) };
-    if (ambId && ambData) obs['amb'] = this.ambulanciaService.atualizar(ambId, { ...ambData, status: 'DISPONIVEL' });
+    // só restaura para DISPONIVEL se a ambulância ainda estiver livre (SEM_EQUIPE)
+    if (ambId && ambData && ambData.status === 'SEM_EQUIPE') {
+      obs['amb'] = this.ambulanciaService.atualizar(ambId, { ...ambData, status: 'DISPONIVEL' });
+    }
 
     forkJoin(obs).subscribe({
       next: () => this.carregarDados(),
