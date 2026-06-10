@@ -80,22 +80,27 @@ A arquitetura AWS proposta visa suportar a implantação dessa solução em nuve
 
 ---
 
-## 6. Estimativa de Instâncias (Ambiente Acadêmico)
+## 6. Estimativa de Custos Mensais (AWS Pricing Calculator)
 
-> Para fins de demonstração e entrega do PI, consideramos os tamanhos abaixo suficientes e econômicos.
+> Estimativa gerada via AWS Pricing Calculator para ambiente acadêmico com configurações mínimas. Valores em USD, região US East (N. Virginia).  
+> Relatório completo disponível em `docs/AWS/estimativa-custos-aws.pdf`
+> Estimativa online: https://calculator.aws/#/estimate?id=65f6bc910dc41ba3504c25075bbbee2687bd574d
 
-| Serviço    | Configuração sugerida          | Observação                                                  |
-| ---------- | ------------------------------ | ----------------------------------------------------------- |
-| EC2        | t3.small (2 vCPU, 2 GB RAM)    | Suficiente para JVM + Spring Boot com carga de demonstração |
-| RDS        | db.t3.micro (1 vCPU, 1 GB RAM) | PostgreSQL 15, Single-AZ (sem Multi-AZ para reduzir custo)  |
-| S3         | Bucket padrão                  | Custo praticamente zero para arquivos estáticos (< 50 MB)   |
-| CloudFront | Distribution padrão            | Free tier cobre 1 TB de transferência/mês                   |
-| ALB        | 1 ALB padrão                   | Incluso no Free Tier por 12 meses (750 h/mês)               |
+| Serviço                 | Configuração                    | Custo mensal |
+| ----------------------- | ------------------------------- | ------------ |
+| Amazon EC2              | t3.small, 1 instância, Linux    | $ 15.18      |
+| Amazon RDS (PostgreSQL) | db.t3.micro, Single-AZ, 20 GB   | $ 15.44      |
+| Amazon S3               | 1 GB Standard, 1000 req         | $ 0.03       |
+| Amazon CloudFront       | 1 GB transfer, 10.000 req HTTPS | $ 0.10       |
+| Elastic Load Balancer   | ALB, 1 instância                | $ 22.27      |
+| **Total mensal**        |                                 | **$ 53.02**  |
+| **Total 12 meses**      |                                 | **$ 636.24** |
 
 ---
 
 ## Histórico de revisões
 
-| Versão | Data       | Alteração                                     | Autor     |
-| ------ | ---------- | --------------------------------------------- | --------- |
-| 1.0    | 09/06/2026 | Criação do documento - arquitetura e diagrama | Gabriella |
+| Versão | Data       | Alteração                                                                | Autor     |
+| ------ | ---------- | ------------------------------------------------------------------------ | --------- |
+| 1.0    | 09/06/2026 | Criação do documento - arquitetura e diagrama                            | Gabriella |
+| 1.1    | 09/06/2026 | Adição da estimativa de custos (seção 6); remoção da seção de instâncias | Gabriella |
