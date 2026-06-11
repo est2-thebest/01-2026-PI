@@ -29,9 +29,9 @@ const ocorrencias = [
 ];
 
 const ambulancias = [
-  { id: 1, placa: 'SOC-0001', tipo: 'USA', status: 'DISPONIVEL', bairroId: 2  },
-  { id: 2, placa: 'SOC-0002', tipo: 'USB', status: 'DISPONIVEL', bairroId: 9  },
-  { id: 3, placa: 'SOC-0003', tipo: 'USA', status: 'SEM_EQUIPE', bairroId: 14 }
+  { id: 1, placa: 'SOC-0001', tipo: 'USA', status: 'DISPONIVEL', bairroId: 2,  possuiHistorico: false },
+  { id: 2, placa: 'SOC-0002', tipo: 'USB', status: 'DISPONIVEL', bairroId: 9,  possuiHistorico: false },
+  { id: 3, placa: 'SOC-0003', tipo: 'USA', status: 'SEM_EQUIPE', bairroId: 14, possuiHistorico: false }
 ];
 
 const bairros = [
@@ -155,6 +155,7 @@ app.put('/api/ocorrencias/:id/despachar', (req, res) => {
       const amb = ambulancias.find(a => a.id === req.body.ambulanciaId);
       if (amb) {
         amb.status = 'EM_ATENDIMENTO';
+        amb.possuiHistorico = true;
         const eq = equipes.find(e => e.ambulanciaId === amb.id);
         if (eq) eq.possuiHistorico = true;
       }

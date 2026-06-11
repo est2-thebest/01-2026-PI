@@ -131,12 +131,6 @@
     .stat-value { color: var(--warning); }
   }
 
-  &.stat-manutencao {
-    border-color: var(--danger);
-    .stat-icon { color: var(--danger); }
-    .stat-value { color: var(--danger); }
-  }
-
   &.stat-total {
     border-color: var(--secondary);
     .stat-icon { color: var(--secondary); }
