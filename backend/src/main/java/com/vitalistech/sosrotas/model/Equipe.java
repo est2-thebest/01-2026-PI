@@ -3,11 +3,14 @@ package com.vitalistech.sosrotas.model;
 import jakarta.persistence.*;
 import java.util.List;
 import com.vitalistech.sosrotas.model.enums.Turno;
+import com.vitalistech.sosrotas.model.enums.StatusEquipe; 
+
 
 /**
  * Entidade que representa uma equipe de atendimento.
  * [RF03] Cadastro de Equipes.
  */
+
 @Entity
 @Table(name = "equipe")
 public class Equipe {
@@ -25,6 +28,10 @@ public class Equipe {
     @Enumerated(EnumType.STRING)
     private Turno turno;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private StatusEquipe status; // Novo campo solicitado pelo Front
+
     @ManyToMany
     @JoinTable(
             name = "equipe_profissional",
@@ -36,52 +43,55 @@ public class Equipe {
     public Equipe() {
     }
 
+    // Atualize o construtor
     public Equipe(Integer id, String descricao, Ambulancia ambulancia,
-                  Turno turno, List<Profissional> profissionais) {
+                  Turno turno, StatusEquipe status, List<Profissional> profissionais) {
         this.id = id;
         this.descricao = descricao;
         this.ambulancia = ambulancia;
         this.turno = turno;
+        this.status = status;
         this.profissionais = profissionais;
     }
 
-    public Integer getId() {
-        return id;
+    // Getters e Setters do novo campo
+    public StatusEquipe getStatus() {
+        return status;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setStatus(StatusEquipe status) {
+        this.status = status;
     }
 
-    public String getDescricao() {
-        return descricao;
+    // ... Mantenha os outros getters e setters intocados ...
+    public Integer getId() { 
+        return id; 
     }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setId(Integer id) { 
+        this.id = id; 
     }
-
-    public Ambulancia getAmbulancia() {
-        return ambulancia;
+    public String getDescricao() { 
+        return descricao; 
     }
-
-    public void setAmbulancia(Ambulancia ambulancia) {
-        this.ambulancia = ambulancia;
+    public void setDescricao(String descricao) { 
+        this.descricao = descricao; 
     }
-
-    public Turno getTurno() {
-        return turno;
+    public Ambulancia getAmbulancia() { 
+        return ambulancia; 
     }
-
-    public void setTurno(Turno turno) {
-        this.turno = turno;
+    public void setAmbulancia(Ambulancia ambulancia) { 
+        this.ambulancia = ambulancia; 
     }
-
-    public List<Profissional> getProfissionais() {
-        return profissionais;
+    public Turno getTurno() { 
+        return turno; 
     }
-
-    public void setProfissionais(List<Profissional> profissionais) {
-        this.profissionais = profissionais;
+    public void setTurno(Turno turno) { 
+        this.turno = turno; 
+    }
+    public List<Profissional> getProfissionais() { 
+        return profissionais; 
+    }
+    public void setProfissionais(List<Profissional> profissionais) { 
+        this.profissionais = profissionais; 
     }
 }

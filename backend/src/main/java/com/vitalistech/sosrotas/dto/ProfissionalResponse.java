@@ -9,5 +9,7 @@ public record ProfissionalResponse(
         String contato,
         Boolean ativo,
         FuncaoProfissional funcao,
-        Turno turno
+        Turno turno,
+        String cpf,
+        String cnpj
 ) {}

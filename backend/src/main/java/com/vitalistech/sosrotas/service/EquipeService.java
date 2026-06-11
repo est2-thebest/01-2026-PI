@@ -11,6 +11,7 @@ import com.vitalistech.sosrotas.model.Equipe;
 import com.vitalistech.sosrotas.model.Ambulancia;
 import com.vitalistech.sosrotas.model.Profissional;
 import com.vitalistech.sosrotas.model.enums.StatusAmbulancia;
+import com.vitalistech.sosrotas.model.enums.StatusEquipe;
 import com.vitalistech.sosrotas.repository.IAmbulanciaRepository;
 import com.vitalistech.sosrotas.repository.IEquipeRepository;
 import com.vitalistech.sosrotas.repository.IProfissionalRepository;
@@ -51,12 +52,18 @@ public class EquipeService {
         Equipe equipe = new Equipe();
         equipe.setDescricao(request.descricao());
         equipe.setTurno(request.turno());
+        
+        // Se o front não passar um status inicial, define como DISPONIVEL
+        equipe.setStatus(request.status() == null ? StatusEquipe.DISPONIVEL : request.status());
 
         if (request.ambulanciaId() != null) {
             Ambulancia amb = ambulanciaRepository.findById(request.ambulanciaId())
                     .orElseThrow(() -> new RuntimeException("Ambulância não encontrada."));
+            
+            if (StatusAmbulancia.EM_ATENDIMENTO == amb.getStatus()) {
+                throw new IllegalStateException("Esta viatura já está em atendimento ativo.");
+            }
             equipe.setAmbulancia(amb);
-            atualizarStatusAmbulanciaAoVincular(equipe);
         }
 
         if (request.profissionalIds() != null && !request.profissionalIds().isEmpty()) {
@@ -67,7 +74,10 @@ public class EquipeService {
             equipe.setProfissionais(profissionais);
         }
 
-        return toResponseDTO(equipeRepository.save(equipe));
+        Equipe equipeSalva = equipeRepository.save(equipe);
+        atualizarStatusAmbulanciaAoVincular(equipeSalva);
+
+        return toResponseDTO(equipeSalva);
     }
 
     @Transactional
@@ -75,16 +85,37 @@ public class EquipeService {
         Equipe existente = equipeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Equipe não encontrada."));
 
+        // VALIDAÇÃO COM O NOVO ENUM: Não deixa editar equipes em campo
+        if (StatusEquipe.EM_ATENDIMENTO == existente.getStatus()) {
+            throw new IllegalStateException("Não é permitido editar uma equipe que está Em Atendimento/Em campo.");
+        }
+
+        // NOVA VALIDAÇÃO PEDIDA PELO FRONT: Impede alteração se a equipe já estiver inativa
+        if (StatusEquipe.INATIVA == existente.getStatus()) {
+            throw new IllegalStateException("Não é permitido editar uma equipe que está Inativa.");
+        }
+
         existente.setDescricao(request.descricao());
         existente.setTurno(request.turno());
+        
+        if (request.status() != null) {
+            existente.setStatus(request.status());
+        }
+
+        Ambulancia ambulanciaAntiga = existente.getAmbulancia();
+        Ambulancia ambulanciaNova = null;
 
         if (request.ambulanciaId() != null) {
-            Ambulancia amb = ambulanciaRepository.findById(request.ambulanciaId())
+            ambulanciaNova = ambulanciaRepository.findById(request.ambulanciaId())
                     .orElseThrow(() -> new RuntimeException("Ambulância não encontrada."));
-            existente.setAmbulancia(amb);
-        } else {
-            existente.setAmbulancia(null);
         }
+
+        if (ambulanciaAntiga != null && !ambulanciaAntiga.equals(ambulanciaNova)) {
+            ambulanciaAntiga.setStatus(StatusAmbulancia.SEM_EQUIPE);
+            ambulanciaRepository.save(ambulanciaAntiga);
+        }
+
+        existente.setAmbulancia(ambulanciaNova);
 
         if (request.profissionalIds() != null) {
             List<Profissional> profissionais = request.profissionalIds().stream()
@@ -94,22 +125,47 @@ public class EquipeService {
             existente.setProfissionais(profissionais);
         }
 
-        return toResponseDTO(equipeRepository.save(existente));
+        Equipe equipeAtualizada = equipeRepository.save(existente);
+        atualizarStatusAmbulanciaAoVincular(equipeAtualizada);
+
+        return toResponseDTO(equipeAtualizada);
     }
 
     @Transactional
     public void deletar(Integer id) {
         Equipe equipe = equipeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Equipe não encontrada."));
+        
+        // VALIDAÇÃO COM O NOVO ENUM: Não deixa deletar equipes em campo
+        if (StatusEquipe.EM_ATENDIMENTO == equipe.getStatus()) {
+            throw new IllegalStateException("Não é permitido excluir uma equipe que está Em Atendimento/Em campo.");
+        }
+
+        if (equipe.getAmbulancia() != null) {
+            Ambulancia amb = equipe.getAmbulancia();
+            amb.setStatus(StatusAmbulancia.SEM_EQUIPE);
+            ambulanciaRepository.save(amb);
+        }
+
         equipeRepository.delete(equipe);
     }
 
     private void atualizarStatusAmbulanciaAoVincular(Equipe equipe) {
-        if (equipe.getAmbulancia() != null && equipe.getAmbulancia().getStatus() == StatusAmbulancia.SEM_EQUIPE) {
+        if (equipe.getAmbulancia() != null) {
             Ambulancia amb = equipe.getAmbulancia();
-            amb.setStatus(StatusAmbulancia.DISPONIVEL);
-            ambulanciaRepository.save(amb);
-            logger.info("Ambulância id={} atualizada para DISPONIVEL.", amb.getId());
+            
+            // CORREÇÃO DE TESTE DO FRONT: Se a equipe estiver inativa, a ambulância obrigatoriamente fica SEM_EQUIPE
+            if (StatusEquipe.INATIVA == equipe.getStatus()) {
+                amb.setStatus(StatusAmbulancia.SEM_EQUIPE);
+                ambulanciaRepository.save(amb);
+                logger.info("Ambulância id={} forçada para SEM_EQUIPE porque a equipe vinculada está INATIVA.", amb.getId());
+            } 
+            // Caso contrário, se a ambulância estava vazia (SEM_EQUIPE), ela agora passa a estar DISPONIVEL
+            else if (StatusAmbulancia.SEM_EQUIPE == amb.getStatus()) {
+                amb.setStatus(StatusAmbulancia.DISPONIVEL);
+                ambulanciaRepository.save(amb);
+                logger.info("Ambulância id={} sincronizada.", amb.getId());
+            }
         }
     }
 
@@ -123,7 +179,10 @@ public class EquipeService {
                         p.getContato(),
                         p.getAtivo(),
                         p.getFuncao(),
-                        p.getTurno()))
+                        p.getTurno(),
+                        p.getCpf(),
+                        p.getCnpj())
+                )
                 .toList();
 
         return new EquipeResponse(
@@ -131,6 +190,30 @@ public class EquipeService {
                 equipe.getDescricao(),
                 equipe.getAmbulancia() != null ? equipe.getAmbulancia().getId() : null,
                 equipe.getTurno(),
+                equipe.getStatus(), // Mapeado no DTO
                 profissionaisDTO);
+    }
+
+    @Transactional
+    public EquipeResponse inativarEquipe(Integer id) {
+        Equipe equipe = equipeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Equipe não encontrada."));
+
+        // Regra de segurança: Equipe em campo não pode ser inativada subitamente
+        if (StatusEquipe.EM_ATENDIMENTO == equipe.getStatus()) {
+            throw new IllegalStateException("Não é possível inativar uma equipe que está em atendimento ativo!");
+        }
+
+        equipe.setStatus(StatusEquipe.INATIVA);
+        
+        // Opcional: Se a equipe for inativada, talvez você queira liberar a ambulância dela
+        if (equipe.getAmbulancia() != null) {
+            Ambulancia amb = equipe.getAmbulancia();
+            amb.setStatus(StatusAmbulancia.SEM_EQUIPE);
+            ambulanciaRepository.save(amb);
+            // equipe.setAmbulancia(null); // Desvincular se for regra de negócio
+        }
+
+        return toResponseDTO(equipeRepository.save(equipe));
     }
 }

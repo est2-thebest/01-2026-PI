@@ -14,8 +14,10 @@ public class Profissional {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(length = 100)
     private String nome;
 
+    @Column(length = 12)
     private String contato;
 
     private Boolean ativo;
@@ -26,23 +28,25 @@ public class Profissional {
     @Enumerated(EnumType.STRING)
     private Turno turno;
 
+    @Column(length = 14)
+    private String cpf;
+
+    @Column(length = 18)
+    private String cnpj;
+
     public Profissional() {
     }
 
-    public Profissional(
-            Integer id,
-            String nome,
-            String contato,
-            Boolean ativo,
-            FuncaoProfissional funcao,
-            Turno turno) {
-
-        this.id = id;
-        this.nome = nome;
-        this.contato = contato;
-        this.ativo = ativo;
-        this.funcao = funcao;
-        this.turno = turno;
+    public Profissional(Integer id, String nome, String contato, Boolean ativo, FuncaoProfissional funcao, Turno turno, String cpf, String cnpj) 
+    {
+    this.id = id;
+    this.nome = nome;
+    this.contato = contato;
+    this.ativo = ativo;
+    this.funcao = funcao;
+    this.turno = turno;
+    this.cpf = cpf;
+    this.cnpj = cnpj;
     }
 
     // getters e setters
@@ -95,5 +99,19 @@ public class Profissional {
 
     public void setTurno(Turno turno) {
         this.turno = turno;
+    }
+
+    public String getCpf() { 
+        return cpf; 
+    }
+    public void setCpf(String cpf) { 
+        this.cpf = cpf; 
+    }
+
+    public String getCnpj() { 
+        return cnpj; 
+    }
+    public void setCnpj(String cnpj) { 
+        this.cnpj = cnpj; 
     }
 }

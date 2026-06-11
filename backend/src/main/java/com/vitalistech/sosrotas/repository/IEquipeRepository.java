@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IEquipeRepository
@@ -20,9 +21,14 @@ public interface IEquipeRepository
     List<Equipe> findByAmbulancia(Ambulancia ambulancia);
 
     /**
+     * Retorna a primeira equipe vinculada a uma ambulância (Optional para uso com .orElse).
+     */
+    Optional<Equipe> findFirstByAmbulancia(Ambulancia ambulancia);
+
+    /**
      * Busca equipes filtrando por ambulância e turno específico.
      */
-    List<Equipe> findByAmbulanciaAndTurno(
+    Optional<Equipe> findByAmbulanciaAndTurno(
             Ambulancia ambulancia,
             Turno turno
     );

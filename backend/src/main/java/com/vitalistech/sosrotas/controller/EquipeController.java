@@ -47,4 +47,19 @@ public class EquipeController {
         equipeService.deletar(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * ADICIONADO PARA O FRONTEND:
+     * Captura a exceção de regra de negócio (bloqueio de alteração em equipes EM_ATENDIMENTO)
+     * e devolve um erro amigável 400 Bad Request com a mensagem exata.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @PatchMapping("/{id}/inativar")
+    public ResponseEntity<EquipeResponse> inativar(@PathVariable Integer id) {
+        return ResponseEntity.ok(equipeService.inativarEquipe(id));
+    }
 }
