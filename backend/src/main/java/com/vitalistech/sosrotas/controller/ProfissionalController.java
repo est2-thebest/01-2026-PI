@@ -38,6 +38,12 @@ public class ProfissionalController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
+    // NOVO EXCEPTION HANDLER: Trata as violações de regras de negócio de estado ativo
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ProfissionalResponse> atualizar(@PathVariable Integer id, @RequestBody ProfissionalRequest request) {
         return ResponseEntity.ok(profissionalService.atualizar(id, request));

@@ -4,7 +4,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vitalistech.sosrotas.repository.IProfissionalRepository;
+import com.vitalistech.sosrotas.repository.IEquipeRepository; // NOVO IMPORT
 import com.vitalistech.sosrotas.model.Profissional;
+import com.vitalistech.sosrotas.model.Equipe; // NOVO IMPORT
+import com.vitalistech.sosrotas.model.enums.StatusEquipe; // NOVO IMPORT
 import com.vitalistech.sosrotas.dto.ProfissionalRequest;
 import com.vitalistech.sosrotas.dto.ProfissionalResponse;
 
@@ -12,9 +15,12 @@ import com.vitalistech.sosrotas.dto.ProfissionalResponse;
 public class ProfissionalService {
 
     private final IProfissionalRepository repository;
+    private final IEquipeRepository equipeRepository; // NOVO REPOSITORY INJETADO
 
-    public ProfissionalService(IProfissionalRepository repository) {
+    // Mantida a injeção limpa por construtor adicionando o novo repositório
+    public ProfissionalService(IProfissionalRepository repository, IEquipeRepository equipeRepository) {
         this.repository = repository;
+        this.equipeRepository = equipeRepository;
     }
 
     public List<ProfissionalResponse> listarTodos() {
@@ -34,10 +40,10 @@ public class ProfissionalService {
         // Validação de obrigatoriedade mínima
         validarDocumentos(request);
 
-        Profissional profissional = new Profissional();
-        copiarDadosParaEntidade(request, profissional);
+        Profissional profesional = new Profissional();
+        copiarDadosParaEntidade(request, profesional);
         
-        return toResponseDTO(repository.save(profissional));
+        return toResponseDTO(repository.save(profesional));
     }
 
     @Transactional
@@ -47,6 +53,9 @@ public class ProfissionalService {
         
         Profissional existente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Profissional não encontrado"));
+
+        // NOVA VALIDAÇÃO: Impede a edição caso o profissional esteja em empenho ativo
+        validarSeEstaEmOcorrenciaAtiva(existente);
 
         existente.setNome(request.nome());
         existente.setContato(request.contato());
@@ -83,6 +92,20 @@ public class ProfissionalService {
         }
     }
 
+    /**
+     * Valida se o profissional está vinculado a alguma equipe em atendimento operacional ativo.
+     */
+    private void validarSeEstaEmOcorrenciaAtiva(Profissional profissional) {
+        // Busca as equipes associadas ao profissional para validar o estado reativo da máquina de atendimento
+        List<Equipe> equipesDoProfissional = equipeRepository.findByProfissionaisId(profissional.getId());
+
+        for (Equipe equipe : equipesDoProfissional) {
+            if (StatusEquipe.EM_ATENDIMENTO.equals(equipe.getStatus())) {
+                throw new IllegalStateException("Operação negada: O profissional está vinculado a uma equipe em atendimento ativo no momento.");
+            }
+        }
+    }
+
     // Atualize também o mapeador de resposta
     public ProfissionalResponse toResponseDTO(Profissional profissional) {
         return new ProfissionalResponse(
@@ -99,9 +122,12 @@ public class ProfissionalService {
 
     @Transactional
     public void deletar(Integer id) {
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("Profissional não encontrado");
-        }
-        repository.deleteById(id);
+        Profissional existente = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Profissional não encontrado"));
+
+        // NOVA VALIDAÇÃO: Impede a exclusão caso o profissional esteja em empenho ativo
+        validarSeEstaEmOcorrenciaAtiva(existente);
+        
+        repository.delete(existente);
     }
 }
