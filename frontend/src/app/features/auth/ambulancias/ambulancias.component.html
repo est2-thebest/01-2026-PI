@@ -34,13 +34,6 @@
           <span class="stat-label">Em Atendimento</span>
         </div>
       </div>
-      <div class="stat-card stat-manutencao">
-        <i class="pi pi-wrench stat-icon"></i>
-        <div class="stat-info">
-          <span class="stat-value">{{ totalManutencao }}</span>
-          <span class="stat-label">Em Manutenção</span>
-        </div>
-      </div>
       <div class="stat-card stat-total">
         <i class="pi pi-list stat-icon"></i>
         <div class="stat-info">
@@ -68,8 +61,6 @@
         <option value="">Status — Todos</option>
         <option value="DISPONIVEL">Disponível</option>
         <option value="EM_ATENDIMENTO">Em Atendimento</option>
-        <option value="MANUTENCAO">Manutenção</option>
-        <option value="INATIVA">Inativa</option>
         <option value="SEM_EQUIPE">Sem Equipe</option>
       </select>
 
@@ -123,7 +114,7 @@
                   </td>
                   <td>{{ amb.bairro?.nome || '—' }}</td>
                   <td class="col-actions">
-                    <!-- Editar — apenas SEM_EQUIPE e DISPONIVEL -->
+                    <!-- Editar — todos exceto EM_ATENDIMENTO -->
                     @if (podeEditar(amb)) {
                       <button
                         id="btn-editar-{{ amb.id }}"
@@ -131,28 +122,6 @@
                         (click)="abrirFormulario(amb)"
                         title="Editar ambulância">
                         <i class="pi pi-pencil"></i>
-                      </button>
-                    }
-
-                    <!-- Inativar — apenas SEM_EQUIPE ou MANUTENCAO -->
-                    @if (podeInativar(amb)) {
-                      <button
-                        id="btn-inativar-{{ amb.id }}"
-                        class="btn-action btn-warning"
-                        (click)="inativar(amb)"
-                        title="Inativar ambulância">
-                        <i class="pi pi-ban"></i>
-                      </button>
-                    }
-
-                    <!-- Reativar — apenas INATIVA -->
-                    @if (podeReativar(amb)) {
-                      <button
-                        id="btn-reativar-{{ amb.id }}"
-                        class="btn-action btn-success"
-                        (click)="reativar(amb)"
-                        title="Reativar ambulância">
-                        <i class="pi pi-check-circle"></i>
                       </button>
                     }
 
@@ -211,47 +180,22 @@
               formControlName="placa"
               class="form-control"
               [class.input-error]="form.get('placa')?.invalid && form.get('placa')?.touched"
-              placeholder="ABC1234 ou ABC-1234"
-              [readonly]="!!editandoId" />
+              placeholder="ABC1234 ou ABC-1234" />
             @if (form.get('placa')?.invalid && form.get('placa')?.touched) {
               <span class="error-text"><i class="pi pi-exclamation-circle"></i> Placa inválida. Use o formato ABC1234.</span>
             }
-            @if (editandoId) {
-              <span class="hint-text"><i class="pi pi-info-circle"></i> A placa não pode ser alterada após o cadastro.</span>
+            @if (editandoId && !placaEditavel) {
+              <span class="hint-text"><i class="pi pi-info-circle"></i> A placa só pode ser alterada quando o status for "Sem Equipe".</span>
             }
           </div>
 
-          <!-- Tipo e Status (status apenas no edit) -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="campo-tipo"><i class="pi pi-tag"></i> Tipo *</label>
-              <select id="campo-tipo" formControlName="tipo" class="form-control">
-                <option value="USA">USA — Suporte Avançado de Vida</option>
-                <option value="USB">USB — Suporte Básico de Vida</option>
-              </select>
-            </div>
-
-            <!-- Status só aparece no modo de edição -->
-            @if (editandoId) {
-              <div class="form-group">
-                <label for="campo-status"><i class="pi pi-circle"></i> Status *</label>
-                <select id="campo-status" formControlName="status" class="form-control">
-                  <!-- Status gerenciados pelo sistema aparecem como opção informativa -->
-                  @if (statusSistemaAtual) {
-                    <option [value]="statusAtualAoEditar" disabled>
-                      {{ labelStatus(statusAtualAoEditar || '') }} (gerenciado pelo sistema)
-                    </option>
-                  }
-                  <option value="MANUTENCAO">Manutenção</option>
-                  <option value="INATIVA">Inativa</option>
-                </select>
-                @if (statusSistemaAtual) {
-                  <span class="hint-text"><i class="pi pi-info-circle"></i>
-                    Status atual é gerenciado pelas equipes. Você pode colocar em Manutenção ou Inativar.
-                  </span>
-                }
-              </div>
-            }
+          <!-- Tipo -->
+          <div class="form-group">
+            <label for="campo-tipo"><i class="pi pi-tag"></i> Tipo *</label>
+            <select id="campo-tipo" formControlName="tipo" class="form-control">
+              <option value="USA">USA — Suporte Avançado de Vida</option>
+              <option value="USB">USB — Suporte Básico de Vida</option>
+            </select>
           </div>
 
           <!-- Bairro / Localização (obrigatório) -->

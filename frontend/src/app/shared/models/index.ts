@@ -29,8 +29,9 @@ export interface Ambulancia {
   id?: number;
   placa: string;
   tipo: 'USA' | 'USB';
-  status: 'DISPONIVEL' | 'EM_ATENDIMENTO' | 'MANUTENCAO' | 'INATIVA' | 'SEM_EQUIPE';
+  status: 'DISPONIVEL' | 'EM_ATENDIMENTO' | 'SEM_EQUIPE';
   bairro?: Bairro | null;
+  possuiHistorico?: boolean;
 }
 
 // Profissional.java — SEM campo cref, esse campo não existe na entidade Java
