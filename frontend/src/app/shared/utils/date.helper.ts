@@ -1,44 +1,28 @@
 // ============================================================
-// date.helper.ts
-// Trata o formato de datas do backend Spring Boot.
+// date.helper.ts — utilitários de data
 //
-// Por padrão o Jackson serializa LocalDateTime como ARRAY:
-//   [2025, 6, 3, 14, 30, 0]   ← ano, mês, dia, hora, min, seg
+// PADRÃO DE PROJETO 2: ADAPTER (ver shared/adapters/date.adapter.ts)
 //
-// Se a colega adicionar no application.properties:
-//   spring.jackson.serialization.write-dates-as-timestamps=false
-// o backend vai passar a enviar strings ISO: "2025-06-03T14:30:00"
+// Este módulo delega ao DateAdapterFactory a responsabilidade de
+// escolher qual implementação usar (ArrayDateAdapter ou IsoDateAdapter)
+// com base no formato que o backend enviou.
 //
-// Esta função aceita AMBOS os formatos sem precisar mudar os componentes.
+// Os componentes que chamam formatarData() continuam idênticos —
+// eles não precisam saber que existem dois formatos possíveis.
 // ============================================================
 
+import { DateAdapterFactory } from '../adapters/date.adapter';
+
+// Formata data com hora: "03/06/2025, 14:30:00"
+// Padrão Adapter: DateAdapterFactory escolhe o adapter correto internamente
 export function formatarData(data: string | number[] | null | undefined): string {
-  if (!data) return '—';
-
-  // Formato array: [ano, mes, dia, hora?, min?, seg?]
-  if (Array.isArray(data)) {
-    const [ano, mes, dia, hora = 0, min = 0, seg = 0] = data as number[];
-    const d = new Date(ano, mes - 1, dia, hora, min, seg);
-    return d.toLocaleString('pt-BR');
-  }
-
-  // Formato string ISO ou qualquer outro string
-  try {
-    return new Date(data as string).toLocaleString('pt-BR');
-  } catch {
-    return String(data);
-  }
+  const adapter = DateAdapterFactory.criar(data);
+  return adapter ? adapter.formatar('pt-BR') : '—';
 }
 
+// Formata apenas a data sem hora: "03/06/2025"
+// Padrão Adapter: mesma chamada, independente do formato recebido do backend
 export function formatarDataCurta(data: string | number[] | null | undefined): string {
-  if (!data) return '—';
-  if (Array.isArray(data)) {
-    const [ano, mes, dia] = data as number[];
-    return `${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}/${ano}`;
-  }
-  try {
-    return new Date(data as string).toLocaleDateString('pt-BR');
-  } catch {
-    return String(data);
-  }
+  const adapter = DateAdapterFactory.criar(data);
+  return adapter ? adapter.formatarCurto() : '—';
 }

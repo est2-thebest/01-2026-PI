@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { OcorrenciaService } from '../../../services/ocorrencia.service';
-import { BairroService } from '../../../services/bairro.service';
+// Padrão Decorator: BairroServiceComCache envolve BairroService adicionando cache
+import { BairroServiceComCache } from '../../../shared/decorators/bairro-cache.service';
 import { Ocorrencia, Bairro, OcorrenciaDetalhes } from '../../../shared/models';
 import { ConfirmModalService } from '../../../shared/components/modals/confirm.service';
 
@@ -114,7 +115,7 @@ export class OcorrenciasComponent implements OnInit {
 
   constructor(
     private ocorrenciaService: OcorrenciaService,
-    private bairroService: BairroService,
+    private bairroService: BairroServiceComCache,  // Decorator substitui BairroService
     private fb: FormBuilder,
     private confirmService: ConfirmModalService
   ) {

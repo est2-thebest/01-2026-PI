@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { AmbulanciaService } from '../../../services/ambulancia.service';
-import { BairroService } from '../../../services/bairro.service';
+// Padrão Decorator: BairroServiceComCache envolve BairroService adicionando cache
+import { BairroServiceComCache } from '../../../shared/decorators/bairro-cache.service';
 import { Ambulancia, Bairro } from '../../../shared/models';
 import { ConfirmModalService } from '../../../shared/components/modals/confirm.service';
 
@@ -43,7 +44,7 @@ export class AmbulanciasComponent implements OnInit {
 
   constructor(
     private ambulanciaService: AmbulanciaService,
-    private bairroService: BairroService,
+    private bairroService: BairroServiceComCache,  // Decorator substitui BairroService
     private fb: FormBuilder,
     private confirmService: ConfirmModalService
   ) {
