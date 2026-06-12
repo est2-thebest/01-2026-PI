@@ -8,11 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * [PADRÃO DE PROJETO: SINGLETON]
- * Aplicado via escopo nativo do Spring Framework através da anotação @Service.
- * Justificativa: Garante uma única instância centralizada do serviço de bairros gerenciando o acesso à malha urbana, assegurando a consistência dos dados de localidades consumidos pelas controllers e regras de despacho.
- */
 @Service
 public class BairroService {
 
