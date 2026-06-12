@@ -38,49 +38,49 @@ public class JwtAuthenticationFilter
         this.userDetailsService = userDetailsService;
     }
 
-    @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+        // JwtAuthenticationFilter.java
+        @Override
+        protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // Lista as rotas que devem pular o filtro JWT
+        return path.startsWith("/auth/") ||
+                path.startsWith("/relatorios/") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs");
+        }
 
-        String authHeader =
-                request.getHeader("Authorization");
+        @Override
+        protected void doFilterInternal(
+                HttpServletRequest request,
+                HttpServletResponse response,
+                FilterChain filterChain)
+                throws ServletException, IOException {
 
-        if (authHeader == null ||
-                !authHeader.startsWith("Bearer ")) {
+        String authHeader = request.getHeader("Authorization");
 
-            filterChain.doFilter(request, response);
-            return;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
         }
 
         String token = authHeader.substring(7);
-
-        String email =
-                jwtService.extractUsername(token);
+        String email = jwtService.extractUsername(token);
 
         if (email != null &&
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication() == null) {
+                SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails =
-                    userDetailsService
-                            .loadUserByUsername(email);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(auth);
+                SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
         filterChain.doFilter(request, response);
-    }
+        }
 }
