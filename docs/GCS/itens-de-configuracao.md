@@ -2,7 +2,7 @@
 
 **Projeto:** SOS Rota — Eng5 2026/1  
 **Responsável GCS:** Gabriella Pio  
-**Última atualização:** 03/06/2026
+**Última atualização:** 12/06/2026
 
 ---
 
@@ -18,16 +18,16 @@ processo formal de controle de mudanças (RFC + Issue + PR).
 
 ### 1. Código-fonte — Backend
 
-| ID   | Nome                         | Tipo         | Localização no Repositório                           | Responsável |
-| ---- | ---------------------------- | ------------ | ---------------------------------------------------- | ----------- |
-| IC01 | Aplicação Spring Boot        | Código-fonte | `/backend/`                                          | Luiz        |
-| IC02 | Controllers REST             | Código-fonte | `/backend/src/.../controller/`                       | Luiz        |
-| IC03 | Services (regras de negócio) | Código-fonte | `/backend/src/.../service/`                          | Luiz        |
-| IC04 | Repositories (JPA)           | Código-fonte | `/backend/src/.../repository/`                       | Luiz        |
-| IC05 | Entidades / Models           | Código-fonte | `/backend/src/.../model/`                            | Luiz        |
-| IC06 | DTOs (Data Transfer Objects) | Código-fonte | `/backend/src/.../dto/`                              | Luiz        |
-| IC07 | Configurações da aplicação   | Configuração | `/backend/src/main/resources/application.properties` | Luiz        |
-| IC08 | Arquivo de build Maven       | Configuração | `/backend/pom.xml`                                   | Luiz        |
+| ID   | Nome                         | Tipo         | Localização no Repositório                                    | Responsável |
+| ---- | ---------------------------- | ------------ | ------------------------------------------------------------- | ----------- |
+| IC01 | Aplicação Spring Boot        | Código-fonte | `/backend/`                                                   | Luiz        |
+| IC02 | Controllers REST             | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/controller/` | Luiz        |
+| IC03 | Services (regras de negócio) | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/service/`    | Luiz        |
+| IC04 | Repositories (JPA)           | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/repository/` | Luiz        |
+| IC05 | Entidades / Models           | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/model/`      | Luiz        |
+| IC06 | DTOs (Data Transfer Objects) | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/dto/`        | Luiz        |
+| IC07 | Configurações da aplicação   | Configuração | `/backend/src/main/resources/application.properties`          | Luiz        |
+| IC08 | Arquivo de build Maven       | Configuração | `/backend/pom.xml`                                            | Luiz        |
 
 > ⚠️ Os caminhos com `...` serão atualizados assim que o Luiz definir o pacote base (ex: `com.vitalistech.sosrota`).
 
@@ -38,7 +38,7 @@ processo formal de controle de mudanças (RFC + Issue + PR).
 | ID   | Nome                    | Tipo         | Localização no Repositório                     | Responsável |
 | ---- | ----------------------- | ------------ | ---------------------------------------------- | ----------- |
 | IC09 | Aplicação Angular       | Código-fonte | `/frontend/`                                   | Eduarda     |
-| IC10 | Componentes Angular     | Código-fonte | `/frontend/src/app/components/`                | Eduarda     |
+| IC10 | Componentes Angular     | Código-fonte | `/frontend/src/app/features/auth/`             | Eduarda     |
 | IC11 | Serviços Angular (HTTP) | Código-fonte | `/frontend/src/app/services/`                  | Eduarda     |
 | IC12 | Módulos de roteamento   | Código-fonte | `/frontend/src/app/app.routes.ts`              | Eduarda     |
 | IC13 | Configuração de build   | Configuração | `/frontend/angular.json`                       | Eduarda     |
@@ -48,10 +48,10 @@ processo formal de controle de mudanças (RFC + Issue + PR).
 
 ### 3. Banco de Dados
 
-| ID   | Nome                     | Tipo         | Localização no Repositório                            | Responsável |
-| ---- | ------------------------ | ------------ | ----------------------------------------------------- | ----------- |
-| IC15 | Configuração do banco H2 | Configuração | `/backend/src/main/resources/application.properties`  | Luiz        |
-| IC16 | Scripts de inicialização | Dados        | `/backend/src/main/resources/data.sql` _(se existir)_ | Luiz        |
+| ID   | Nome                     | Tipo         | Localização no Repositório                                                                | Responsável |
+| ---- | ------------------------ | ------------ | ----------------------------------------------------------------------------------------- | ----------- |
+| IC15 | Configuração do banco H2 | Configuração | `/backend/src/main/resources/application.properties`                                      | Luiz        |
+| IC16 | Scripts de inicialização | Dados        | `/backend/src/main/resources/bairros.csv` `/backend/src/main/resources/ruas_conexoes.csv` | Luiz        |
 
 > A escolha do H2 em memória como banco de dados do projeto está registrada e justificada na RFC-001.
 
@@ -61,39 +61,38 @@ processo formal de controle de mudanças (RFC + Issue + PR).
 
 Exigência explícita do PI Eng5: identificar e comentar no código onde cada padrão está aplicado (Singleton, Adapter, Iterator, Template Method, Factory Method, Decorator).
 
-| ID   | Nome                   | Tipo         | Localização no Repositório           | Responsável |
-| ---- | ---------------------- | ------------ | ------------------------------------ | ----------- |
-| IC17 | Padrão Singleton       | Código-fonte | A preencher pelo Luiz até 05/06/2026 | Luiz        |
-| IC18 | Padrão Adapter         | Código-fonte | A preencher pelo Luiz até 05/06/2026 | Luiz        |
-| IC19 | Padrão Iterator        | Código-fonte | A preencher pelo Luiz até 05/06/2026 | Luiz        |
-| IC20 | Padrão Template Method | Código-fonte | A preencher pelo Luiz até 05/06/2026 | Luiz        |
-| IC21 | Padrão Factory Method  | Código-fonte | A preencher pelo Luiz até 05/06/2026 | Luiz        |
-| IC22 | Padrão Decorator       | Código-fonte | A preencher pelo Luiz até 05/06/2026 | Luiz        |
+| ID   | Nome                   | Tipo         | Localização no Repositório                                                             | Responsável |
+| ---- | ---------------------- | ------------ | -------------------------------------------------------------------------------------- | ----------- |
+| IC17 | Padrão Singleton       | Código-fonte | `/frontend/src/app/core/services/auth.service.ts`                                      | Eduarda     |
+| IC18 | Padrão Adapter         | Código-fonte | `/frontend/src/app/shared/adapters/date.adapter.ts`                                    | Eduarda     |
+| IC19 | Padrão Iterator        | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/service/DespachoService.java`         | Luiz        |
+| IC20 | Padrão Template Method | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/service/DespachoBase.java`            | Luiz        |
+| IC21 | Padrão Factory Method  | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/geraRelatorios/RelatorioFactory.java` | Luiz        |
+| IC22 | Padrão Decorator       | Código-fonte | `/frontend/src/app/shared/decorators/bairro-cache.service.ts`                          | Eduarda     |
 
 ---
 
 ### 5. Linguagens Formais e Autômatos (LFA)
 
 Exigência explícita do PI Eng5: validações REGEX implementadas no código, 3 autômatos finitos, gramática livre de contexto e simulação do analisador léxico/sintático.
-
-| ID   | Nome                                            | Tipo         | Localização no Repositório                   | Responsável |
-| ---- | ----------------------------------------------- | ------------ | -------------------------------------------- | ----------- |
-| IC23 | Implementação REGEX no código                   | Código-fonte | Backend ou frontend (a definir com Caio)     | Caio        |
-| IC24 | Tabela de REGEX + comentários                   | Documento    | `/docs/LFA/regex-e-automatos.md`             | Caio        |
-| IC25 | Diagramas dos 3 Autômatos Finitos               | Documento    | `/docs/LFA/automatos.md` ou imagens na pasta | Caio        |
-| IC26 | Gramática Livre de Contexto (consulta avançada) | Documento    | `/docs/LFA/gramatica-consulta.md`            | Caio        |
-| IC27 | Simulação do analisador léxico e sintático      | Código-fonte | A definir com Caio até 10/06/2026            | Caio        |
+| ID | Nome | Tipo | Localização no Repositório | Responsável |
+| ---- | ----------------------------------------------- | ------------ | ------------------------------------------------------------ | ----------- |
+| IC23 | Implementação REGEX no código | Código-fonte | `/frontend/src/app/shared/utils/validators.ts` | Caio |
+| IC24 | Tabela de REGEX + comentários | Documento | `/docs/LFA/regex-e-automatos.md` | Caio |
+| IC25 | Diagramas dos 3 Autômatos Finitos | Documento | `/docs/LFA/automatos.md` ou imagens na pasta | Caio |
+| IC26 | Gramática Livre de Contexto (consulta avançada) | Documento | `/docs/LFA/gramatica-consulta.md` | Caio |
+| IC27 | Simulação do analisador léxico e sintático | Código-fonte | Verificado com a professora - necessário apenas documentação | Caio |
 
 ---
 
 ### 6. Infraestrutura e Pipeline
 
-| ID   | Nome                     | Tipo         | Localização no Repositório                                                    | Responsável |
-| ---- | ------------------------ | ------------ | ----------------------------------------------------------------------------- | ----------- |
-| IC28 | Pipeline de CI           | Configuração | `.github/workflows/ci.yml`                                                    | Gabriella   |
-| IC29 | Configuração de ambiente | Configuração | `.env.example`                                                                | Gabriella   |
-| IC30 | .gitignore               | Configuração | `.gitignore`                                                                  | Gabriella   |
-| IC31 | docker-compose.yml       | Configuração | `/docker-compose.yml` _(a confirmar com Luiz até 05/06/2026 se será mantido)_ | Luiz        |
+| ID   | Nome                     | Tipo         | Localização no Repositório                             | Responsável |
+| ---- | ------------------------ | ------------ | ------------------------------------------------------ | ----------- |
+| IC28 | Pipeline de CI           | Configuração | `.github/workflows/ci.yml`                             | Gabriella   |
+| IC29 | Configuração de ambiente | Configuração | `.env.example`                                         | Gabriella   |
+| IC30 | .gitignore               | Configuração | `.gitignore`                                           | Gabriella   |
+| IC31 | docker-compose.yml       | Configuração | Não será mantido - não foi pedido no escopo do projeto | Luiz        |
 
 ---
 
@@ -110,7 +109,7 @@ Exigência explícita do PI Eng5: validações REGEX implementadas no código, 3
 | IC38 | Matriz de Rastreabilidade         | Documento | `/docs/GCS/rastreabilidade.md`       | Gabriella   |
 | IC39 | ERS — Especificação de Requisitos | Documento | `/docs/ERS.md`                       | Eduarda     |
 | IC40 | Documento AWS — Arquitetura       | Documento | `/docs/AWS/arquitetura-aws.md`       | Gabriella   |
-| IC41 | Documento Padrões de Projeto      | Documento | `/docs/padroes-de-projeto.md`        | Luiz        |
+| IC41 | Documento Padrões de Projeto      | Documento | `/docs/padroes-de-projeto.md`        | Gabriella   |
 
 ---
 
@@ -126,6 +125,7 @@ Exigência explícita do PI Eng5: validações REGEX implementadas no código, 3
 
 ## Histórico de revisões
 
-| Versão | Data       | Alteração                   | Autor     |
-| ------ | ---------- | --------------------------- | --------- |
-| 1.0    | 03/06/2026 | Criação inicial do catálogo | Gabriella |
+| Versão | Data       | Alteração                                                | Autor     |
+| ------ | ---------- | -------------------------------------------------------- | --------- |
+| 1.0    | 03/06/2026 | Criação inicial do catálogo                              | Gabriella |
+| 1.1    | 12/06/2026 | Atualização parcial, de acordo com o feito até o momento | Gabriella |
