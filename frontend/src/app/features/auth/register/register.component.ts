@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { emailValidator } from '../../../shared/utils/validators';
 
 @Component({
   selector: 'app-register',
@@ -21,7 +22,7 @@ export class RegisterComponent {
   constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.form = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
-      email:    ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/)]],
+      email:    ['', [Validators.required, emailValidator()]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
@@ -53,7 +54,8 @@ export class RegisterComponent {
     const c = this.form.get(campo);
     if (c?.errors?.['required'])   return 'Campo obrigatório';
     if (c?.errors?.['minlength'])  return `Mínimo ${c.errors['minlength'].requiredLength} caracteres`;
-    if (c?.errors?.['pattern'])    return campo === 'email' ? 'E-mail inválido. Ex: nome@dominio.com' : 'Formato inválido';
+    if (c?.errors?.['emailInvalido']) return 'E-mail inválido. Ex: nome@dominio.com';
+    if (c?.errors?.['pattern'])       return 'Formato inválido';
     return '';
   }
 }

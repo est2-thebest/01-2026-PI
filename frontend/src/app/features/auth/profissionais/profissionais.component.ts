@@ -6,6 +6,7 @@ import { ProfissionalService } from '../../../services/profissional.service';
 import { EquipeService } from '../../../services/equipe.service';
 import { ConfirmModalService } from '../../../shared/components/modals/confirm.service';
 import { Profissional, Equipe } from '../../../shared/models';
+import { REGEX, telefoneValidator, formatarTelefone, formatarCPF, formatarCNPJ } from '../../../shared/utils/validators';
 
 @Component({
   selector: 'app-profissionais',
@@ -51,17 +52,15 @@ export class ProfissionaisComponent implements OnInit {
       nome:          ['', [Validators.required, Validators.minLength(3)]],
       funcao:        ['MEDICO', Validators.required],
       turno:         ['MATUTINO'],
-      contato:       ['', [Validators.required, Validators.pattern(/^\(\d{2}\)\s\d{4,5}-\d{4}$/)]],
+      contato:       ['', [Validators.required, telefoneValidator()]],
       ativo:         [true, Validators.required],
       tipoDocumento: ['CPF'],
       documento:     ['', [Validators.required, (control: AbstractControl): ValidationErrors | null => {
         const valor = control.value as string;
         if (!valor) return null;
         const tipo = control.parent?.get('tipoDocumento')?.value;
-        const cpfRe  = /^(?:\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})$/;
-        const cnpjRe = /^(?:\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{14})$/;
-        if (tipo === 'CPF'  && !cpfRe.test(valor))  return { documentoInvalido: true };
-        if (tipo === 'CNPJ' && !cnpjRe.test(valor)) return { documentoInvalido: true };
+        if (tipo === 'CPF'  && !REGEX.CPF.test(valor))  return { documentoInvalido: true };
+        if (tipo === 'CNPJ' && !REGEX.CNPJ.test(valor)) return { documentoInvalido: true };
         return null;
       }]]
     });
@@ -120,45 +119,17 @@ export class ProfissionaisComponent implements OnInit {
       : 'CPF inválido. Ex: 999.999.999-99';
   }
 
-  aplicarMascaraDocumento(valor: string): string {
-    const tipo = this.form.get('tipoDocumento')?.value;
-    const digits = valor.replace(/\D/g, '');
-
-    if (tipo === 'CNPJ') {
-      const d = digits.slice(0, 14);
-      if (d.length <= 2)  return d;
-      if (d.length <= 5)  return `${d.slice(0,2)}.${d.slice(2)}`;
-      if (d.length <= 8)  return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5)}`;
-      if (d.length <= 12) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8)}`;
-      return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}`;
-    } else {
-      const d = digits.slice(0, 11);
-      if (d.length <= 3) return d;
-      if (d.length <= 6) return `${d.slice(0,3)}.${d.slice(3)}`;
-      if (d.length <= 9) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}`;
-      return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
-    }
-  }
-
   formatarDocumento(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const formatado = this.aplicarMascaraDocumento(input.value);
+    const tipo = this.form.get('tipoDocumento')?.value;
+    const formatado = tipo === 'CNPJ' ? formatarCNPJ(input.value) : formatarCPF(input.value);
     input.value = formatado;
     this.form.get('documento')?.setValue(formatado, { emitEvent: false });
   }
 
-  aplicarMascara(valor: string): string {
-    const digits = valor.replace(/\D/g, '').slice(0, 11);
-    if (digits.length === 0) return '';
-    if (digits.length <= 2) return `(${digits}`;
-    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-  }
-
   formatarContato(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const formatado = this.aplicarMascara(input.value);
+    const formatado = formatarTelefone(input.value);
     input.value = formatado;
     this.form.get('contato')?.setValue(formatado, { emitEvent: false });
   }
@@ -180,7 +151,7 @@ export class ProfissionaisComponent implements OnInit {
         nome:          profissional.nome,
         funcao:        profissional.funcao,
         turno:         profissional.turno || 'MATUTINO',
-        contato:       this.aplicarMascara(profissional.contato || ''),
+        contato:       formatarTelefone(profissional.contato || ''),
         ativo:         profissional.ativo,
         tipoDocumento: profissional.tipoDocumento || 'CPF',
         documento:     profissional.documento || ''
