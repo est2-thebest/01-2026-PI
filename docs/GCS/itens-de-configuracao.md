@@ -2,7 +2,7 @@
 
 **Projeto:** SOS Rota — Eng5 2026/1  
 **Responsável GCS:** Gabriella Pio  
-**Última atualização:** 12/06/2026
+**Última atualização:** 13/06/2026
 
 ---
 
@@ -29,7 +29,7 @@ processo formal de controle de mudanças (RFC + Issue + PR).
 | IC07 | Configurações da aplicação   | Configuração | `/backend/src/main/resources/application.properties`          | Luiz        |
 | IC08 | Arquivo de build Maven       | Configuração | `/backend/pom.xml`                                            | Luiz        |
 
-> ⚠️ Os caminhos com `...` serão atualizados assim que o Luiz definir o pacote base (ex: `com.vitalistech.sosrota`).
+> Caminhos confirmados com o pacote base `com.vitalistech.sosrotas`.
 
 ---
 
@@ -75,13 +75,14 @@ Exigência explícita do PI Eng5: identificar e comentar no código onde cada pa
 ### 5. Linguagens Formais e Autômatos (LFA)
 
 Exigência explícita do PI Eng5: validações REGEX implementadas no código, 3 autômatos finitos, gramática livre de contexto e simulação do analisador léxico/sintático.
-| ID | Nome | Tipo | Localização no Repositório | Responsável |
-| ---- | ----------------------------------------------- | ------------ | ------------------------------------------------------------ | ----------- |
-| IC23 | Implementação REGEX no código | Código-fonte | `/frontend/src/app/shared/utils/validators.ts` | Caio |
-| IC24 | Tabela de REGEX + comentários | Documento | `/docs/LFA/regex-e-automatos.md` | Caio |
-| IC25 | Diagramas dos 3 Autômatos Finitos | Documento | `/docs/LFA/automatos.md` ou imagens na pasta | Caio |
-| IC26 | Gramática Livre de Contexto (consulta avançada) | Documento | `/docs/LFA/gramatica-consulta.md` | Caio |
-| IC27 | Simulação do analisador léxico e sintático | Código-fonte | Verificado com a professora - necessário apenas documentação | Caio |
+
+| ID   | Nome                                            | Tipo         | Localização no Repositório                                          | Responsável |
+| ---- | ----------------------------------------------- | ------------ | ------------------------------------------------------------------- | ----------- |
+| IC23 | Implementação REGEX no código                   | Código-fonte | `/frontend/src/app/shared/utils/validators.ts`                      | Eduarda e Caio     |
+| IC24 | Tabela de REGEX + comentários                   | Documento    | `/docs/LFA/regex-e-automatos.md`                                    | Caio        |
+| IC25 | Diagramas dos 3 Autômatos Finitos               | Documento    | `/docs/LFA/automatos.md` ou imagens na pasta                        | Caio        |
+| IC26 | Gramática Livre de Contexto (consulta avançada) | Documento    | `/docs/LFA/gramatica-consulta.md`                                   | Caio        |
+| IC27 | Simulação do analisador léxico e sintático      | Documento    | Verificado com a professora — necessário apenas documentação        | Caio        |
 
 ---
 
@@ -90,9 +91,9 @@ Exigência explícita do PI Eng5: validações REGEX implementadas no código, 3
 | ID   | Nome                     | Tipo         | Localização no Repositório                             | Responsável |
 | ---- | ------------------------ | ------------ | ------------------------------------------------------ | ----------- |
 | IC28 | Pipeline de CI           | Configuração | `.github/workflows/ci.yml`                             | Gabriella   |
-| IC29 | Configuração de ambiente | Configuração | `.env.example`                                         | Gabriella   |
+| IC29 | Configuração de ambiente | Configuração | `.env.example`                                      | Gabriella   |
 | IC30 | .gitignore               | Configuração | `.gitignore`                                           | Gabriella   |
-| IC31 | docker-compose.yml       | Configuração | Não será mantido - não foi pedido no escopo do projeto | Luiz        |
+| IC31 | docker-compose.yml       | Configuração | Não será mantido — fora do escopo do projeto           | Luiz        |
 
 ---
 
@@ -119,13 +120,16 @@ Exigência explícita do PI Eng5: validações REGEX implementadas no código, 3
 2. Alterações em ICs de código devem ocorrer em **feature branches** e entrar via **Pull Request**.
 3. Alterações em ICs de configuração crítica (`pom.xml`, `angular.json`, `ci.yml`, `application.properties`) devem ser descritas na RFC correspondente.
 4. A cada nova **release/tag**, este catálogo deve ser revisado para refletir novos ICs ou mudanças de localização.
-5. ICs marcados como "a preencher" ou "a confirmar" devem ser atualizados até **05/06/2026**.
+5. ICs marcados como "a preencher" ou "a confirmar" devem ser atualizados antes da baseline BL1.
 
 ---
 
 ## Histórico de revisões
 
-| Versão | Data       | Alteração                                                | Autor     |
-| ------ | ---------- | -------------------------------------------------------- | --------- |
-| 1.0    | 03/06/2026 | Criação inicial do catálogo                              | Gabriella |
-| 1.1    | 12/06/2026 | Atualização parcial, de acordo com o feito até o momento | Gabriella |
+
+| Versão | Data       | Alteração                                                                         | Autor     |
+| ------ | ---------- | --------------------------------------------------------------------------------- | --------- |
+| 1.0    | 03/06/2026 | Criação inicial do catálogo                                                       | Gabriella |
+| 1.1    | 12/06/2026 | Atualização parcial, de acordo com o feito até o momento                          | Gabriella |
+| 1.2    | 13/06/2026 | Corrige IC23; IC29/IC31 descartados; aviso de caminho removido                    | Gabriella |
+| 1.3    | 13/06/2026 | IC29 criado (.env.example adicionado ao repositório)                              | Gabriella |

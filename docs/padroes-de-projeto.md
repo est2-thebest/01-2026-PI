@@ -2,7 +2,7 @@
 
 **Projeto:** SOS Rota — Eng5 2026/1  
 **Responsável GCS:** Gabriella Pio  
-**Última atualização:** 12/06/2026
+**Última atualização:** 13/06/2026
 
 ---
 
@@ -20,8 +20,8 @@ Cada padrão foi identificado no código-fonte, comentado no arquivo corresponde
 | 2   | Adapter              | Frontend | `/frontend/src/app/shared/adapters/date.adapter.ts`                                    | 1            | Eduarda     |
 | 2   | Adapter (uso)        | Frontend | `/frontend/src/app/shared/helpers/date.helper.ts`                                      | 1            | Eduarda     |
 | 3   | Decorator            | Frontend | `/frontend/src/app/shared/decorators/bairro-cache.service.ts`                          | 1            | Eduarda     |
-| 3   | Decorator (uso)      | Frontend | `/frontend/src/app/features/ambulancias/ambulancias.component.ts`                      | 11           | Eduarda     |
-| 3   | Decorator (uso)      | Frontend | `/frontend/src/app/features/ocorrencias/ocorrencias.component.ts`                      | 11           | Eduarda     |
+| 3   | Decorator (uso)      | Frontend | `/frontend/src/app/features/auth/ambulancias/ambulancias.component.ts`                    | 11           | Eduarda     |
+| 3   | Decorator (uso)      | Frontend | `/frontend/src/app/features/auth/ocorrencias/ocorrencias.component.ts`                    | 11           | Eduarda     |
 | 4   | Iterator             | Backend  | `/backend/src/main/java/com/vitalistech/sosrotas/service/DespachoService.java`         | 9            | Luiz        |
 | 5   | Template Method      | Backend  | `/backend/src/main/java/com/vitalistech/sosrotas/service/DespachoBase.java`            | 1            | Luiz        |
 | 6   | Factory Method       | Backend  | `/backend/src/main/java/com/vitalistech/sosrotas/geraRelatorios/RelatorioFactory.java` | 1            | Luiz        |
@@ -172,3 +172,4 @@ executarDespacho()        <- método template (final — não pode ser sobrescri
 | ------ | ---------- | ------------------------------------------------------------------------------------------------------------------------- | --------- |
 | 1.0    | 11/06/2026 | Criação do documento com mapeamento dos padrões do backend                                                                | Luiz      |
 | 1.1    | 12/06/2026 | Reestruturação do documento: inclusão dos padrões do frontend (Singleton, Adapter, Decorator) e padronização do documento | Gabriella |
+| 1.2    | 13/06/2026 | Correção dos caminhos dos componentes Decorator (features/auth/)                                                         | Gabriella |

@@ -2,7 +2,7 @@
 
 **Projeto:** SOS Rota — Eng5 2026/1  
 **Responsável GCS:** Gabriella Pio  
-**Última atualização:** 03/06/2026
+**Última atualização:** 13/06/2026
 
 ---
 
@@ -16,17 +16,16 @@ O projeto adota o padrão **MAJOR.MINOR.PATCH** conforme especificado em [semver
 | MINOR | Nova funcionalidade adicionada de forma retrocompatível                      | `1.0.0 → 1.1.0` |
 | PATCH | Correção de bug ou ajuste sem nova funcionalidade                            | `1.0.0 → 1.0.1` |
 
-### Exemplos aplicados ao SOS Rota
+### Releases do SOS Rota
 
-| Situação                                | Versão resultante |
-| --------------------------------------- | ----------------- |
-| Estrutura inicial do repositório (BL0)  | `v0.1.0`          |
-| Adição do CRUD de Ocorrências           | `v0.2.0`          |
-| Correção de bug no endpoint de despacho | `v0.2.1`          |
-| Sistema funcional completo (BL1)        | `v1.0.0`          |
-| Nova funcionalidade adicionada pós-BL1  | `v1.1.0`          |
+O projeto adota apenas duas releases formais, correspondentes às duas baselines definidas:
 
-> A tabela acima deve ser revisada ao final do projeto para refletir exemplos reais aplicados
+| Situação                                               | Versão    |
+| ------------------------------------------------------ | --------- |
+| Estrutura inicial do repositório (BL0)                 | `v0.1.0`  |
+| Sistema funcional completo para apresentação (BL1)     | `v1.0.0`  |
+
+> O projeto não possui releases intermediárias (MINOR ou PATCH) por ser um projeto acadêmico de escopo fechado e prazo curto. Correções e ajustes foram feitos diretamente nas feature branches antes do merge, sem necessidade de tags de patch.
 
 ---
 
@@ -90,15 +89,16 @@ Formato: `tipo: descrição curta no imperativo (#numero-da-issue)`
 
 ## Histórico de releases
 
-| Versão   | Data             | Baseline | Descrição                                      | Status       |
-| -------- | ---------------- | -------- | ---------------------------------------------- | ------------ |
-| `v0.1.0` | 02/06/2026       | BL0      | Estrutura inicial do repositório e pipeline CI | ✅ Publicada |
-| `v1.0.0` | Prev. 12/06/2026 | BL1      | Sistema funcional completo                     | 🔄 Planejada |
+| Versão   | Data                        | Baseline | Descrição                                      | Status       |
+| -------- | --------------------------- | -------- | ---------------------------------------------- | ------------ |
+| `v0.1.0` | 02/06/2026                  | BL0      | Estrutura inicial do repositório e pipeline CI | ✅ Publicada |
+| `v1.0.0` | 14/06/2026  | BL1      | Sistema funcional completo                     | 🔄 Planejada |
 
 ---
 
 ## Histórico de revisões do documento
 
-| Versão | Data       | Alteração            | Autor     |
-| ------ | ---------- | -------------------- | --------- |
-| 1.0    | 03/06/2026 | Criação do documento | Gabriella |
+| Versão | Data       | Alteração                                                                   | Autor     |
+| ------ | ---------- | --------------------------------------------------------------------------- | --------- |
+| 1.0    | 03/06/2026 | Criação do documento                                                        | Gabriella |
+| 1.1    | 13/06/2026 | Substitui exemplos hipotéticos por releases reais; corrige data da v1.0.0  | Gabriella |

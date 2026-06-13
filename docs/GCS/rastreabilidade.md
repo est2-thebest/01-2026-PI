@@ -2,7 +2,7 @@
 
 **Projeto:** SOS Rota — Eng5 2026/1  
 **Responsável GCS:** Gabriella Pio  
-**Última atualização:** 03/06/2026
+**Última atualização:** 13/06/2026
 
 ---
 
@@ -30,63 +30,68 @@ A Matriz de Rastreabilidade conecta cada requisito implementado aos artefatos co
 
 ### GCS — Gerência de Configuração
 
-| Requisito                                                | Issue | Branch                         | Arquivo(s) principal(is)                                      | PR  | Release | Status |
-| -------------------------------------------------------- | ----- | ------------------------------ | ------------------------------------------------------------- | --- | ------- | ------ |
-| GCS01 — Templates de Issue e PR                          | #1    | `feature/templates-github`     | `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md` | —   | v0.1.0  | ✅     |
-| GCS02 — Documentação GCS (ICs, Baselines, Versionamento) | #7    | `feature/docs-gcs-fundacao`    | `docs/GCS/`                                                   | —   | v0.1.0  | 🔄     |
-| GCS03 — RFC-001                                          | #8    | `feature/docs-rfc-001`         | `docs/GCS/rfc-001.md`                                         | —   | v0.1.0  | 🔄     |
-| GCS04 — Pipeline de CI                                   | —     | —                              | `.github/workflows/ci.yml`                                    | —   | v0.1.0  | ✅     |
-| GCS05 — Matriz de Rastreabilidade                        | #31   | `feature/docs-rastreabilidade` | `docs/GCS/rastreabilidade.md`                                 | —   | v1.0.0  | 🔄     |
+| Requisito                                                | Issue | Branch                         | Arquivo(s) principal(is)                                      | PR   | Release | Status |
+| -------------------------------------------------------- | ----- | ------------------------------ | ------------------------------------------------------------- | ---- | ------- | ------ |
+| GCS01 — Templates de Issue e PR                          | #1    | `chore/setup-templates`        | `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md` | #2   | v0.1.0  | ✅     |
+| GCS02 — Documentação GCS (ICs, Baselines, Versionamento) | #7    | `feature/docs-gcs-fundacao`    | `docs/GCS/`                                                   | #33  | v0.1.0  | ✅     |
+| GCS03 — RFC-001                                          | #8    | `feature/docs-rfc-001`         | `docs/GCS/rfc-001.md`                                         | #34  | v0.1.0  | ✅     |
+| GCS04 — Pipeline de CI                                   | —     | —                              | `.github/workflows/ci.yml`                                    | —    | v0.1.0  | ✅     |
+| GCS05 — Matriz de Rastreabilidade                        | #31   | `feature/docs-rastreabilidade` | `docs/GCS/rastreabilidade.md`                                 | —    | v1.0.0  | 🔄     |
 
 ---
 
 ### Backend — Spring Boot
 
-| Requisito                            | Issue | Branch                          | Arquivo(s) principal(is)                                     | PR  | Release | Status |
-| ------------------------------------ | ----- | ------------------------------- | ------------------------------------------------------------ | --- | ------- | ------ |
-| RF01 — Configuração Spring Boot + H2 | #4    | `feature/backend-setup`         | `pom.xml`, `application.properties`                          | —   | —       | 🔄     |
-| RF02 — Autenticação JWT              | #20   | `feature/backend-auth`          | `AuthController.java`, `AuthService.java`, `JwtService.java` | —   | —       | 🔄     |
-| RF03 — CRUD de Ocorrências           | #5    | `feature/backend-ocorrencias`   | `OcorrenciaController.java`, `OcorrenciaService.java`        | —   | —       | 🔄     |
-| RF04 — CRUD de Ambulâncias           | #9    | `feature/backend-ambulancias`   | `AmbulanciaController.java`, `AmbulanciaService.java`        | —   | —       | 🔄     |
-| RF05 — CRUD de Equipes               | #10   | `feature/backend-equipes`       | `EquipeController.java`, `EquipeService.java`                | —   | —       | 🔄     |
-| RF06 — CRUD de Bairros               | #21   | `feature/backend-bairros`       | `BairroController.java`, `BairroService.java`                | —   | —       | 🔄     |
-| RF07 — CRUD de Profissionais         | #22   | `feature/backend-profissionais` | `ProfissionalController.java`, `ProfissionalService.java`    | —   | —       | 🔄     |
-| RF08 — Despacho e roteamento         | #11   | `feature/backend-despacho`      | `DespachoController.java`, `DijkstraService.java`            | —   | —       | 🔄     |
-| RF09 — Endpoint de Dashboard         | #23   | `feature/backend-dashboard`     | `DashboardController.java`, `DashboardService.java`          | —   | —       | 🔄     |
-| RF10 — Endpoint de Relatórios        | #12   | `feature/backend-relatorios`    | `RelatorioController.java`, `RelatorioService.java`          | —   | —       | 🔄     |
+| Requisito                            | Issue | Branch                                | Arquivo(s) principal(is)                                     | PR  | Release | Status |
+| ------------------------------------ | ----- | ------------------------------------- | ------------------------------------------------------------ | --- | ------- | ------ |
+| RF01 — Configuração Spring Boot + H2 | #4    | `feature/setup-backend`               | `pom.xml`, `application.properties`                          | #35 | v0.1.0  | ✅     |
+| RF02 — Autenticação JWT              | #20   | `feature/backend-auth`                | `AuthController.java`, `AuthService.java`, `JwtService.java` | #39 | —       | ✅     |
+| RF03 — CRUD de Ocorrências           | #5    | `chore/backend-ocorrencias`           | `OcorrenciaController.java`, `OcorrenciaService.java`        | #51 | —       | ✅     |
+| RF04 — CRUD de Ambulâncias           | #9    | `feature/backend-profissionais`       | `AmbulanciaController.java`, `AmbulanciaService.java`        | #42 | —       | ✅     |
+| RF05 — CRUD de Equipes               | #10   | `feature/backend-equipes`             | `EquipeController.java`, `EquipeService.java`                | #46 | —       | ✅     |
+| RF06 — CRUD de Bairros               | #21   | `feature/backend-bairros`             | `BairroController.java`, `BairroService.java`                | #40 | —       | ✅     |
+| RF07 — CRUD de Profissionais         | #22   | `feature/backend-profissionais`       | `ProfissionalController.java`, `ProfissionalService.java`    | #42 | —       | ✅     |
+| RF08 — Despacho e roteamento         | #11   | `feature/backend-dashboard/relatorios`| `DespachoController.java`, `DijkstraService.java`            | #53 | —       | ✅     |
+| RF09 — Endpoint de Dashboard         | #23   | `feature/backend-dashboard/relatorios`| `DashboardController.java`, `DashboardService.java`          | #53 | —       | ✅     |
+| RF10 — Endpoint de Relatórios        | #12   | `feature/backend-dashboard/relatorios`| `RelatorioController.java`, `RelatorioService.java`          | #53 | —       | ✅     |
 
 ---
 
 ### Frontend — Angular
 
-| Requisito                  | Issue | Branch                         | Arquivo(s) principal(is)                         | PR  | Release | Status |
-| -------------------------- | ----- | ------------------------------ | ------------------------------------------------ | --- | ------- | ------ |
-| RF11 — Setup Angular       | #6    | `feature/frontend-setup`       | `angular.json`, `app.module.ts`, `app.routes.ts` | —   | —       | 🔄     |
-| RF12 — Tela de Login       | #13   | `feature/frontend-login`       | `login.component.ts`, `auth.service.ts`          | —   | —       | 🔄     |
-| RF13 — Dashboard           | #14   | `feature/frontend-dashboard`   | `dashboard.component.ts`                         | —   | —       | 🔄     |
-| RF14 — Tela de Ocorrências | #15   | `feature/frontend-ocorrencias` | `ocorrencias.component.ts`                       | —   | —       | 🔄     |
-| RF15 — Tela de Ambulâncias | #16   | `feature/frontend-ambulancias` | `ambulancias.component.ts`                       | —   | —       | 🔄     |
-| RF16 — Tela de Equipes     | #17   | `feature/frontend-equipes`     | `equipes.component.ts`                           | —   | —       | 🔄     |
-| RF17 — Tela de Despacho    | #18   | `feature/frontend-despacho`    | `despacho.component.ts`                          | —   | —       | 🔄     |
-| RF19 — Tela de Relatórios  | #19   | `feature/frontend-relatorios`  | `relatorios.component.ts`                        | —   | —       | 🔄     |
+| Requisito                                         | Issue | Branch                          | Arquivo(s) principal(is)                                         | PR  | Release | Status |
+| ------------------------------------------------- | ----- | ------------------------------- | ---------------------------------------------------------------- | --- | ------- | ------ |
+| RF11 — Setup Angular                              | #6    | `feature/setup-frontend`        | `angular.json`, `app.routes.ts`                                  | #36 | —       | ✅     |
+| RF12 — Tela de Login                              | #13   | `feature/frontend-login`        | `login.component.ts`, `auth.service.ts`                          | #37 | —       | ✅     |
+| RF13 — Dashboard                                  | #14   | `feature/frontend-dashboard`    | `dashboard.component.ts`                                         | #38 | —       | ✅     |
+| RF14 — Tela de Ocorrências                        | #15   | `feature/frontend-ocorrencias`  | `ocorrencias.component.ts`                                       | #43 | —       | ✅     |
+| RF15 — Tela de Ambulâncias                        | #16   | `feature/frontend-ambulancias`  | `ambulancias.component.ts`                                       | #45 | —       | ✅     |
+| RF16 — Tela de Equipes                            | #17   | `feature/frontend-equipes`      | `equipes.component.ts`                                           | #48 | —       | ✅     |
+| RF17 — Tela de Despacho                           | #18   | `feature/frontend-despacho`     | `despacho.component.ts`                                          | #49 | —       | ✅     |
+| RF18 — Tela de Profissionais                      | #44   | `feature/frontend-profissionais`| `profissionais.component.ts`                                     | #47 | —       | ✅     |
+| RF19 — Tela de Relatórios                         | #19   | `feature/frontend-relatorios`   | `relatorios.component.ts`                                        | #54 | —       | ✅     |
+| RF20 — Integração validators LFA nos componentes  | —     | `refactor/frontend-validators`  | `validators.ts`, `profissionais.component.ts`                    | #60 | —       | ✅     |
 
 ---
 
 ### Padrões de Projeto
 
-| Requisito                                     | Issue | Branch                       | Arquivo(s) principal(is)     | PR  | Release | Status |
-| --------------------------------------------- | ----- | ---------------------------- | ---------------------------- | --- | ------- | ------ |
-| PP01 — Mapeamento e comentários dos 6 padrões | #24   | `feature/padroes-de-projeto` | `docs/padroes-de-projeto.md` | —   | —       | 🔄     |
+| Requisito                                          | Issue | Branch                          | Arquivo(s) principal(is)                                             | PR  | Release | Status |
+| -------------------------------------------------- | ----- | ------------------------------- | -------------------------------------------------------------------- | --- | ------- | ------ |
+| PP01 — Mapeamento e comentários no backend         | #24   | `feature/padroes-de-projeto`    | Arquivos Java anotados (`@Singleton`, `@Adapter`, etc.)              | #56 | —       | ✅     |
+| PP02 — Documento dos padrões de projeto            | #24   | `feature/padroes-de-projeto`    | `docs/padroes-de-projeto.md`                                         | #55 | —       | ✅     |
+| PP03 — Mapeamento e comentários no frontend        | #24   | `feature/frontend-padroes`      | Componentes Angular anotados                                         | #57 | —       | ✅     |
+| PP04 — Rastreabilidade dos padrões (doc atualizado)| #24   | `docs/padroes-de-projeto`       | `docs/GCS/rastreabilidade.md`, `docs/padroes-de-projeto.md`          | #58 | —       | ✅     |
 
 ---
 
 ### LFA — Linguagens Formais e Autômatos
 
-| Requisito                                 | Issue | Branch                  | Arquivo(s) principal(is)         | PR  | Release | Status |
-| ----------------------------------------- | ----- | ----------------------- | -------------------------------- | --- | ------- | ------ |
-| LFA01 — Implementação REGEX + tabela      | #25   | `feature/lfa-regex`     | `docs/LFA/regex-e-automatos.md`  | —   | —       | 🔄     |
-| LFA02 — Diagramas dos 3 Autômatos Finitos | #26   | `feature/lfa-automatos` | `docs/LFA/automatos.md`          | —   | —       | 🔄     |
-| LFA03 — GLC e analisador léxico/sintático | #27   | `feature/lfa-gramatica` | `docs/LFA/gramatica-consulta.md` | —   | —       | 🔄     |
+| Requisito                                 | Issue | Branch                  | Arquivo(s) principal(is)                                          | PR  | Release | Status |
+| ----------------------------------------- | ----- | ----------------------- | ----------------------------------------------------------------- | --- | ------- | ------ |
+| LFA01 — Implementação REGEX + tabela      | #25   | `feature/lfa-regex`     | `frontend/src/app/shared/utils/validators.ts`, `docs/LFA/regex-e-automatos.md` | —   | —       | 🔄     |
+| LFA02 — Diagramas dos 3 Autômatos Finitos | #26   | `feature/lfa-automatos` | `docs/LFA/automatos.md`                                           | —   | —       | 🔄     |
+| LFA03 — GLC e analisador léxico/sintático | #27   | `feature/lfa-gramatica` | `docs/LFA/gramatica-consulta.md`                                  | —   | —       | 🔄     |
 
 ---
 
@@ -94,8 +99,8 @@ A Matriz de Rastreabilidade conecta cada requisito implementado aos artefatos co
 
 | Requisito                          | Issue | Branch                    | Arquivo(s) principal(is)      | PR  | Release | Status |
 | ---------------------------------- | ----- | ------------------------- | ----------------------------- | --- | ------- | ------ |
-| AWS01 — Arquitetura e diagrama AWS | #28   | `feature/aws-arquitetura` | `docs/AWS/arquitetura-aws.md` | —   | —       | 🔄     |
-| AWS02 — Estimativa de custos       | #29   | `feature/aws-custos`      | `docs/AWS/arquitetura-aws.md` | —   | —       | 🔄     |
+| AWS01 — Arquitetura e diagrama AWS | #28   | `feature/aws-arquitetura` | `docs/AWS/arquitetura-aws.md` | #50 | —       | ✅     |
+| AWS02 — Estimativa de custos       | #29   | `feature/aws-custos`      | `docs/AWS/arquitetura-aws.md` | #52 | —       | ✅     |
 
 ---
 
@@ -124,6 +129,8 @@ A Matriz de Rastreabilidade conecta cada requisito implementado aos artefatos co
 
 ## Histórico de revisões
 
-| Versão | Data       | Alteração                      | Autor     |
-| ------ | ---------- | ------------------------------ | --------- |
-| 1.0    | 03/06/2026 | Criação do esqueleto da matriz | Gabriella |
+| Versão | Data       | Alteração                                                                 | Autor     |
+| ------ | ---------- | ------------------------------------------------------------------------- | --------- |
+| 1.0    | 03/06/2026 | Criação do esqueleto da matriz                                            | Gabriella |
+| 1.1    | 06/06/2026 | Atualização do andamento de requisitos                                    | Gabriella |
+| 1.2    | 13/06/2026 | Preenchimento de PRs; adição de RF18, RF20, PP02–PP04  | Gabriella |
