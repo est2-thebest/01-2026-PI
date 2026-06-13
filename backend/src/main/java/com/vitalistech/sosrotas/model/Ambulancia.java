@@ -1,6 +1,7 @@
 package com.vitalistech.sosrotas.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vitalistech.sosrotas.model.enums.*;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -83,6 +84,7 @@ public class Ambulancia {
         this.status = status;
     }
 
+    @JsonProperty("bairro")
     public Bairro getBairroBase() {
         return bairroBase;
     }

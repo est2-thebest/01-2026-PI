@@ -1,10 +1,10 @@
 package com.vitalistech.sosrotas.model.enums;
 
 public enum StatusOcorrencia {
-    
+
     ABERTA,
     DESPACHADA,
-    EM_ANDAMENTO,
+    EM_ATENDIMENTO,
     CONCLUIDA,
     CANCELADA
 }

@@ -122,7 +122,13 @@ public class EquipeService {
                     .map(pid -> profissionalRepository.findById(pid)
                             .orElseThrow(() -> new RuntimeException("Profissional ID " + pid + " não encontrado.")))
                     .toList();
-            existente.setProfissionais(profissionais);
+            // Modifica a coleção persistente em-lugar para garantir DELETE antes de INSERT no join table
+            if (existente.getProfissionais() == null) {
+                existente.setProfissionais(new java.util.ArrayList<>(profissionais));
+            } else {
+                existente.getProfissionais().clear();
+                existente.getProfissionais().addAll(profissionais);
+            }
         }
 
         Equipe equipeAtualizada = equipeRepository.save(existente);
@@ -185,13 +191,51 @@ public class EquipeService {
                 )
                 .toList();
 
+        EquipeResponse.AmbulanciaResumo ambulanciaResumo = null;
+        if (equipe.getAmbulancia() != null) {
+            var amb = equipe.getAmbulancia();
+            EquipeResponse.BairroResumo bairroResumo = amb.getBairroBase() != null
+                    ? new EquipeResponse.BairroResumo(amb.getBairroBase().getId(), amb.getBairroBase().getNome())
+                    : null;
+            ambulanciaResumo = new EquipeResponse.AmbulanciaResumo(
+                    amb.getId(),
+                    amb.getPlaca(),
+                    amb.getTipo() != null ? amb.getTipo().name() : null,
+                    amb.getStatus() != null ? amb.getStatus().name() : null,
+                    bairroResumo
+            );
+        }
+
         return new EquipeResponse(
                 equipe.getId(),
                 equipe.getDescricao(),
                 equipe.getAmbulancia() != null ? equipe.getAmbulancia().getId() : null,
+                ambulanciaResumo,
                 equipe.getTurno(),
-                equipe.getStatus(), // Mapeado no DTO
+                equipe.getStatus(),
                 profissionaisDTO);
+    }
+
+    @Transactional
+    public EquipeResponse reativarEquipe(Integer id) {
+        Equipe equipe = equipeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Equipe não encontrada."));
+
+        if (StatusEquipe.INATIVA != equipe.getStatus()) {
+            throw new IllegalStateException("Apenas equipes INATIVAS podem ser reativadas.");
+        }
+
+        equipe.setStatus(StatusEquipe.DISPONIVEL);
+
+        if (equipe.getAmbulancia() != null) {
+            Ambulancia amb = equipe.getAmbulancia();
+            if (StatusAmbulancia.SEM_EQUIPE == amb.getStatus()) {
+                amb.setStatus(StatusAmbulancia.DISPONIVEL);
+                ambulanciaRepository.save(amb);
+            }
+        }
+
+        return toResponseDTO(equipeRepository.save(equipe));
     }
 
     @Transactional

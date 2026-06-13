@@ -6,9 +6,14 @@
       <h1><i class="pi pi-chart-bar banner-icon"></i> Relatórios</h1>
       <p>Análise e exportação de dados de ocorrências</p>
     </div>
-    <button class="btn btn-export" (click)="exportarCSV()" title="Exportar dados filtrados como CSV">
-      <i class="pi pi-download"></i> Exportar CSV
-    </button>
+    <div class="export-actions">
+      <button class="btn btn-export" (click)="exportarCSV()" title="Exportar dados filtrados como CSV">
+        <i class="pi pi-download"></i> Exportar CSV
+      </button>
+      <button class="btn btn-export-pdf" (click)="exportarPDF()" title="Exportar relatório por bairro como PDF">
+        <i class="pi pi-file-pdf"></i> Exportar PDF
+      </button>
+    </div>
   </div>
 
   <!-- ===== ERRO ===== -->

@@ -147,14 +147,16 @@ export class ProfissionaisComponent implements OnInit {
     this.erro = null;
     if (profissional) {
       this.editandoId = profissional.id || null;
+      const tipoDoc = profissional.cnpj ? 'CNPJ' : 'CPF';
+      const docValor = profissional.cnpj || profissional.cpf || '';
       this.form.patchValue({
         nome:          profissional.nome,
         funcao:        profissional.funcao,
         turno:         profissional.turno || 'MATUTINO',
         contato:       formatarTelefone(profissional.contato || ''),
         ativo:         profissional.ativo,
-        tipoDocumento: profissional.tipoDocumento || 'CPF',
-        documento:     profissional.documento || ''
+        tipoDocumento: tipoDoc,
+        documento:     docValor
       });
     } else {
       this.editandoId = null;
@@ -175,14 +177,17 @@ export class ProfissionaisComponent implements OnInit {
     this.salvando = true;
     this.erro = null;
 
-    const dados: Profissional = {
-      nome:          this.form.get('nome')?.value,
-      funcao:        this.form.get('funcao')?.value,
-      turno:         this.form.get('turno')?.value,
-      contato:       this.form.get('contato')?.value || null,
-      ativo:         this.form.get('ativo')?.value,
-      tipoDocumento: this.form.get('tipoDocumento')?.value || null,
-      documento:     this.form.get('documento')?.value || null
+    const tipo      = this.form.get('tipoDocumento')?.value;
+    const documento = this.form.get('documento')?.value || null;
+
+    const dados = {
+      nome:    this.form.get('nome')?.value,
+      funcao:  this.form.get('funcao')?.value,
+      turno:   this.form.get('turno')?.value,
+      contato: this.form.get('contato')?.value || null,
+      ativo:   this.form.get('ativo')?.value,
+      cpf:     tipo === 'CPF'  ? documento : null,
+      cnpj:    tipo === 'CNPJ' ? documento : null,
     };
 
     if (this.editandoId) {

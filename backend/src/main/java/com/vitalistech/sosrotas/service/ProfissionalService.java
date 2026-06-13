@@ -4,10 +4,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vitalistech.sosrotas.repository.IProfissionalRepository;
-import com.vitalistech.sosrotas.repository.IEquipeRepository; // NOVO IMPORT
+import com.vitalistech.sosrotas.repository.IEquipeRepository;
+import com.vitalistech.sosrotas.repository.IAmbulanciaRepository;
 import com.vitalistech.sosrotas.model.Profissional;
-import com.vitalistech.sosrotas.model.Equipe; // NOVO IMPORT
-import com.vitalistech.sosrotas.model.enums.StatusEquipe; // NOVO IMPORT
+import com.vitalistech.sosrotas.model.Equipe;
+import com.vitalistech.sosrotas.model.enums.StatusEquipe;
+import com.vitalistech.sosrotas.model.enums.StatusAmbulancia;
 import com.vitalistech.sosrotas.dto.ProfissionalRequest;
 import com.vitalistech.sosrotas.dto.ProfissionalResponse;
 
@@ -15,12 +17,15 @@ import com.vitalistech.sosrotas.dto.ProfissionalResponse;
 public class ProfissionalService {
 
     private final IProfissionalRepository repository;
-    private final IEquipeRepository equipeRepository; // NOVO REPOSITORY INJETADO
+    private final IEquipeRepository equipeRepository;
+    private final IAmbulanciaRepository ambulanciaRepository;
 
-    // Mantida a injeção limpa por construtor adicionando o novo repositório
-    public ProfissionalService(IProfissionalRepository repository, IEquipeRepository equipeRepository) {
+    public ProfissionalService(IProfissionalRepository repository,
+                               IEquipeRepository equipeRepository,
+                               IAmbulanciaRepository ambulanciaRepository) {
         this.repository = repository;
         this.equipeRepository = equipeRepository;
+        this.ambulanciaRepository = ambulanciaRepository;
     }
 
     public List<ProfissionalResponse> listarTodos() {
@@ -57,6 +62,8 @@ public class ProfissionalService {
         // NOVA VALIDAÇÃO: Impede a edição caso o profissional esteja em empenho ativo
         validarSeEstaEmOcorrenciaAtiva(existente);
 
+        boolean eraAtivo = Boolean.TRUE.equals(existente.getAtivo());
+
         existente.setNome(request.nome());
         existente.setContato(request.contato());
         if (request.ativo() != null) {
@@ -64,12 +71,16 @@ public class ProfissionalService {
         }
         existente.setFuncao(request.funcao());
         existente.setTurno(request.turno());
-        
-        // Atualiza os novos campos no banco
         existente.setCpf(request.cpf());
         existente.setCnpj(request.cnpj());
 
-        return toResponseDTO(repository.save(existente));
+        Profissional salvo = repository.save(existente);
+
+        if (eraAtivo && Boolean.FALSE.equals(salvo.getAtivo())) {
+            desativarAmbulanciasDoProfissional(salvo);
+        }
+
+        return toResponseDTO(salvo);
     }
 
     // Método auxiliar para evitar repetição de código
@@ -92,9 +103,17 @@ public class ProfissionalService {
         }
     }
 
-    /**
-     * Valida se o profissional está vinculado a alguma equipe em atendimento operacional ativo.
-     */
+    private void desativarAmbulanciasDoProfissional(Profissional profissional) {
+        List<Equipe> equipes = equipeRepository.findByProfissionaisId(profissional.getId());
+        for (Equipe equipe : equipes) {
+            if (equipe.getAmbulancia() != null
+                    && StatusAmbulancia.DISPONIVEL.equals(equipe.getAmbulancia().getStatus())) {
+                equipe.getAmbulancia().setStatus(StatusAmbulancia.SEM_EQUIPE);
+                ambulanciaRepository.save(equipe.getAmbulancia());
+            }
+        }
+    }
+
     private void validarSeEstaEmOcorrenciaAtiva(Profissional profissional) {
         // Busca as equipes associadas ao profissional para validar o estado reativo da máquina de atendimento
         List<Equipe> equipesDoProfissional = equipeRepository.findByProfissionaisId(profissional.getId());

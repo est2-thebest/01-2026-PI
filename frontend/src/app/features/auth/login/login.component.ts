@@ -19,7 +19,7 @@ export class LoginComponent {
 
   constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
     this.form = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
+      email:    ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
@@ -28,8 +28,8 @@ export class LoginComponent {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.carregando = true;
     this.mensagem = null;
-    const { username, password } = this.form.value;
-    this.auth.login(username, password).subscribe({
+    const { email, password } = this.form.value;
+    this.auth.login(email, password).subscribe({
       next: () => {
         this.mensagem = { tipo: 'success', texto: 'Login realizado! Redirecionando...' };
         setTimeout(() => this.router.navigate(['/dashboard']), 1200);

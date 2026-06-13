@@ -21,7 +21,7 @@ export class RegisterComponent {
 
   constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.form = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
+      nome:     ['', [Validators.required, Validators.minLength(3)]],
       email:    ['', [Validators.required, emailValidator()]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
@@ -30,7 +30,7 @@ export class RegisterComponent {
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.carregando = true;
-    this.http.post(`${environment.apiUrl}/auth/register`, this.form.value).subscribe({
+    this.http.post(`${environment.apiUrl}/auth/register`, { ...this.form.value, role: 'ADMIN' }).subscribe({
       next: () => {
         this.mensagem = { tipo: 'success', texto: 'Cadastro realizado! Redirecionando para login...' };
         setTimeout(() => this.router.navigate(['/login']), 1500);

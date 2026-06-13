@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
 import { RelatorioService } from '../../../services/relatorio.service';
 import { Ocorrencia, AtendimentoPorBairro } from '../../../shared/models';
 
@@ -46,13 +45,16 @@ export class RelatoriosComponent implements OnInit {
     this.carregando = true;
     this.erro = null;
 
-    forkJoin({
-      ocorrencias: this.relatorioService.listarOcorrencias(),
-      porBairro:   this.relatorioService.listarPorBairro()
-    }).subscribe({
-      next: ({ ocorrencias, porBairro }) => {
+    this.relatorioService.listarOcorrencias().subscribe({
+      next: (ocorrencias) => {
         this.ocorrencias = ocorrencias;
-        this.porBairro   = porBairro
+        const contagem: Record<string, number> = {};
+        for (const oc of ocorrencias) {
+          const nome = oc.bairro?.nome;
+          if (nome) contagem[nome] = (contagem[nome] || 0) + 1;
+        }
+        this.porBairro = Object.entries(contagem)
+          .map(([bairro, quantidade]) => ({ bairro, quantidade }))
           .filter(b => b.quantidade > 0)
           .sort((a, b) => b.quantidade - a.quantidade);
         this.carregando = false;
@@ -116,6 +118,22 @@ export class RelatoriosComponent implements OnInit {
     this.filtroStatus = '';
     this.filtroGravidade = '';
     this.filtroBairro = '';
+  }
+
+  exportarPDF(): void {
+    this.relatorioService.exportarPdf().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.download = `relatorio-bairros-${new Date().toISOString().slice(0, 10)}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.erro = 'Não foi possível gerar o PDF. Verifique a conexão com o servidor.';
+      }
+    });
   }
 
   exportarCSV(): void {
