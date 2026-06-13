@@ -7,6 +7,7 @@ import { AmbulanciaService } from '../../../services/ambulancia.service';
 import { BairroServiceComCache } from '../../../shared/decorators/bairro-cache.service';
 import { Ambulancia, Bairro } from '../../../shared/models';
 import { ConfirmModalService } from '../../../shared/components/modals/confirm.service';
+import { placaValidator, formatarPlaca } from '../../../shared/utils/validators';
 
 @Component({
   selector: 'app-ambulancias',
@@ -49,7 +50,7 @@ export class AmbulanciasComponent implements OnInit {
     private confirmService: ConfirmModalService
   ) {
     this.form = this.fb.group({
-      placa:    ['', [Validators.required, Validators.pattern(/^[A-Z]{3}\d[A-Z]\d{2}$|^[A-Z]{3}-?\d{4}$/)]],
+      placa:    ['', [Validators.required, placaValidator()]],
       tipo:     ['USA', Validators.required],
       bairroId: [null, Validators.required]
     });
@@ -104,6 +105,13 @@ export class AmbulanciasComponent implements OnInit {
 
   labelStatus(status: string): string { return this.STATUS_LABELS[status] || status; }
   labelTipo(tipo: string): string     { return this.TIPO_LABELS[tipo] || tipo; }
+
+  formatarPlacaInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const formatado = formatarPlaca(input.value);
+    input.value = formatado;
+    this.form.get('placa')?.setValue(formatado, { emitEvent: false });
+  }
 
   abrirFormulario(ambulancia?: Ambulancia): void {
     this.form.reset({ tipo: 'USA', bairroId: null });

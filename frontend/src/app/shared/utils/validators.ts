@@ -65,6 +65,15 @@ export function telefoneValidator(): ValidatorFn {
   };
 }
 
+// ── Validator: CNPJ (00.000.000/0001-00) ──
+export function cnpjValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value) return null;
+    if (REGEX.CNPJ.test((control.value as string).trim())) return null;
+    return { cnpjInvalido: { message: 'CNPJ inválido. Use o formato 00.000.000/0001-00' } };
+  };
+}
+
 // ── Validator: E-mail ──
 export function emailValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -88,6 +97,16 @@ export function formatarCPF(valor: string): string {
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
     .replace(/(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+}
+
+// Formata CNPJ: 00000000000100 → 00.000.000/0001-00
+export function formatarCNPJ(valor: string): string {
+  const n = valor.replace(/\D/g, '').substring(0, 14);
+  return n
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/(\d{2})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3/$4')
+    .replace(/(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
 }
 
 // Formata telefone: 62999999999 → (62) 99999-9999
