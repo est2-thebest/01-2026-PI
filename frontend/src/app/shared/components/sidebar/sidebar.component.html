@@ -1,0 +1,55 @@
+<aside class="app-sidebar" [class.open]="isOpen" [class.closed]="!isOpen">
+
+  <div class="sidebar-top">
+    <div class="sidebar-logo-wrap">
+      <img src="assets/logo-sp.svg" alt="Vitalis Tech" class="sidebar-logo-img" />
+      <span class="sidebar-logo-text">Vitalis Tech</span>
+    </div>
+    <button class="sidebar-toggle" (click)="alternar()">
+      <i class="pi" [class.pi-chevron-left]="isOpen" [class.pi-chevron-right]="!isOpen"></i>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a routerLink="/dashboard"    routerLinkActive="active" class="sidebar-item">
+      <i class="pi pi-home sidebar-icon icon-dashboard"></i>
+      <span class="sidebar-label">Dashboard</span>
+    </a>
+    <a routerLink="/ocorrencias"  routerLinkActive="active" class="sidebar-item">
+      <i class="pi pi-bell sidebar-icon icon-ocorrencias"></i>
+      <span class="sidebar-label">Ocorrencias</span>
+    </a>
+    <a routerLink="/ambulancias"  routerLinkActive="active" class="sidebar-item">
+      <i class="pi pi-truck sidebar-icon icon-ambulancias"></i>
+      <span class="sidebar-label">Ambulancias</span>
+    </a>
+    <a routerLink="/equipes"      routerLinkActive="active" class="sidebar-item">
+      <i class="pi pi-users sidebar-icon icon-equipes"></i>
+      <span class="sidebar-label">Equipes</span>
+    </a>
+    <a routerLink="/profissionais" routerLinkActive="active" class="sidebar-item">
+      <i class="pi pi-user sidebar-icon icon-profissionais"></i>
+      <span class="sidebar-label">Profissionais</span>
+    </a>
+    <a routerLink="/despacho"     routerLinkActive="active" class="sidebar-item">
+      <i class="pi pi-send sidebar-icon icon-despacho"></i>
+      <span class="sidebar-label">Despacho</span>
+    </a>
+    <a routerLink="/relatorios"   routerLinkActive="active" class="sidebar-item">
+      <i class="pi pi-chart-bar sidebar-icon icon-relatorios"></i>
+      <span class="sidebar-label">Relatorios</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="sidebar-theme-btn" (click)="alternarTema()">
+      <i class="pi" [class.pi-moon]="temaAtual==='light'" [class.pi-sun]="temaAtual==='dark'"></i>
+      <span class="sidebar-label">{{ temaAtual === 'light' ? 'Modo Escuro' : 'Modo Claro' }}</span>
+    </button>
+    <button class="sidebar-logout-btn" (click)="logout()">
+      <i class="pi pi-sign-out"></i>
+      <span class="sidebar-label">Sair</span>
+    </button>
+  </div>
+
+</aside>

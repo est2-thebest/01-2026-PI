@@ -1,0 +1,36 @@
+<div class="login-container">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="assets/logo-p.svg" alt="Vitalis Tech" class="login-logo-img" />
+    </div>
+    <div class="login-header">
+      <h1>Login</h1>
+      <p>Entre com suas credenciais para acessar o sistema</p>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+      @if (mensagem) {
+        <div class="form-alert" [class.form-alert-success]="mensagem.tipo==='success'" [class.form-alert-error]="mensagem.tipo==='error'">
+          {{ mensagem.texto }}
+        </div>
+      }
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" formControlName="email" placeholder="Digite seu e-mail"
+          [class.input-error]="temErro('email')" autocomplete="email" />
+        @if (temErro('email')) { <span class="error-text">{{ erroMsg('email') }}</span> }
+      </div>
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input id="password" type="password" formControlName="password" placeholder="Digite sua senha"
+          [class.input-error]="temErro('password')" autocomplete="current-password" />
+        @if (temErro('password')) { <span class="error-text">{{ erroMsg('password') }}</span> }
+      </div>
+      <button type="submit" class="btn-login" [disabled]="carregando">
+        @if (carregando) { <span class="spinner-sm"></span> Aguarde... } @else { Entrar }
+      </button>
+    </form>
+    <div class="login-footer">
+      <p>Não tem conta? <a routerLink="/register">Cadastre-se aqui</a></p>
+    </div>
+  </div>
+</div>

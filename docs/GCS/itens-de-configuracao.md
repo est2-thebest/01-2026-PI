@@ -1,0 +1,136 @@
+# Catálogo de Itens de Configuração (ICs)
+
+**Projeto:** SOS Rota — Eng5 2026/1  
+**Responsável GCS:** Gabriella Pio  
+**Última atualização:** 14/06/2026
+
+---
+
+## O que é um Item de Configuração?
+
+Um Item de Configuração (IC) é qualquer elemento do projeto que precisa ser identificado,
+controlado e rastreado ao longo do desenvolvimento. Mudanças em ICs devem passar pelo
+processo formal de controle de mudanças (RFC + Issue + PR).
+
+---
+
+## Catálogo
+
+### 1. Código-fonte — Backend
+
+| ID   | Nome                         | Tipo         | Localização no Repositório                                    | Responsável |
+| ---- | ---------------------------- | ------------ | ------------------------------------------------------------- | ----------- |
+| IC01 | Aplicação Spring Boot        | Código-fonte | `/backend/`                                                   | Luiz        |
+| IC02 | Controllers REST             | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/controller/` | Luiz        |
+| IC03 | Services (regras de negócio) | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/service/`    | Luiz        |
+| IC04 | Repositories (JPA)           | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/repository/` | Luiz        |
+| IC05 | Entidades / Models           | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/model/`      | Luiz        |
+| IC06 | DTOs (Data Transfer Objects) | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/dto/`        | Luiz        |
+| IC07 | Configurações da aplicação   | Configuração | `/backend/src/main/resources/application.properties`          | Luiz        |
+| IC08 | Arquivo de build Maven       | Configuração | `/backend/pom.xml`                                            | Luiz        |
+
+> Caminhos confirmados com o pacote base `com.vitalistech.sosrotas`.
+
+---
+
+### 2. Código-fonte — Frontend
+
+| ID   | Nome                    | Tipo         | Localização no Repositório                     | Responsável |
+| ---- | ----------------------- | ------------ | ---------------------------------------------- | ----------- |
+| IC09 | Aplicação Angular       | Código-fonte | `/frontend/`                                   | Eduarda     |
+| IC10 | Componentes Angular     | Código-fonte | `/frontend/src/app/features/auth/`             | Eduarda     |
+| IC11 | Serviços Angular (HTTP) | Código-fonte | `/frontend/src/app/services/`                  | Eduarda     |
+| IC12 | Módulos de roteamento   | Código-fonte | `/frontend/src/app/app.routes.ts`              | Eduarda     |
+| IC13 | Configuração de build   | Configuração | `/frontend/angular.json`                       | Eduarda     |
+| IC14 | Dependências do projeto | Configuração | `/frontend/package.json` e `package-lock.json` | Eduarda     |
+
+---
+
+### 3. Banco de Dados
+
+| ID   | Nome                     | Tipo         | Localização no Repositório                                                                | Responsável |
+| ---- | ------------------------ | ------------ | ----------------------------------------------------------------------------------------- | ----------- |
+| IC15 | Configuração do banco H2 | Configuração | `/backend/src/main/resources/application.properties`                                      | Luiz        |
+| IC16 | Scripts de inicialização | Dados        | `/backend/src/main/resources/bairros.csv` `/backend/src/main/resources/ruas_conexoes.csv` | Luiz        |
+
+> A escolha do H2 em memória como banco de dados do projeto está registrada e justificada na RFC-001.
+
+---
+
+### 4. Padrões de Projeto
+
+Exigência explícita do PI Eng5: identificar e comentar no código onde cada padrão está aplicado (Singleton, Adapter, Iterator, Template Method, Factory Method, Decorator).
+
+| ID   | Nome                   | Tipo         | Localização no Repositório                                                             | Responsável |
+| ---- | ---------------------- | ------------ | -------------------------------------------------------------------------------------- | ----------- |
+| IC17 | Padrão Singleton       | Código-fonte | `/frontend/src/app/core/services/auth.service.ts`                                      | Eduarda     |
+| IC18 | Padrão Adapter         | Código-fonte | `/frontend/src/app/shared/adapters/date.adapter.ts`                                    | Eduarda     |
+| IC19 | Padrão Iterator        | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/service/DespachoService.java`         | Luiz        |
+| IC20 | Padrão Template Method | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/service/DespachoBase.java`            | Luiz        |
+| IC21 | Padrão Factory Method  | Código-fonte | `/backend/src/main/java/com/vitalistech/sosrotas/geraRelatorios/RelatorioFactory.java` | Luiz        |
+| IC22 | Padrão Decorator       | Código-fonte | `/frontend/src/app/shared/decorators/bairro-cache.service.ts`                          | Eduarda     |
+
+---
+
+### 5. Linguagens Formais e Autômatos (LFA)
+
+Exigência explícita do PI Eng5: validações REGEX implementadas no código, 3 autômatos finitos, gramática livre de contexto e simulação do analisador léxico/sintático.
+
+| ID   | Nome                                            | Tipo         | Localização no Repositório                                          | Responsável |
+| ---- | ----------------------------------------------- | ------------ | ------------------------------------------------------------------- | ----------- |
+| IC23 | Implementação REGEX no código                   | Código-fonte | `/frontend/src/app/shared/utils/validators.ts`                      | Eduarda e Caio     |
+| IC24 | Tabela de REGEX + comentários                   | Documento    | `/docs/LFA/regex-e-automatos.md`                                    | Caio        |
+| IC25 | Diagramas dos 3 Autômatos Finitos               | Documento    | `/docs/LFA/automatos.md` ou imagens na pasta                        | Caio        |
+| IC26 | Gramática Livre de Contexto (consulta avançada) | Documento    | `/docs/LFA/gramatica-consulta.md`                                   | Caio        |
+| IC27 | Simulação do analisador léxico e sintático      | Documento    | Verificado com a professora — necessário apenas documentação        | Caio        |
+
+---
+
+### 6. Infraestrutura e Pipeline
+
+| ID   | Nome                     | Tipo         | Localização no Repositório                             | Responsável |
+| ---- | ------------------------ | ------------ | ------------------------------------------------------ | ----------- |
+| IC28 | Pipeline de CI           | Configuração | `.github/workflows/ci.yml`                             | Gabriella   |
+| IC29 | Configuração de ambiente | Configuração | `.env.example`                                      | Gabriella   |
+| IC30 | .gitignore               | Configuração | `.gitignore`                                           | Gabriella   |
+| IC31 | docker-compose.yml       | Configuração | Não será mantido — fora do escopo do projeto           | Luiz        |
+
+---
+
+### 7. Documentação
+
+| ID   | Nome                              | Tipo      | Localização no Repositório           | Responsável |
+| ---- | --------------------------------- | --------- | ------------------------------------ | ----------- |
+| IC32 | README                            | Documento | `/README.md`                         | Gabriella   |
+| IC33 | CHANGELOG                         | Documento | `/CHANGELOG.md`                      | Gabriella   |
+| IC34 | Catálogo de ICs (este arquivo)    | Documento | `/docs/GCS/itens-de-configuracao.md` | Gabriella   |
+| IC35 | Baselines (BL0 e BL1)             | Documento | `/docs/GCS/baselines.md`             | Gabriella   |
+| IC36 | Política de Versionamento         | Documento | `/docs/GCS/versionamento.md`         | Gabriella   |
+| IC37 | RFC-001 (Decisão de uso do H2)    | Documento | `/docs/GCS/rfc-001.md`               | Gabriella   |
+| IC38 | Matriz de Rastreabilidade         | Documento | `/docs/GCS/rastreabilidade.md`       | Gabriella   |
+| IC39 | ERS — Especificação de Requisitos | Documento | `/docs/ERS.md`                       | Eduarda     |
+| IC40 | Documento AWS — Arquitetura       | Documento | `/docs/AWS/arquitetura-aws.md`       | Gabriella   |
+| IC41 | Documento Padrões de Projeto      | Documento | `/docs/padroes-de-projeto.md`        | Gabriella   |
+
+---
+
+## Regras de controle
+
+1. Qualquer alteração em um IC deve ser rastreada por uma **Issue** no GitHub.
+2. Alterações em ICs de código devem ocorrer em **feature branches** e entrar via **Pull Request**.
+3. Alterações em ICs de configuração crítica (`pom.xml`, `angular.json`, `ci.yml`, `application.properties`) devem ser descritas na RFC correspondente.
+4. A cada nova **release/tag**, este catálogo deve ser revisado para refletir novos ICs ou mudanças de localização.
+5. ICs marcados como "a preencher" ou "a confirmar" devem ser atualizados antes da baseline BL1.
+
+---
+
+## Histórico de revisões
+
+
+| Versão | Data       | Alteração                                                                         | Autor     |
+| ------ | ---------- | --------------------------------------------------------------------------------- | --------- |
+| 1.0    | 03/06/2026 | Criação inicial do catálogo                                                       | Gabriella |
+| 1.1    | 12/06/2026 | Atualização parcial, de acordo com o feito até o momento                          | Gabriella |
+| 1.2    | 13/06/2026 | Corrige IC23; IC29/IC31 descartados; aviso de caminho removido                    | Gabriella |
+| 1.3    | 13/06/2026 | IC29 criado (.env.example adicionado ao repositório)                              | Gabriella |
+| 1.4    | 14/06/2026 | Catálogo revisado e finalizado para BL1 (v1.0.0)                                  | Gabriella |

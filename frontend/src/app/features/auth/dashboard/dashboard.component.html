@@ -1,0 +1,150 @@
+<div class="dashboard-wrapper">
+  <!-- ===== BANNER ===== -->
+  <div class="page-banner">
+    <div class="page-banner-content">
+      <h1><i class="pi pi-chart-bar banner-icon"></i> Dashboard</h1>
+      <p>Visão geral do sistema de emergências</p>
+    </div>
+  </div>
+
+  @if (erro) {
+    <div class="alert alert-error">{{ erro }}</div>
+  }
+
+  @if (carregando) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Carregando dashboard...</p>
+    </div>
+  } @else {
+    <div class="stats-grid">
+      <!-- Profissionais -->
+      <div class="stat-card card-profissionais">
+        <div class="stat-icon stat-icon-secondary"><i class="pi pi-user"></i></div>
+        <div class="stat-content">
+          <h3>{{ stats.profissionaisCadastrados }}</h3>
+          <p>Profissionais</p>
+        </div>
+      </div>
+
+      <!-- Ambulâncias Disponíveis -->
+      <div class="stat-card card-ambulancias">
+        <div class="stat-icon stat-icon-primary"><i class="pi pi-truck"></i></div>
+        <div class="stat-content">
+          <h3>{{ stats.ambulanciasDisponiveis }}/{{ stats.ambulanciasTotal }}</h3>
+          <p>Ambulâncias Disponíveis</p>
+        </div>
+      </div>
+
+      <!-- Equipes Ativas -->
+      <div class="stat-card card-equipes">
+        <div class="stat-icon stat-icon-secondary"><i class="pi pi-users"></i></div>
+        <div class="stat-content">
+          <h3>{{ stats.equipesAtivas }}</h3>
+          <p>Equipes Ativas</p>
+        </div>
+      </div>
+
+      <!-- Ocorrências Abertas -->
+      <div class="stat-card card-ocorrencias">
+        <div class="stat-icon stat-icon-warning"><i class="pi pi-bell"></i></div>        <div class="stat-content">
+          <h3>{{ stats.ocorrenciasAbertas }}</h3>
+          <p>Ocorrências Abertas</p>
+        </div>
+      </div>
+
+      <!-- Atendimentos Hoje -->
+      <div class="stat-card card-atendimentos">
+        <div class="stat-icon stat-icon-success"><i class="pi pi-check-circle"></i></div>        <div class="stat-content">
+          <h3>{{ stats.atendimentosHoje }}</h3>
+          <p>Atendimentos Hoje</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ambulâncias em Serviço -->
+    @if (ambulanciasEmAtendimento.length > 0) {
+      <div class="table-card" style="margin-bottom: 1.5rem;">
+        <div class="section-header">
+          <h2><i class="pi pi-truck" style="margin-right: 0.4rem;"></i> Ambulâncias em Serviço</h2>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Placa</th>
+                <th>Tipo</th>
+                <th>Equipe</th>
+                <th>Turno</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of ambulanciasEmAtendimento; track item.ambulancia.id) {
+                <tr>
+                  <td><strong>{{ item.ambulancia.placa }}</strong></td>
+                  <td><span class="badge" [ngClass]="item.ambulancia.tipo">{{ item.ambulancia.tipo }}</span></td>
+                  <td>{{ item.equipe?.descricao || '—' }}</td>
+                  <td>
+                    @if (item.equipe?.turno) {
+                      <span class="badge" [ngClass]="item.equipe!.turno">{{ item.equipe!.turno }}</span>
+                    } @else {
+                      <span>—</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Histórico Recente -->
+    <div class="table-card">
+      <div class="section-header">
+        <h2>Ocorrências Recentes</h2>
+      </div>
+      @if (historicoOcorrencias.length === 0) {
+        <div class="empty-state">
+          <i class="pi pi-inbox" style="font-size: 2.8rem; color: var(--text-light); margin-bottom: 0.6rem;"></i>
+          <p>Nenhuma ocorrência registrada</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Bairro</th>
+                <th>Tipo</th>
+                <th>Gravidade</th>
+                <th>Status</th>
+                <th>Abertura</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (oc of historicoOcorrencias; track oc.id) {
+                <tr>
+                  <td>#{{ oc.id }}</td>
+                  <td>{{ oc.bairro?.nome || 'N/A' }}</td>
+                  <td>{{ oc.tipo }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="oc.gravidade">
+                      {{ oc.gravidade }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="oc.status">
+                      {{ oc.status }}
+                    </span>
+                  </td>
+                  <td>{{ converterData(oc.dataHoraAbertura) | date: 'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

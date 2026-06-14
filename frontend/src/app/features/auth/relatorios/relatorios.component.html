@@ -1,0 +1,223 @@
+<div class="relatorios-wrapper">
+
+  <!-- ===== BANNER ===== -->
+  <div class="page-banner">
+    <div class="page-banner-content">
+      <h1><i class="pi pi-chart-bar banner-icon"></i> Relatórios</h1>
+      <p>Análise e exportação de dados de ocorrências</p>
+    </div>
+    <div class="export-actions">
+      <button class="btn btn-export" (click)="exportarCSV()" title="Exportar dados filtrados como CSV">
+        <i class="pi pi-download"></i> Exportar CSV
+      </button>
+      <button class="btn btn-export-pdf" (click)="exportarPDF()" title="Exportar relatório por bairro como PDF">
+        <i class="pi pi-file-pdf"></i> Exportar PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== ERRO ===== -->
+  @if (erro) {
+    <div class="alert-bar alert-error">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ erro }}
+      <button class="alert-close" (click)="erro = null"><i class="pi pi-times"></i></button>
+    </div>
+  }
+
+  <!-- ===== LOADING ===== -->
+  @if (carregando) {
+    <div class="loading-container">
+      <i class="pi pi-spin pi-spinner loading-spinner"></i>
+      <p>Carregando relatórios...</p>
+    </div>
+  } @else {
+
+    <!-- ===== KPI CARDS ===== -->
+    <div class="kpi-strip">
+      <div class="kpi-card kpi-total">
+        <i class="pi pi-list kpi-icon"></i>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ ocorrencias.length }}</span>
+          <span class="kpi-label">Total de Ocorrências</span>
+        </div>
+      </div>
+      <div class="kpi-card kpi-aberta">
+        <i class="pi pi-exclamation-circle kpi-icon"></i>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ totalPorStatus['ABERTA'] }}</span>
+          <span class="kpi-label">Abertas</span>
+        </div>
+      </div>
+      <div class="kpi-card kpi-atendimento">
+        <i class="pi pi-truck kpi-icon"></i>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ totalPorStatus['DESPACHADA'] + totalPorStatus['EM_ATENDIMENTO'] }}</span>
+          <span class="kpi-label">Em Andamento</span>
+        </div>
+      </div>
+      <div class="kpi-card kpi-concluida">
+        <i class="pi pi-check-circle kpi-icon"></i>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ totalPorStatus['CONCLUIDA'] }}</span>
+          <span class="kpi-label">Concluídas</span>
+        </div>
+      </div>
+      <div class="kpi-card kpi-cancelada">
+        <i class="pi pi-times-circle kpi-icon"></i>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ totalPorStatus['CANCELADA'] }}</span>
+          <span class="kpi-label">Canceladas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== BREAKDOWN ===== -->
+    <div class="breakdown-grid">
+
+      <!-- Por Gravidade -->
+      <div class="breakdown-card">
+        <h3 class="breakdown-title">
+          <i class="pi pi-sliders-v"></i> Distribuição por Gravidade
+        </h3>
+        <div class="bar-list">
+          @for (g of totalPorGravidade; track g.chave) {
+            <div class="bar-item">
+              <div class="bar-meta">
+                <span class="badge" [ngClass]="g.chave">{{ g.label }}</span>
+                <span class="bar-count">{{ g.total }} <small>({{ g.pct }}%)</small></span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" [ngClass]="g.chave" [style.width.%]="g.pct"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Por Bairro -->
+      <div class="breakdown-card">
+        <h3 class="breakdown-title">
+          <i class="pi pi-map-marker"></i> Ocorrências por Bairro
+        </h3>
+        @if (porBairro.length === 0) {
+          <p class="breakdown-empty">Nenhum dado disponível.</p>
+        } @else {
+          <div class="bairro-list">
+            @for (b of porBairro; track b.bairro) {
+              <div class="bairro-item">
+                <span class="bairro-nome">{{ b.bairro }}</span>
+                <div class="bar-track bar-track-sm">
+                  <div class="bar-fill bar-fill-bairro" [style.width.%]="(b.quantidade / maxBairro) * 100"></div>
+                </div>
+                <span class="bairro-count">{{ b.quantidade }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- ===== FILTROS + TABELA ===== -->
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <h3 class="table-title">
+            <i class="pi pi-table"></i>
+            Ocorrências
+            @if (ocorrenciasFiltradas.length !== ocorrencias.length) {
+              <span class="filter-badge">{{ ocorrenciasFiltradas.length }} de {{ ocorrencias.length }}</span>
+            }
+          </h3>
+        </div>
+        <div class="toolbar-right">
+          <div class="search-group">
+            <i class="pi pi-search search-icon"></i>
+            <input
+              type="text"
+              placeholder="Buscar por tipo, bairro..."
+              [(ngModel)]="filtroBusca"
+              class="search-input" />
+          </div>
+          <div class="filter-selects">
+            <select [(ngModel)]="filtroStatus" class="filter-select">
+              <option value="">Status — Todos</option>
+              <option value="ABERTA">Aberta</option>
+              <option value="DESPACHADA">Despachada</option>
+              <option value="EM_ATENDIMENTO">Em Atendimento</option>
+              <option value="CONCLUIDA">Concluída</option>
+              <option value="CANCELADA">Cancelada</option>
+            </select>
+            <select [(ngModel)]="filtroGravidade" class="filter-select">
+              <option value="">Gravidade — Todas</option>
+              <option value="ALTA">Alta</option>
+              <option value="MEDIA">Média</option>
+              <option value="BAIXA">Baixa</option>
+            </select>
+            <select [(ngModel)]="filtroBairro" class="filter-select">
+              <option value="">Bairro — Todos</option>
+              @for (b of bairrosDisponiveis; track b) {
+                <option [value]="b">{{ b }}</option>
+              }
+            </select>
+          </div>
+          @if (filtroBusca || filtroStatus || filtroGravidade || filtroBairro) {
+            <button class="btn btn-secondary btn-sm" (click)="limparFiltros()" title="Limpar filtros">
+              <i class="pi pi-filter-slash"></i> Limpar
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (ocorrenciasFiltradas.length === 0) {
+        <div class="empty-state">
+          <i class="pi pi-inbox empty-icon"></i>
+          <p>Nenhuma ocorrência encontrada</p>
+          <span>Tente ajustar os filtros de pesquisa</span>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tipo</th>
+                <th>Gravidade</th>
+                <th>Status</th>
+                <th>Bairro</th>
+                <th>Data Abertura</th>
+                <th>Observação</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (oc of ocorrenciasFiltradas; track oc.id) {
+                <tr>
+                  <td class="col-id">{{ oc.id }}</td>
+                  <td><strong>{{ oc.tipo }}</strong></td>
+                  <td>
+                    <span class="badge" [ngClass]="oc.gravidade">
+                      {{ GRAVIDADE_LABELS[oc.gravidade] }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="oc.status">
+                      {{ STATUS_LABELS[oc.status] }}
+                    </span>
+                  </td>
+                  <td>{{ oc.bairro?.nome || '—' }}</td>
+                  <td class="col-data">
+                    {{ converterData(oc.dataHoraAbertura) | date: 'dd/MM/yyyy HH:mm' }}
+                  </td>
+                  <td class="col-obs">{{ oc.observacao || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+  }
+
+</div>
