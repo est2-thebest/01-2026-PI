@@ -143,108 +143,100 @@ digraph TelefoneAutomaton {
 }
 ```
 
-Aqui está o texto limpo, sem nenhum símbolo de formatação matemática, pronto para você copiar e colar diretamente no seu documento do Google Docs.
-
 # Módulo de Consulta Avançada
 
 **Objetivo:** Processamento de comandos e filtros personalizados para requisição de relatórios pelo usuário administrador.
+**Exemplo de Comando Suportado:** `parametro.tipo = "xxx" AND parametro.setor = "yyy"`
 
-**Exemplo de Comando Suportado:** parametro.tipo = "xxx" AND parametro.setor = "yyy"
+---
 
 ## 1. Simulação do Analisador Léxico (Definição dos Tokens)
 
 Antes da análise sintática, o analisador léxico processa a string de entrada e a converte em uma sequência de símbolos terminais (tokens). Os tokens mapeados para este sistema são:
 
-- **id:** Representa os campos do sistema (ex: parametro.tipo, parametro.setor).
-    
-- **op:** Operadores relacionais (ex: =, !=, >, <).
-    
-- **val:** Valores de comparação (ex: "xxx", "yyy", 123).
-    
-- **and / or:** Operadores lógicos.
-    
-- **( / ):** Parênteses para precedência.
-    
+* **id:** Representa os campos do sistema (ex: `parametro.tipo`, `parametro.setor`).
+* **op:** Operadores relacionais (ex: `=`, `!=`, `>`, `<`).
+* **val:** Valores de comparação (ex: `"xxx"`, `"yyy"`, `123`).
+* **and / or:** Operadores lógicos.
+* **( / ):** Parênteses para precedência.
 
 **Exemplo de Simulação Léxica:**
+A string original `parametro.tipo = "xxx" AND parametro.setor = "yyy"` é lida e convertida na seguinte fita de tokens para o analisador sintático:
+`[id] [op] [val] [and] [id] [op] [val] [$]` *(O símbolo `$` representa o fim da cadeia).*
 
-A string original parametro.tipo = "xxx" AND parametro.setor = "yyy" é lida e convertida na seguinte fita de tokens para o analisador sintático:
-
-[id] [op] [val] [and] [id] [op] [val] [$] _(O símbolo $ representa o fim da cadeia)._
+---
 
 ## 2. Gramática Livre de Contexto (GLC)
 
 Para a implementação, a gramática foi fatorada e teve sua recursão à esquerda removida, garantindo compatibilidade com analisadores descendentes preditivos.
 
-**Símbolos Não-Terminais:** E (Expressão), E' (Extensão de Expressão), T (Termo), T' (Extensão de Termo), F (Fator).
-
-**Símbolos Terminais:** id, op, val, and, or, (, )
+**Símbolos Não-Terminais:** $E$ (Expressão), $E'$ (Extensão de Expressão), $T$ (Termo), $T'$ (Extensão de Termo), $F$ (Fator).
+**Símbolos Terminais:** $id$, $op$, $val$, $and$, $or$, $($, $)$
 
 **Regras de Produção:**
 
-E -> T E'
+$$E \to T \ E'$$
 
-E' -> or T E' | e
+$$E' \to or \ T \ E' \mid \epsilon$$
 
-T -> F T'
+$$T \to F \ T'$$
 
-T' -> and F T' | e
+$$T' \to and \ F \ T' \mid \epsilon$$
 
-F -> id op val | ( E )
+$$F \to id \ op \ val \mid ( \ E \ )$$
 
-_(Nota: O símbolo "e" representa a palavra vazia ou transição nula)._
+*(Nota: O símbolo $\epsilon$ representa a palavra vazia ou transição nula).*
+
+---
 
 ## 3. Técnica Escolhida: Análise Sintática LL(1)
 
 **Técnica Escolhida:** Análise Sintática Descendente Preditiva Tabular (Top-Down LL(1)).
 
-**Justificativa:** Esta técnica foi escolhida por permitir a construção de um analisador linear de complexidade O(n) altamente eficiente. Utilizando uma pilha explícita e uma tabela de parsing preditiva, elimina-se a necessidade de retrocesso (backtracking), garantindo a validação rápida dos comandos inseridos pelo administrador.
+**Justificativa:** Esta técnica foi escolhida por permitir a construção de um analisador linear de complexidade $O(n)$ altamente eficiente. Utilizando uma pilha explícita e uma tabela de parsing preditiva, elimina-se a necessidade de retrocesso (*backtracking*), garantindo a validação rápida dos comandos inseridos pelo administrador.
 
 ### 3.1. Conjuntos FIRST e FOLLOW (Base para a Tabela)
 
 O cálculo dos conjuntos define as regras de preenchimento da tabela sintática:
 
-- **FIRST(E)** = { id, ( } | **FOLLOW(E)** = { $, ) }
-    
-- **FIRST(E')** = { or, e } | **FOLLOW(E')** = { $, ) }
-    
-- **FIRST(T)** = { id, ( } | **FOLLOW(T)** = { or, $, ) }
-    
-- **FIRST(T')** = { and, e } | **FOLLOW(T')** = { or, $, ) }
-    
-- **FIRST(F)** = { id, ( } | **FOLLOW(F)** = { and, or, $, ) }
-    
+* **FIRST(E)** = { $id$, $($ } | **FOLLOW(E)** = { $\$$, $)$ }
+* **FIRST(E')** = { $or$, $\epsilon$ } | **FOLLOW(E')** = { $\$$, $)$ }
+* **FIRST(T)** = { $id$, $($ } | **FOLLOW(T)** = { $or$, $\$$, $)$ }
+* **FIRST(T')** = { $and$, $\epsilon$ } | **FOLLOW(T')** = { $or$, $\$$, $)$ }
+* **FIRST(F)** = { $id$, $($ } | **FOLLOW(F)** = { $and$, $or$, $\$$, $)$ }
 
 ### 3.2. Tabela de Parsing
 
-_(Células vazias representam erros sintáticos. Se a entrada do administrador cair em uma célula vazia, o sistema acusa que o comando é inválido)._
+*(Nota para o Google Docs: Ao colar, o Google Docs converterá automaticamente esta estrutura em uma tabela editável. Células vazias representam erros sintáticos, ou seja, se a entrada cair em uma célula vazia, o sistema acusa erro na consulta do administrador).*
 
-|**Não-Terminal**|**id**|**op**|**val**|**and**|**or**|**(**|**)**|**$**|
-|---|---|---|---|---|---|---|---|---|
-|**E**|E -> T E'|||||E -> T E'|||
-|**E'**|||||E' -> or T E'||E' -> e|E' -> e|
-|**T**|T -> F T'|||||T -> F T'|||
-|**T'**||||T' -> and F T'|T' -> e||T' -> e|T' -> e|
-|**F**|F -> id op val|||||F -> ( E )|||
+| Não-Terminal | id | op | val | and | or | ( | ) | $ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **E** | $E \to T \ E'$ |  |  |  |  | $E \to T \ E'$ |  |  |
+| **E'** |  |  |  |  | $E' \to or \ T \ E'$ |  | $E' \to \epsilon$ | $E' \to \epsilon$ |
+| **T** | $T \to F \ T'$ |  |  |  |  | $T \to F \ T'$ |  |  |
+| **T'** |  |  |  | $T' \to and \ F \ T'$ | $T' \to \epsilon$ |  | $T' \to \epsilon$ | $T' \to \epsilon$ |
+| **F** | $F \to id \ op \ val$ |  |  |  |  | $F \to ( \ E \ )$ |  |  |
 
-## 4. Simulação de Execução
+---
 
-Abaixo, a simulação do reconhecimento da cadeia do exemplo id op val and id op val $, demonstrando a validação bem-sucedida pelo sistema.
+## 4. Simulação de Execução (Opcional)
 
-| **Pilha (Topo à esquerda)** | **Entrada (Início à esquerda)** | **Ação (Regra Aplicada)**   |
-| --------------------------- | ------------------------------- | --------------------------- |
-| E $                         | id op val and id op val $       | Troca E por T E'            |
-| T E' $                      | id op val and id op val $       | Troca T por F T'            |
-| F T' E' $                   | id op val and id op val $       | Troca F por id op val       |
-| id op val T' E' $           | id op val and id op val $       | Consome id                  |
-| op val T' E' $              | op val and id op val $          | Consome op                  |
-| val T' E' $                 | val and id op val $             | Consome val                 |
-| T' E' $                     | and id op val $                 | Troca T' por and F T'       |
-| and F T' E' $               | and id op val $                 | Consome and                 |
-| F T' E' $                   | id op val $                     | Troca F por id op val       |
-| id op val T' E' $           | id op val $                     | Consome id                  |
-| op val T' E' $              | op val $                        | Consome op                  |
-| val T' E' $                 | val $                           | Consome val                 |
-| T' E' $                     | $                               | Troca T' por e              |
-| E' $                        | $                               | Troca E' por e              |
-| $                           | $                               | **Cadeia Aceita (Sucesso)** |
+Abaixo, a simulação do reconhecimento da cadeia do exemplo `id op val and id op val $`, demonstrando a validação bem-sucedida pelo sistema.
+
+| Pilha (Topo à esquerda) | Entrada (Início à esquerda) | Ação (Regra Aplicada) |
+| --- | --- | --- |
+| $E \ \$$ | `id op val and id op val $` | Troca $E$ por $T \ E'$ |
+| $T \ E' \ \$$ | `id op val and id op val $` | Troca $T$ por $F \ T'$ |
+| $F \ T' \ E' \ \$$ | `id op val and id op val $` | Troca $F$ por $id \ op \ val$ |
+| $id \ op \ val \ T' \ E' \ \$$ | `id op val and id op val $` | Consome `id` |
+| $op \ val \ T' \ E' \ \$$ | `op val and id op val $` | Consome `op` |
+| $val \ T' \ E' \ \$$ | `val and id op val $` | Consome `val` |
+| $T' \ E' \ \$$ | `and id op val $` | Troca $T'$ por $and \ F \ T'$ |
+| $and \ F \ T' \ E' \ \$$ | `and id op val $` | Consome `and` |
+| $F \ T' \ E' \ \$$ | `id op val $` | Troca $F$ por $id \ op \ val$ |
+| $id \ op \ val \ T' \ E' \ \$$ | `id op val $` | Consome `id` |
+| $op \ val \ T' \ E' \ \$$ | `op val $` | Consome `op` |
+| $val \ T' \ E' \ \$$ | `val $` | Consome `val` |
+| $T' \ E' \ \$$ | `$` | Troca $T'$ por $\epsilon$ |
+| $E' \ \$$ | `$` | Troca $E'$ por $\epsilon$ |
+| $\$$ | `$` | **Cadeia Aceita (Sucesso)** |
