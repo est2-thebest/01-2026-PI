@@ -35,7 +35,7 @@ export interface Ambulancia {
 }
 
 // Profissional.java — SEM campo cref, esse campo não existe na entidade Java
-// tipoDocumento e documento são armazenados pelo mock mas ignorados pelo backend real
+// Backend retorna cpf e cnpj; tipoDocumento/documento são campos de UI derivados deles
 export interface Profissional {
   id?: number;
   nome: string;
@@ -43,8 +43,12 @@ export interface Profissional {
   contato?: string | null;
   ativo: boolean;
   turno?: 'MATUTINO' | 'VESPERTINO' | 'NOTURNO' | null;
+  cpf?: string | null;
+  cnpj?: string | null;
   tipoDocumento?: string | null;
   documento?: string | null;
+  emEquipe?: boolean;
+  emAtendimentoAtivo?: boolean;
 }
 
 // Equipe.java
@@ -54,6 +58,7 @@ export interface Equipe {
   ambulancia?: Ambulancia | null;
   profissionais: Profissional[];
   turno: 'MATUTINO' | 'VESPERTINO' | 'NOTURNO';
+  status?: 'DISPONIVEL' | 'EM_ATENDIMENTO' | 'INATIVA';
   ativo?: boolean;
   possuiHistorico?: boolean;
 }

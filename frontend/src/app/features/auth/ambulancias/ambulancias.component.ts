@@ -158,8 +158,7 @@ export class AmbulanciasComponent implements OnInit {
       status:   this.editandoId
         ? (this.ambulancias.find(a => a.id === this.editandoId)?.status ?? 'SEM_EQUIPE')
         : 'SEM_EQUIPE',
-      bairroId: bairroId,
-      bairro:   bairro
+      bairroBaseId: bairroId
     };
 
     if (this.editandoId) {

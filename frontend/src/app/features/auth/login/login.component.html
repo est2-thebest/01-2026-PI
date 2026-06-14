@@ -14,10 +14,10 @@
         </div>
       }
       <div class="form-group">
-        <label for="username">Usuário</label>
-        <input id="username" type="text" formControlName="username" placeholder="Digite seu usuário"
-          [class.input-error]="temErro('username')" autocomplete="username" />
-        @if (temErro('username')) { <span class="error-text">{{ erroMsg('username') }}</span> }
+        <label for="email">E-mail</label>
+        <input id="email" type="email" formControlName="email" placeholder="Digite seu e-mail"
+          [class.input-error]="temErro('email')" autocomplete="email" />
+        @if (temErro('email')) { <span class="error-text">{{ erroMsg('email') }}</span> }
       </div>
       <div class="form-group">
         <label for="password">Senha</label>

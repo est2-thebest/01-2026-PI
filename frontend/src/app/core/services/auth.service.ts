@@ -59,10 +59,10 @@ export class AuthService {
   get estaLogado(): boolean { return !!this.obterToken(); }
   get usuarioAtual(): Usuario | null { return this.usuarioSubject.value; }
 
-  login(username: string, password: string): Observable<LoginResponse> {
+  login(email: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(
       `${environment.apiUrl}/auth/login`,
-      { username, password }
+      { email, password }
     ).pipe(
       tap(resp => {
         localStorage.setItem(TOKEN_KEY, resp.token);

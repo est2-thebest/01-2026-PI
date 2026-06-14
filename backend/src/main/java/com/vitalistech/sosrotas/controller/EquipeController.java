@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/equipes")
@@ -48,18 +49,26 @@ public class EquipeController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * ADICIONADO PARA O FRONTEND:
-     * Captura a exceção de regra de negócio (bloqueio de alteração em equipes EM_ATENDIMENTO)
-     * e devolve um erro amigável 400 Bad Request com a mensagem exata.
-     */
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", ex.getMessage() != null ? ex.getMessage() : "Operação não permitida."));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleGeneral(Exception ex) {
+        String msg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", msg));
     }
 
     @PatchMapping("/{id}/inativar")
     public ResponseEntity<EquipeResponse> inativar(@PathVariable Integer id) {
         return ResponseEntity.ok(equipeService.inativarEquipe(id));
+    }
+
+    @PatchMapping("/{id}/reativar")
+    public ResponseEntity<EquipeResponse> reativar(@PathVariable Integer id) {
+        return ResponseEntity.ok(equipeService.reativarEquipe(id));
     }
 }

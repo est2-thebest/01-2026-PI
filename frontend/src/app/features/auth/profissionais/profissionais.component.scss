@@ -465,6 +465,21 @@
     align-items: center;
     gap: 0.3rem;
   }
+
+  .info-text {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.25rem;
+  }
+
+  .input-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--bg-secondary);
+  }
 }
 
 .form-row {

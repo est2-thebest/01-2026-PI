@@ -43,6 +43,12 @@
   .banner-icon { color: var(--primary); font-size: 1.5rem; }
 }
 
+.export-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
 /* ── Alerta de erro ──────────────────────────────────────── */
 .alert-bar {
   display: flex;
@@ -103,6 +109,12 @@
     background: var(--primary);
     color: #fff;
     &:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(164, 22, 26, 0.3); }
+  }
+
+  &.btn-export-pdf {
+    background: #c0392b;
+    color: #fff;
+    &:hover { background: #a93226; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(192, 57, 43, 0.35); }
   }
 
   &.btn-secondary {

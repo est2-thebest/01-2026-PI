@@ -4,6 +4,7 @@ import com.vitalistech.sosrotas.model.Bairro;
 import com.vitalistech.sosrotas.repository.IBairroRepository;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 @Component
+@Order(1)
 public class BairroDataLoader
         implements CommandLineRunner {
 

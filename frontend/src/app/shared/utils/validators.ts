@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // validators.ts
 // VALIDAÇÕES COM EXPRESSÕES REGULARES — requisito do PI Eng5
 // Disciplina: Linguagens Formais e Autômatos e Compiladores
@@ -30,7 +30,7 @@ export const REGEX = {
   PLACA_ANTIGA:   /^[A-Z]{3}[0-9]{4}$/,
   CPF:            /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
   CNPJ:           /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
-  TELEFONE:       /^\(?\d{2}\)?\s?9?\d{4}-?\d{4}$/,
+  TELEFONE:       /^\(\d{2}\)\s9\d{4}-\d{4}$/,
   EMAIL:          /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/,
 };
 
@@ -60,6 +60,10 @@ export function cpfValidator(): ValidatorFn {
 export function telefoneValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     if (!control.value) return null;
+    const digits = (control.value as string).replace(/\D/g, '');
+    if (digits.length === 10) {
+      return { faltaDigitoNove: { message: 'Falta o dígito 9 após o DDD. Ex: (62) 99999-9999' } };
+    }
     if (REGEX.TELEFONE.test((control.value as string).trim())) return null;
     return { telefoneInvalido: { message: 'Telefone inválido. Ex: (62) 99999-9999' } };
   };

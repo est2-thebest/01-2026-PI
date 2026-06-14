@@ -21,7 +21,7 @@ import { Ocorrencia, OcorrenciaDetalhes, OcorrenciaHistorico } from '../shared/m
 
 @Injectable({ providedIn: 'root' })
 export class OcorrenciaService {
-  private url = `${environment.apiUrl}/ocorrencias`;
+  private url = `${environment.apiUrl}/api/ocorrencias`;
   constructor(private http: HttpClient) {}
 
   listarTodas(): Observable<Ocorrencia[]> { return this.http.get<Ocorrencia[]>(this.url); }
@@ -41,9 +41,8 @@ export class OcorrenciaService {
     return this.http.put<any>(`${this.url}/${id}/despachar`, { ambulanciaId: ambulanciaId ?? null });
   }
 
-  // Real backend: POST /api/ocorrencias/:id/confirmar-saida → status = EM_ANDAMENTO + Dijkstra
-  confirmarSaida(id: number): Observable<void> { return this.http.post<void>(`${this.url}/${id}/confirmar-saida`, {}); }
-  concluirAtendimento(id: number): Observable<void> { return this.http.post<void>(`${this.url}/${id}/concluir`, {}); }
+  confirmarSaida(id: number): Observable<any> { return this.http.post<any>(`${this.url}/${id}/confirmar-saida`, {}); }
+  concluirAtendimento(id: number): Observable<any> { return this.http.put<any>(`${this.url}/${id}/concluir`, {}); }
   cancelar(id: number, justificativa?: string): Observable<void> {
     return this.http.post<void>(`${this.url}/${id}/cancelar`, { justificativa: justificativa || '' });
   }

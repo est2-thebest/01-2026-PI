@@ -8,24 +8,20 @@ public class AmbulanciaResponse {
     private String placa;
     private String tipo;
     private String status;
-    private Integer bairroId;
-    private String bairroNome;
+    private BairroResumo bairro;
 
     public AmbulanciaResponse() {}
 
-    // Construtor de conveniência que mapeia diretamente a Entidade para o DTO de saída
     public AmbulanciaResponse(Ambulancia ambulancia) {
         this.id = ambulancia.getId();
         this.placa = ambulancia.getPlaca();
         this.tipo = ambulancia.getTipo() != null ? ambulancia.getTipo().name() : null;
         this.status = ambulancia.getStatus() != null ? ambulancia.getStatus().name() : null;
         if (ambulancia.getBairroBase() != null) {
-            this.bairroId = ambulancia.getBairroBase().getId();
-            this.bairroNome = ambulancia.getBairroBase().getNome();
+            this.bairro = new BairroResumo(ambulancia.getBairroBase().getId(), ambulancia.getBairroBase().getNome());
         }
     }
 
-    // Getters e Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getPlaca() { return placa; }
@@ -34,8 +30,19 @@ public class AmbulanciaResponse {
     public void setTipo(String tipo) { this.tipo = tipo; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public Integer getBairroId() { return bairroId; }
-    public void setBairroId(Integer bairroId) { this.bairroId = bairroId; }
-    public String getBairroNome() { return bairroNome; }
-    public void setBairroNome(String bairroNome) { this.bairroNome = bairroNome; }
+    public BairroResumo getBairro() { return bairro; }
+    public void setBairro(BairroResumo bairro) { this.bairro = bairro; }
+
+    public static class BairroResumo {
+        private Integer id;
+        private String nome;
+
+        public BairroResumo() {}
+        public BairroResumo(Integer id, String nome) { this.id = id; this.nome = nome; }
+
+        public Integer getId() { return id; }
+        public void setId(Integer id) { this.id = id; }
+        public String getNome() { return nome; }
+        public void setNome(String nome) { this.nome = nome; }
+    }
 }

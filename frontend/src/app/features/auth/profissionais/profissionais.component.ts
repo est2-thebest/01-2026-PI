@@ -144,18 +144,27 @@ export class ProfissionaisComponent implements OnInit {
 
   abrirFormulario(profissional?: Profissional): void {
     this.form.reset({ funcao: 'MEDICO', turno: 'MATUTINO', ativo: true, contato: '', tipoDocumento: 'CPF', documento: '' });
+    this.form.get('turno')?.enable();
+    this.form.get('funcao')?.enable();
     this.erro = null;
+
     if (profissional) {
       this.editandoId = profissional.id || null;
+      const tipoDoc = profissional.cnpj ? 'CNPJ' : 'CPF';
+      const docValor = profissional.cnpj || profissional.cpf || '';
       this.form.patchValue({
         nome:          profissional.nome,
         funcao:        profissional.funcao,
         turno:         profissional.turno || 'MATUTINO',
         contato:       formatarTelefone(profissional.contato || ''),
         ativo:         profissional.ativo,
-        tipoDocumento: profissional.tipoDocumento || 'CPF',
-        documento:     profissional.documento || ''
+        tipoDocumento: tipoDoc,
+        documento:     docValor
       });
+      if (profissional.emEquipe) {
+        this.form.get('turno')?.disable();
+        this.form.get('funcao')?.disable();
+      }
     } else {
       this.editandoId = null;
     }
@@ -165,6 +174,8 @@ export class ProfissionaisComponent implements OnInit {
   fecharFormulario(): void {
     this.mostraFormulario = false;
     this.form.reset();
+    this.form.get('turno')?.enable();
+    this.form.get('funcao')?.enable();
     this.editandoId = null;
     this.erro = null;
   }
@@ -175,14 +186,17 @@ export class ProfissionaisComponent implements OnInit {
     this.salvando = true;
     this.erro = null;
 
-    const dados: Profissional = {
-      nome:          this.form.get('nome')?.value,
-      funcao:        this.form.get('funcao')?.value,
-      turno:         this.form.get('turno')?.value,
-      contato:       this.form.get('contato')?.value || null,
-      ativo:         this.form.get('ativo')?.value,
-      tipoDocumento: this.form.get('tipoDocumento')?.value || null,
-      documento:     this.form.get('documento')?.value || null
+    const tipo      = this.form.get('tipoDocumento')?.value;
+    const documento = this.form.get('documento')?.value || null;
+
+    const dados = {
+      nome:    this.form.get('nome')?.value,
+      funcao:  this.form.get('funcao')?.value,
+      turno:   this.form.get('turno')?.value,
+      contato: this.form.get('contato')?.value || null,
+      ativo:   this.form.get('ativo')?.value,
+      cpf:     tipo === 'CPF'  ? documento : null,
+      cnpj:    tipo === 'CNPJ' ? documento : null,
     };
 
     if (this.editandoId) {

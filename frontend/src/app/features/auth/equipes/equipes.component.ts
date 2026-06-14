@@ -101,9 +101,10 @@ export class EquipesComponent implements OnInit {
           id:              r.id,
           descricao:       r.descricao,
           turno:           r.turno,
-          ativo:           r.ativo !== false,
+          status:          r.status || 'DISPONIVEL',
+          ativo:           r.status !== 'INATIVA',
           possuiHistorico: r.possuiHistorico || false,
-          ambulancia:      this.ambulancias.find(a => a.id === r.ambulanciaId) || r.ambulancia || null,
+          ambulancia:      r.ambulancia || this.ambulancias.find(a => a.id === r.ambulanciaId) || null,
           profissionais:   (r.profissionais || []).map((p: any) => ({ ...p, funcao: p.funcao || p.role || null }))
         }));
         this.carregando = false;
@@ -155,8 +156,8 @@ export class EquipesComponent implements OnInit {
   }
 
   statusEquipe(equipe: Equipe): 'ATIVA' | 'EM_ATENDIMENTO' | 'INATIVA' {
-    if (equipe.ambulancia?.status === 'EM_ATENDIMENTO') return 'EM_ATENDIMENTO';
-    if (equipe.ativo === false) return 'INATIVA';
+    if (equipe.status === 'EM_ATENDIMENTO') return 'EM_ATENDIMENTO';
+    if (equipe.status === 'INATIVA') return 'INATIVA';
     return 'ATIVA';
   }
 
@@ -248,24 +249,8 @@ export class EquipesComponent implements OnInit {
       profissionalIds: this.profissionaisSelecionados.map(p => p.id!)
     };
 
-    // Captura IDs antes do save para atualizar status das ambulâncias depois
-    const newAmbId: number | null = payload.ambulanciaId;
-    const oldAmbId: number | null = this.editandoId
-      ? (this.equipes.find(e => e.id === this.editandoId)?.ambulancia?.id ?? null)
-      : null;
-
     const onSuccess = () => {
-      // Atualiza status das ambulâncias se houve troca
-      if (newAmbId !== oldAmbId) {
-        if (newAmbId) {
-          const newAmb = this.ambulancias.find(a => a.id === newAmbId);
-          if (newAmb) this.ambulanciaService.atualizar(newAmbId, { ...newAmb, status: 'DISPONIVEL' }).subscribe();
-        }
-        if (oldAmbId) {
-          const oldAmb = this.ambulancias.find(a => a.id === oldAmbId);
-          if (oldAmb) this.ambulanciaService.atualizar(oldAmbId, { ...oldAmb, status: 'SEM_EQUIPE' }).subscribe();
-        }
-      }
+      // O backend já atualiza o status das ambulâncias em EquipeService
       this.salvando = false;
       this.carregarDados();
       this.fecharFormulario();
@@ -300,14 +285,9 @@ export class EquipesComponent implements OnInit {
     });
     if (!confirmado) return;
 
-    const ambId   = equipe.ambulancia?.id;
-    const ambData = ambId ? this.ambulancias.find(a => a.id === ambId) : null;
-    const obs: Record<string, any> = { equipe: this.equipeService.atualizar(equipe.id!, { ...equipe, ativo: false }) };
-    if (ambId && ambData) obs['amb'] = this.ambulanciaService.atualizar(ambId, { ...ambData, status: 'SEM_EQUIPE' });
-
-    forkJoin(obs).subscribe({
+    this.equipeService.inativar(equipe.id!).subscribe({
       next: () => this.carregarDados(),
-      error: () => { this.erro = 'Erro ao inativar equipe.'; }
+      error: (err: any) => { this.erro = err?.error?.message || 'Erro ao inativar equipe.'; }
     });
   }
 
@@ -321,17 +301,9 @@ export class EquipesComponent implements OnInit {
     });
     if (!confirmado) return;
 
-    const ambId   = equipe.ambulancia?.id;
-    const ambData = ambId ? this.ambulancias.find(a => a.id === ambId) : null;
-    const obs: Record<string, any> = { equipe: this.equipeService.atualizar(equipe.id!, { ...equipe, ativo: true }) };
-    // só restaura para DISPONIVEL se a ambulância ainda estiver livre (SEM_EQUIPE)
-    if (ambId && ambData && ambData.status === 'SEM_EQUIPE') {
-      obs['amb'] = this.ambulanciaService.atualizar(ambId, { ...ambData, status: 'DISPONIVEL' });
-    }
-
-    forkJoin(obs).subscribe({
+    this.equipeService.reativar(equipe.id!).subscribe({
       next: () => this.carregarDados(),
-      error: () => { this.erro = 'Erro ao reativar equipe.'; }
+      error: (err: any) => { this.erro = err?.error?.message || 'Erro ao reativar equipe.'; }
     });
   }
 
@@ -344,15 +316,9 @@ export class EquipesComponent implements OnInit {
       cancelText:  'Nao, cancelar'
     });
     if (confirmado) {
-      const ambId   = equipe.ambulancia?.id;
-      const ambData = ambId ? this.ambulancias.find(a => a.id === ambId) : null;
-
       this.equipeService.excluir(equipe.id!).subscribe({
         next: () => {
-          // Reverte status da ambulância vinculada para SEM_EQUIPE
-          if (ambId && ambData) {
-            this.ambulanciaService.atualizar(ambId, { ...ambData, status: 'SEM_EQUIPE' }).subscribe();
-          }
+          // O backend já reverte o status da ambulância em EquipeService.deletar()
           this.carregarDados();
         },
         error: (err: any) => {

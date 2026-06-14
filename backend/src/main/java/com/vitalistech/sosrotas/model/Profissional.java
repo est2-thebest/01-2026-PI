@@ -4,7 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vitalistech.sosrotas.model.enums.FuncaoProfissional;
 import com.vitalistech.sosrotas.model.enums.Turno;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "profissionais")
@@ -17,7 +24,7 @@ public class Profissional {
     @Column(length = 100)
     private String nome;
 
-    @Column(length = 12)
+    @Column(length = 15)
     private String contato;
 
     private Boolean ativo;

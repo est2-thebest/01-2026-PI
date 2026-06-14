@@ -247,22 +247,12 @@ export class OcorrenciasComponent implements OnInit {
     if (this.ocorrenciaEditando?.id) {
       this.ocorrenciaService.atualizar(this.ocorrenciaEditando.id, dados).subscribe({
         next: () => { this.salvando = false; this.carregarDados(); this.fecharFormulario(); },
-        error: () => { 
-          // MOCK: se não tiver backend, simula que salvou
-          this.salvando = false; 
-          this.carregarDados(); 
-          this.fecharFormulario(); 
-        }
+        error: () => { this.salvando = false; this.erro = 'Erro ao atualizar ocorrencia. Tente novamente.'; }
       });
     } else {
       this.ocorrenciaService.criar(dados).subscribe({
         next: () => { this.salvando = false; this.carregarDados(); this.fecharFormulario(); },
-        error: () => { 
-          // MOCK: se não tiver backend, simula que salvou
-          this.salvando = false; 
-          this.carregarDados(); 
-          this.fecharFormulario(); 
-        }
+        error: () => { this.salvando = false; this.erro = 'Erro ao cadastrar ocorrencia. Verifique os dados.'; }
       });
     }
   }

@@ -9,9 +9,9 @@
         </div>
       }
       <div class="form-group">
-        <label>Usuário</label>
-        <input type="text" formControlName="username" placeholder="Nome de usuário" [class.input-error]="temErro('username')" />
-        @if (temErro('username')) { <span class="error-text">{{ erroMsg('username') }}</span> }
+        <label>Nome</label>
+        <input type="text" formControlName="nome" placeholder="Seu nome" [class.input-error]="temErro('nome')" />
+        @if (temErro('nome')) { <span class="error-text">{{ erroMsg('nome') }}</span> }
       </div>
       <div class="form-group">
         <label>E-mail</label>
