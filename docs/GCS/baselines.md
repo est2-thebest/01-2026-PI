@@ -2,7 +2,7 @@
 
 **Projeto:** SOS Rota — Eng5 2026/1  
 **Responsável GCS:** Gabriella Pio  
-**Última atualização:** 13/06/2026
+**Última atualização:** 14/06/2026
 
 ---
 
@@ -55,8 +55,8 @@ Estado inicial do repositório do projeto SOS Rota Eng5, contendo a estrutura ba
 ## BL1 — Baseline Funcional
 
 **Tag:** `v1.0.0`  
-**Data prevista:** ~~12/06/2026~~ — 14/06/2026 (apresentação pendente)  
-**Status:** 🔄 Em construção
+**Data prevista:** 14/06/2026  
+**Status:** ✅ Estabelecida
 
 ### Descrição
 
@@ -101,13 +101,13 @@ Primeira versão funcional do sistema SOS Rota, com todas as funcionalidades pri
 - [x] Build do backend passa no CI sem erros (`mvn verify`)
 - [x] Build do frontend passa no CI sem erros (`ng build`)
 - [x] Todas as telas principais funcionando: Login, Dashboard, Ocorrências, Ambulâncias, Profissionais, Equipes, Despacho, Relatórios
-- [ ] Integração Angular ↔ Spring Boot validada ponta a ponta
+- [x] Integração Angular ↔ Spring Boot validada ponta a ponta
 - [x] Todos os 6 padrões de projeto identificados e comentados no código
 - [x] REGEX implementadas no código e integradas nos componentes (PR #60 — `refactor/frontend-validators`)
-- [ ] Matriz de rastreabilidade completa
-- [ ] CHANGELOG atualizado com v1.0.0
-- [ ] Todas as Issues do milestone BL1 fechadas ou justificadas como "won't do"
-- [ ] Tag `v1.0.0` criada na `main` após merge do último PR
+- [x] Matriz de rastreabilidade completa
+- [x] CHANGELOG atualizado com v1.0.0
+- [x] Todas as Issues do milestone BL1 fechadas ou justificadas como "won't do"
+- [x] Tag `v1.0.0` criada na `main` após merge do último PR
 
 ---
 
@@ -118,3 +118,4 @@ Primeira versão funcional do sistema SOS Rota, com todas as funcionalidades pri
 | 1.0    | 03/06/2026 | Criação do documento de baselines                                                      | Gabriella |
 | 1.1    | 06/06/2026 | Revisado de acordo com os requisitos implementados até o momento                       | Gabriella |
 | 1.2    | 13/06/2026 | Corrige IC36/IC37 na BL0; atualiza critérios BL1 (REGEX, tela Profissionais); data revisada | Gabriella |
+| 1.3    | 14/06/2026 | BL1 estabelecida: todos os critérios cumpridos, tag v1.0.0 publicada                  | Gabriella |

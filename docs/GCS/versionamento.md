@@ -2,7 +2,7 @@
 
 **Projeto:** SOS Rota — Eng5 2026/1  
 **Responsável GCS:** Gabriella Pio  
-**Última atualização:** 13/06/2026
+**Última atualização:** 14/06/2026
 
 ---
 
@@ -91,8 +91,8 @@ Formato: `tipo: descrição curta no imperativo (#numero-da-issue)`
 
 | Versão   | Data                        | Baseline | Descrição                                      | Status       |
 | -------- | --------------------------- | -------- | ---------------------------------------------- | ------------ |
-| `v0.1.0` | 02/06/2026                  | BL0      | Estrutura inicial do repositório e pipeline CI | ✅ Publicada |
-| `v1.0.0` | 14/06/2026  | BL1      | Sistema funcional completo                     | 🔄 Planejada |
+| `v0.1.0` | 02/06/2026 | BL0      | Estrutura inicial do repositório e pipeline CI | ✅ Publicada |
+| `v1.0.0` | 14/06/2026 | BL1      | Sistema funcional completo                     | ✅ Publicada |
 
 ---
 
@@ -102,3 +102,4 @@ Formato: `tipo: descrição curta no imperativo (#numero-da-issue)`
 | ------ | ---------- | --------------------------------------------------------------------------- | --------- |
 | 1.0    | 03/06/2026 | Criação do documento                                                        | Gabriella |
 | 1.1    | 13/06/2026 | Substitui exemplos hipotéticos por releases reais; corrige data da v1.0.0  | Gabriella |
+| 1.2    | 14/06/2026 | Marca v1.0.0 como publicada após criação da tag BL1                         | Gabriella |
