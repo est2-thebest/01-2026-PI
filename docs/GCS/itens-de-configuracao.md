@@ -2,7 +2,7 @@
 
 **Projeto:** SOS Rota — Eng5 2026/1  
 **Responsável GCS:** Gabriella Pio  
-**Última atualização:** 13/06/2026
+**Última atualização:** 14/06/2026
 
 ---
 
@@ -133,3 +133,4 @@ Exigência explícita do PI Eng5: validações REGEX implementadas no código, 3
 | 1.1    | 12/06/2026 | Atualização parcial, de acordo com o feito até o momento                          | Gabriella |
 | 1.2    | 13/06/2026 | Corrige IC23; IC29/IC31 descartados; aviso de caminho removido                    | Gabriella |
 | 1.3    | 13/06/2026 | IC29 criado (.env.example adicionado ao repositório)                              | Gabriella |
+| 1.4    | 14/06/2026 | Catálogo revisado e finalizado para BL1 (v1.0.0)                                  | Gabriella |
