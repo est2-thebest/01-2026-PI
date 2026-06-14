@@ -47,6 +47,8 @@ export interface Profissional {
   cnpj?: string | null;
   tipoDocumento?: string | null;
   documento?: string | null;
+  emEquipe?: boolean;
+  emAtendimentoAtivo?: boolean;
 }
 
 // Equipe.java

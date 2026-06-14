@@ -187,7 +187,9 @@ public class EquipeService {
                         p.getFuncao(),
                         p.getTurno(),
                         p.getCpf(),
-                        p.getCnpj())
+                        p.getCnpj(),
+                        true,
+                        false)
                 )
                 .toList();
 

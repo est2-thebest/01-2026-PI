@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vitalistech.sosrotas.repository.IProfissionalRepository;
 import com.vitalistech.sosrotas.repository.IEquipeRepository;
 import com.vitalistech.sosrotas.repository.IAmbulanciaRepository;
+import com.vitalistech.sosrotas.model.Ambulancia;
 import com.vitalistech.sosrotas.model.Profissional;
 import com.vitalistech.sosrotas.model.Equipe;
 import com.vitalistech.sosrotas.model.enums.StatusEquipe;
@@ -69,7 +70,16 @@ public class ProfissionalService {
         if (request.ativo() != null) {
             existente.setAtivo(request.ativo());
         }
+        boolean emEquipe = equipeRepository.existsByProfissionaisContaining(existente);
+
+        if (emEquipe && request.funcao() != null && !request.funcao().equals(existente.getFuncao())) {
+            throw new IllegalStateException("Nao e permitido alterar a funcao de um profissional vinculado a uma equipe.");
+        }
         existente.setFuncao(request.funcao());
+
+        if (emEquipe && request.turno() != null && !request.turno().equals(existente.getTurno())) {
+            throw new IllegalStateException("Nao e permitido alterar o turno de um profissional vinculado a uma equipe.");
+        }
         existente.setTurno(request.turno());
         existente.setCpf(request.cpf());
         existente.setCnpj(request.cnpj());
@@ -106,10 +116,20 @@ public class ProfissionalService {
     private void desativarAmbulanciasDoProfissional(Profissional profissional) {
         List<Equipe> equipes = equipeRepository.findByProfissionaisId(profissional.getId());
         for (Equipe equipe : equipes) {
-            if (equipe.getAmbulancia() != null
-                    && StatusAmbulancia.DISPONIVEL.equals(equipe.getAmbulancia().getStatus())) {
-                equipe.getAmbulancia().setStatus(StatusAmbulancia.SEM_EQUIPE);
-                ambulanciaRepository.save(equipe.getAmbulancia());
+            if (StatusEquipe.EM_ATENDIMENTO.equals(equipe.getStatus())) {
+                continue;
+            }
+
+            Ambulancia ambulancia = equipe.getAmbulancia();
+
+            // Remove o vínculo FK antes de salvar para liberar a unique constraint
+            equipe.setStatus(StatusEquipe.INATIVA);
+            equipe.setAmbulancia(null);
+            equipeRepository.save(equipe);
+
+            if (ambulancia != null && !StatusAmbulancia.EM_ATENDIMENTO.equals(ambulancia.getStatus())) {
+                ambulancia.setStatus(StatusAmbulancia.SEM_EQUIPE);
+                ambulanciaRepository.save(ambulancia);
             }
         }
     }
@@ -125,8 +145,11 @@ public class ProfissionalService {
         }
     }
 
-    // Atualize também o mapeador de resposta
     public ProfissionalResponse toResponseDTO(Profissional profissional) {
+        List<Equipe> equipes = equipeRepository.findByProfissionaisId(profissional.getId());
+        boolean emEquipe = !equipes.isEmpty();
+        boolean emAtendimentoAtivo = equipes.stream()
+                .anyMatch(e -> StatusEquipe.EM_ATENDIMENTO.equals(e.getStatus()));
         return new ProfissionalResponse(
                 profissional.getId(),
                 profissional.getNome(),
@@ -135,7 +158,9 @@ public class ProfissionalService {
                 profissional.getFuncao(),
                 profissional.getTurno(),
                 profissional.getCpf(),
-                profissional.getCnpj()
+                profissional.getCnpj(),
+                emEquipe,
+                emAtendimentoAtivo
         );
     }
 

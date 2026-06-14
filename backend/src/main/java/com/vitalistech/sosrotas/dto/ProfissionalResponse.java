@@ -11,5 +11,7 @@ public record ProfissionalResponse(
         FuncaoProfissional funcao,
         Turno turno,
         String cpf,
-        String cnpj
+        String cnpj,
+        boolean emEquipe,
+        boolean emAtendimentoAtivo
 ) {}

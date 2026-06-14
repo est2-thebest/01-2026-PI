@@ -144,7 +144,10 @@ export class ProfissionaisComponent implements OnInit {
 
   abrirFormulario(profissional?: Profissional): void {
     this.form.reset({ funcao: 'MEDICO', turno: 'MATUTINO', ativo: true, contato: '', tipoDocumento: 'CPF', documento: '' });
+    this.form.get('turno')?.enable();
+    this.form.get('funcao')?.enable();
     this.erro = null;
+
     if (profissional) {
       this.editandoId = profissional.id || null;
       const tipoDoc = profissional.cnpj ? 'CNPJ' : 'CPF';
@@ -158,6 +161,10 @@ export class ProfissionaisComponent implements OnInit {
         tipoDocumento: tipoDoc,
         documento:     docValor
       });
+      if (profissional.emEquipe) {
+        this.form.get('turno')?.disable();
+        this.form.get('funcao')?.disable();
+      }
     } else {
       this.editandoId = null;
     }
@@ -167,6 +174,8 @@ export class ProfissionaisComponent implements OnInit {
   fecharFormulario(): void {
     this.mostraFormulario = false;
     this.form.reset();
+    this.form.get('turno')?.enable();
+    this.form.get('funcao')?.enable();
     this.editandoId = null;
     this.erro = null;
   }

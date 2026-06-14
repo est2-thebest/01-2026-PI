@@ -1,4 +1,4 @@
-<div class="profissionais-wrapper">
+﻿<div class="profissionais-wrapper">
 
   <!-- ===== BANNER ===== -->
   <div class="page-banner">
@@ -99,13 +99,15 @@
                     </span>
                   </td>
                   <td class="col-actions">
-                    <button
-                      id="btn-editar-{{ prof.id }}"
-                      class="btn-action btn-edit"
-                      (click)="abrirFormulario(prof)"
-                      title="Editar profissional">
-                      <i class="pi pi-pencil"></i>
-                    </button>
+                    @if (!prof.emAtendimentoAtivo) {
+                      <button
+                        id="btn-editar-{{ prof.id }}"
+                        class="btn-action btn-edit"
+                        (click)="abrirFormulario(prof)"
+                        title="Editar profissional">
+                        <i class="pi pi-pencil"></i>
+                      </button>
+                    }
 
                     <!-- Inativar — visível quando ativo -->
                     @if (prof.ativo) {
@@ -194,20 +196,28 @@
           <div class="form-row">
             <div class="form-group">
               <label for="campo-funcao"><i class="pi pi-briefcase"></i> Funcao *</label>
-              <select id="campo-funcao" formControlName="funcao" class="form-control">
+              <select id="campo-funcao" formControlName="funcao" class="form-control"
+                [class.input-disabled]="form.get('funcao')?.disabled">
                 <option value="MEDICO">Medico</option>
                 <option value="ENFERMEIRO">Enfermeiro</option>
                 <option value="MOTORISTA">Motorista</option>
               </select>
+              @if (form.get('funcao')?.disabled) {
+                <span class="info-text"><i class="pi pi-lock"></i> Função bloqueada: profissional vinculado a uma equipe.</span>
+              }
             </div>
 
             <div class="form-group">
               <label for="campo-turno"><i class="pi pi-clock"></i> Turno *</label>
-              <select id="campo-turno" formControlName="turno" class="form-control">
+              <select id="campo-turno" formControlName="turno" class="form-control"
+                [class.input-disabled]="form.get('turno')?.disabled">
                 <option value="MATUTINO">Matutino</option>
                 <option value="VESPERTINO">Vespertino</option>
                 <option value="NOTURNO">Noturno</option>
               </select>
+              @if (form.get('turno')?.disabled) {
+                <span class="info-text"><i class="pi pi-lock"></i> Turno bloqueado: profissional vinculado a uma equipe.</span>
+              }
             </div>
           </div>
 
@@ -255,8 +265,11 @@
               @if (form.get('contato')?.hasError('required') && form.get('contato')?.touched) {
                 <span class="error-text"><i class="pi pi-exclamation-circle"></i> Campo obrigatório.</span>
               }
-              @if (form.get('contato')?.hasError('pattern') && form.get('contato')?.touched) {
-                <span class="error-text"><i class="pi pi-exclamation-circle"></i> Formato invalido. Ex: (62) 99999-9999</span>
+              @if (form.get('contato')?.hasError('faltaDigitoNove') && form.get('contato')?.touched) {
+                <span class="error-text"><i class="pi pi-exclamation-circle"></i> Falta o dígito 9 após o DDD. Ex: (62) 99999-9999</span>
+              }
+              @if (form.get('contato')?.hasError('telefoneInvalido') && form.get('contato')?.touched) {
+                <span class="error-text"><i class="pi pi-exclamation-circle"></i> Telefone inválido. Ex: (62) 99999-9999</span>
               }
             </div>
 
